@@ -1,18 +1,13 @@
 <?php
+namespace InstagramScraper;
 
-/**
- * Created by PhpStorm.
- * User: rajymbekkapisev
- * Date: 20/04/16
- * Time: 01:17
- */
 class InstagramScraper implements InstagramDataProvider
 {
     const INSTAGRAM_URL = 'https://www.instagram.com/';
 
     function getAccount($username)
     {
-        $response = Unirest\Request::get(self::INSTAGRAM_URL . $username);
+        $response = \Unirest\Request::get(self::INSTAGRAM_URL . $username);
         if ($response->code !== 200) {
             return null;
         }
@@ -29,7 +24,7 @@ class InstagramScraper implements InstagramDataProvider
         $maxId = '';
         $isMoreAvailable = true;
         while ($index < $count && $isMoreAvailable) {
-            $response = Unirest\Request::get(self::INSTAGRAM_URL . $username . '/media/?max_id=' . $maxId);
+            $response = \Unirest\Request::get(self::INSTAGRAM_URL . $username . '/media/?max_id=' . $maxId);
             if ($response->code !== 200) {
                 return [];
             }

@@ -6,11 +6,18 @@
  * Time: 23:30
  */
 
-require 'vendor/autoload.php';
-require 'src/data/InstagramDataProvider.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-require 'src/model/Account.php';
-require 'src/model/Media.php';
+require 'vendor/autoload.php';
+
+require 'src/InstagramScraper/InstagramDataProvider.php';
+require 'src/InstagramScraper/Account.php';
+require 'src/InstagramScraper/Media.php';
+require 'src/InstagramScraper.php';
+
+
+use InstagramScraper\InstagramScraper;
 
 
 $instagram = new InstagramScraper();

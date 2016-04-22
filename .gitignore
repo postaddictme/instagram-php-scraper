@@ -1,3 +1,5 @@
 .idea
 vendor/
 composer.phar
+composer.locks
+.DS_Store

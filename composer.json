@@ -20,7 +20,7 @@
   },
   "autoload": {
     "psr-0": {
-      "Scraper": "src"
+      "InstagramScraper": "src"
     }
   },
   "support": {

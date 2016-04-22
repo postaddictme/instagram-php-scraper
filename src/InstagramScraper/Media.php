@@ -1,11 +1,6 @@
 <?php
+namespace InstagramScraper;
 
-/**
- * Created by PhpStorm.
- * User: rajymbekkapisev
- * Date: 20/04/16
- * Time: 01:15
- */
 class Media
 {
     public $id;
