@@ -12,18 +12,13 @@ require 'data/FirstInstagramDataProvider.php';
 require 'model/Account.php';
 require 'model/Media.php';
 
-//$client = new GuzzleHttp\Client();
-//
-//$res = $client->request('GET', "https://www.instagram.com/$username/media/");
-//var_dump($res->getBody());
 
 $instagram = new FirstInstagramDataProvider();
-$account = $instagram->getAccount('raiym');
-echo '<pre>';
-echo json_encode($account);
-echo '</pre>';
-//
-//$medias = $instagram->getMedias('durov', 150);
-//echo json_encode($medias);
-//$response = Unirest\Request::get(FirstInstagramDataProvider::INSTAGRAM_URL . 'madinamstf/media/');
-//echo $response->raw_body;
+$account = $instagram->getAccount('kevin');
+echo $account->followedByCount;
+echo $account->mediaCount;
+
+$medias = $instagram->getMedias('kevin', 150);
+
+echo $medias[0]->imageStandardResolutionUrl;
+echo $medias[0]->caption;

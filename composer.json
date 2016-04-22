@@ -7,7 +7,6 @@
         }
     ],
     "require": {
-        "guzzlehttp/guzzle": "^6.2",
         "mashape/unirest-php": "^3.0"
     }
 }
