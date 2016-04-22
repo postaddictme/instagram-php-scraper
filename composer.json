@@ -1,0 +1,13 @@
+{
+    "name": "raiym/php-instagram-scrapper",
+    "authors": [
+        {
+            "name": "raiym",
+            "email": "r.kapishev@gmail.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^6.2",
+        "mashape/unirest-php": "^3.0"
+    }
+}
