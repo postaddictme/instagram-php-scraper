@@ -11,6 +11,7 @@ class Media
     public $imageLowResolutionUrl;
     public $imageThumbnailUrl;
     public $imageStandardResolutionUrl;
+    public $imageHighResolutionUrl;
     public $caption;
     public $videoLowResolutionUrl;
     public $videoStandardResolutionUrl;
@@ -25,6 +26,7 @@ class Media
         $this->imageLowResolutionUrl = $mediaArray['images']['low_resolution']['url'];
         $this->imageThumbnailUrl = $mediaArray['images']['thumbnail']['url'];
         $this->imageStandardResolutionUrl = $mediaArray['images']['standard_resolution']['url'];
+        $this->imageHighResolutionUrl = str_replace('320x320', '1080x1080', $this->imageLowResolutionUrl);
         $this->caption = $mediaArray['caption']['text'];
 
         if ($this->type === 'video') {
