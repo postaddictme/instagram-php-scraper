@@ -6,5 +6,4 @@ interface InstagramDataProvider
 {
     function getAccount($username);
     function getMedias($username, $last = 10);
-
 }
