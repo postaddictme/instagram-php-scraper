@@ -9,11 +9,38 @@ use InstagramScraper\InstagramScraper;
 
 $instagram = new InstagramScraper();
 $account = $instagram->getAccount('kevin');
+/*
+Available properties: 
+    $username;
+    $followsCount;
+    $followedByCount;
+    $profilePicUrl;
+    $id;
+    $biography;
+    $fullName;
+    $mediaCount;
+    $isPrivate;
+    $externalUrl;
+*/
 echo $account->followedByCount;
-echo $account->mediaCount;
 
 $medias = $instagram->getMedias('kevin', 150);
 
-echo $medias[0]->imageStandardResolutionUrl;
+/*
+Available properties: 
+    $id;
+    $createdTime;
+    $type;
+    $link;
+    $imageLowResolutionUrl;
+    $imageThumbnailUrl;
+    $imageStandardResolutionUrl;
+    $imageHighResolutionUrl;
+    $caption;
+    $videoLowResolutionUrl;
+    $videoStandardResolutionUrl;
+    $videoLowBandwidthUrl;
+*/
+echo $medias[0]->imageHighResolutionUrl;
 echo $medias[0]->caption;
 ```
