@@ -1,4 +1,5 @@
 <?php
+
 namespace InstagramScraper;
 
 interface InstagramDataProvider

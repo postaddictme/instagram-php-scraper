@@ -3,3 +3,4 @@ vendor/
 composer.phar
 composer.locks
 .DS_Store
+index.php
