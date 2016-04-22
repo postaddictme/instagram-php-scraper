@@ -7,13 +7,13 @@
  */
 
 require 'vendor/autoload.php';
-require 'data/InstagramDataProvider.php';
-require 'data/FirstInstagramDataProvider.php';
-require 'model/Account.php';
-require 'model/Media.php';
+require 'src/data/InstagramDataProvider.php';
+
+require 'src/model/Account.php';
+require 'src/model/Media.php';
 
 
-$instagram = new FirstInstagramDataProvider();
+$instagram = new InstagramScraper();
 $account = $instagram->getAccount('kevin');
 echo $account->followedByCount;
 echo $account->mediaCount;

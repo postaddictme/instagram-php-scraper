@@ -6,7 +6,7 @@
  * Date: 20/04/16
  * Time: 01:17
  */
-class FirstInstagramDataProvider implements InstagramDataProvider
+class InstagramScraper implements InstagramDataProvider
 {
     const INSTAGRAM_URL = 'https://www.instagram.com/';
 
