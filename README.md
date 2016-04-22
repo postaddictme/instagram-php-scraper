@@ -1,8 +1,11 @@
 # instagram-php-scraper
 # Usage
 
+`composer require raiym/instagram-php-scraper`
+
+
 ```php
-$instagram = new FirstInstagramDataProvider();
+$instagram = new InstagramScraper();
 $account = $instagram->getAccount('kevin');
 echo $account->followedByCount;
 echo $account->mediaCount;
