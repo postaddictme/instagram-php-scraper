@@ -19,7 +19,10 @@ class InstagramScraper implements InstagramDataProvider
         $arr = explode('window._sharedData = ', $response->body);
         $json = explode(';</script>', $arr[1])[0];
         $userArray = json_decode($json, true);
-        if (!array_key_exists('ProfilePage', $userArray['entry_data'])) {
+        if (!is_array($userArray)) {
+            throw new Exception('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
+        }
+        if (!isset($userArray['entry_data']['ProfilePage'])) {
             throw new Exception('Account with this username does not exist');
 
         }
@@ -39,6 +42,9 @@ class InstagramScraper implements InstagramDataProvider
             }
 
             $arr = json_decode($response->raw_body, true);
+            if (!is_array($arr)) {
+                throw new Exception('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
+            }
             if (count($arr['items']) === 0) {
                 return [];
             }
@@ -46,7 +52,7 @@ class InstagramScraper implements InstagramDataProvider
                 if ($index === $count) {
                     return $medias;
                 }
-                array_push($medias, new Media($mediaArray));
+                $medias[] = new Media($mediaArray);
                 $index++;
             }
             $maxId = $arr['items'][count($arr['items']) - 1]['id'];
