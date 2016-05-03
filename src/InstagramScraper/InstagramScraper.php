@@ -11,19 +11,19 @@ class InstagramScraper implements InstagramDataProvider
 
         $response = \Unirest\Request::get(self::INSTAGRAM_URL . $username);
         if ($response->code === 404) {
-            throw new Exception('Account with this username does not exist.');
+            throw new InstagramException('Account with this username does not exist.');
         }
         if ($response->code !== 200) {
-            throw new Exception('Response code is not equal 200. Something went wrong. Please report issue.');
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
         }
         $arr = explode('window._sharedData = ', $response->body);
         $json = explode(';</script>', $arr[1])[0];
         $userArray = json_decode($json, true);
         if (!is_array($userArray)) {
-            throw new Exception('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
+            throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
         }
         if (!isset($userArray['entry_data']['ProfilePage'])) {
-            throw new Exception('Account with this username does not exist');
+            throw new InstagramException('Account with this username does not exist');
 
         }
         return new Account($userArray['entry_data']['ProfilePage'][0]['user']);
@@ -38,12 +38,12 @@ class InstagramScraper implements InstagramDataProvider
         while ($index < $count && $isMoreAvailable) {
             $response = \Unirest\Request::get(self::INSTAGRAM_URL . $username . '/media/?max_id=' . $maxId);
             if ($response->code !== 200) {
-                throw new Exception('Response code is not equal 200. Something went wrong. Please report issue.');
+                throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
             }
 
             $arr = json_decode($response->raw_body, true);
             if (!is_array($arr)) {
-                throw new Exception('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
+                throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
             }
             if (count($arr['items']) === 0) {
                 return [];
