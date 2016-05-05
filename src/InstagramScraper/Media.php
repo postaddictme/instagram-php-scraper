@@ -21,7 +21,6 @@ class Media
 
     function __construct()
     {
-
     }
 
     public static function fromApi($mediaArray)
@@ -37,7 +36,6 @@ class Media
         $instance->imageStandardResolutionUrl = self::getCleanImageUrl($mediaArray['images']['standard_resolution']['url']);
         $instance->imageHighResolutionUrl = str_replace('320x320', '1080x1080', $instance->imageLowResolutionUrl);
         $instance->caption = $mediaArray['caption']['text'];
-
         if ($instance->type === 'video') {
             $instance->videoLowResolutionUrl = $mediaArray['videos']['low_resolution']['url'];
             $instance->videoStandardResolutionUrl = $mediaArray['videos']['standard_resolution']['url'];
@@ -70,6 +68,4 @@ class Media
         $instance->owner = Account::fromMediaPage($mediaArray['owner']);
         return $instance;
     }
-
-
 }

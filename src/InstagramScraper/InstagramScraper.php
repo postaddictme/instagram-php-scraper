@@ -10,7 +10,6 @@ class InstagramScraper implements InstagramDataProvider
 
     function getAccount($username)
     {
-
         $response = Request::get(self::INSTAGRAM_URL . $username);
         if ($response->code === 404) {
             throw new InstagramException('Account with this username does not exist.');

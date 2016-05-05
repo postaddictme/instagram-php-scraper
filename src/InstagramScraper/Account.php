@@ -17,7 +17,6 @@ class Account
 
     function __construct()
     {
-
     }
 
     public static function fromAccountPage($userArray)
