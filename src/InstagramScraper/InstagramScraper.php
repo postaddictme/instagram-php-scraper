@@ -69,7 +69,12 @@ class InstagramScraper implements InstagramDataProvider
 
     function getMediaByCode($mediaCode)
     {
-        $response = Request::get(self::INSTAGRAM_URL . 'p/' . $mediaCode);
+        return self::getMediaByUrl(self::INSTAGRAM_URL . 'p/' . $mediaCode)
+    }
+
+    function getMediaByUrl($mediaUrl)
+    {
+        $response = Request::get($mediaUrl);
         if ($response->code === 404) {
             throw new InstagramException('Media with given code does not exist.');
         }
