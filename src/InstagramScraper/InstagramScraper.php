@@ -69,7 +69,7 @@ class InstagramScraper implements InstagramDataProvider
 
     function getMediaByCode($mediaCode)
     {
-        return self::getMediaByUrl(self::INSTAGRAM_URL . 'p/' . $mediaCode)
+        return self::getMediaByUrl(self::INSTAGRAM_URL . 'p/' . $mediaCode);
     }
 
     function getMediaByUrl($mediaUrl)
