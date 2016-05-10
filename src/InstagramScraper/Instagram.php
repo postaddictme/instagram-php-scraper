@@ -4,7 +4,7 @@ namespace InstagramScraper;
 
 use Unirest\Request;
 
-class InstagramScraper implements InstagramDataProvider
+class Instagram implements InstagramDataProvider
 {
     const INSTAGRAM_URL = 'https://www.instagram.com/';
 

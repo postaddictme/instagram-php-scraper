@@ -5,9 +5,9 @@
 
 
 ```php
-use InstagramScraper\InstagramScraper;
+use InstagramScraper\Instagram;
 
-$instagram = new InstagramScraper();
+$instagram = new Instagram();
 $account = $instagram->getAccount('kevin');
 /*
 Available properties: 

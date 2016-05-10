@@ -35,7 +35,9 @@ class Media
         $instance->imageThumbnailUrl = self::getCleanImageUrl($mediaArray['images']['thumbnail']['url']);
         $instance->imageStandardResolutionUrl = self::getCleanImageUrl($mediaArray['images']['standard_resolution']['url']);
         $instance->imageHighResolutionUrl = str_replace('320x320', '1080x1080', $instance->imageLowResolutionUrl);
-        $instance->caption = $mediaArray['caption']['text'];
+        if (isset($mediaArray['caption'])) {
+            $instance->caption = $mediaArray['caption']['text'];
+        }
         if ($instance->type === 'video') {
             $instance->videoLowResolutionUrl = $mediaArray['videos']['low_resolution']['url'];
             $instance->videoStandardResolutionUrl = $mediaArray['videos']['standard_resolution']['url'];
@@ -60,7 +62,7 @@ class Media
         }
         $instance->createdTime = $mediaArray['date'];
         $instance->code = $mediaArray['code'];
-        $instance->link = InstagramScraper::INSTAGRAM_URL . 'p/' . $instance->code;
+        $instance->link = Instagram::INSTAGRAM_URL . 'p/' . $instance->code;
         $instance->imageStandardResolutionUrl = self::getCleanImageUrl($mediaArray['display_src']);
         $instance->imageLowResolutionUrl = str_replace('640x640', '320x320', $instance->imageStandardResolutionUrl);
         $instance->imageHighResolutionUrl = str_replace('640x640', '1080x1080', $instance->imageStandardResolutionUrl);
