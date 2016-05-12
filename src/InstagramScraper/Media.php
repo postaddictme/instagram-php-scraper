@@ -51,6 +51,20 @@ class Media
         return strpos($imageUrl, '?ig_cache_key=') ? substr($imageUrl, 0, strpos($imageUrl, '?ig_cache_key=')) : $imageUrl;
     }
 
+    private static function getImageUrls($imageUrl) {
+        $imageUrl = self::getCleanImageUrl($imageUrl);
+        $parts = explode('/', parse_url($imageUrl)['path']);
+        $standard = 'https://scontent.cdninstagram.com/'.$parts[1].'/s640x640/'.$parts[2].'/'.$parts[3];
+        $urls = [
+            'standard' => $standard,
+            'low' => str_replace('640x640', '320x320', $standard),
+            'high' => str_replace('640x640', '1080x1080', $standard),
+            'thumbnail' => str_replace('640x640', '150x150', $standard)
+        ];
+        return $urls;       
+    }
+
+
     public static function fromMediaPage($mediaArray)
     {
         $instance = new self();
@@ -63,9 +77,11 @@ class Media
         $instance->createdTime = $mediaArray['date'];
         $instance->code = $mediaArray['code'];
         $instance->link = Instagram::INSTAGRAM_URL . 'p/' . $instance->code;
-        $instance->imageStandardResolutionUrl = self::getCleanImageUrl($mediaArray['display_src']);
-        $instance->imageLowResolutionUrl = str_replace('640x640', '320x320', $instance->imageStandardResolutionUrl);
-        $instance->imageHighResolutionUrl = str_replace('640x640', '1080x1080', $instance->imageStandardResolutionUrl);
+        $images = self::getImageUrls($mediaArray['display_src']);
+        $instance->imageStandardResolutionUrl = $images['standard'];
+        $instance->imageLowResolutionUrl = $images['low'];
+        $instance->imageHighResolutionUrl = $images['high'];
+        $instance->imageThumbnailUrl = $images['thumbnail'];
         $instance->caption = $mediaArray['caption'];
         $instance->owner = Account::fromMediaPage($mediaArray['owner']);
         return $instance;
