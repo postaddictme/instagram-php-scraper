@@ -82,7 +82,9 @@ class Media
         $instance->imageLowResolutionUrl = $images['low'];
         $instance->imageHighResolutionUrl = $images['high'];
         $instance->imageThumbnailUrl = $images['thumbnail'];
-        $instance->caption = $mediaArray['caption'];
+        if (isset($mediaArray['caption'])) {
+            $instance->caption = $mediaArray['caption']['text'];
+        }
         $instance->owner = Account::fromMediaPage($mediaArray['owner']);
         return $instance;
     }
