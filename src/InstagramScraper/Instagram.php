@@ -2,6 +2,7 @@
 
 namespace InstagramScraper;
 
+use InvalidArgumentException;
 use Unirest\Request;
 
 class Instagram implements InstagramDataProvider
@@ -74,6 +75,9 @@ class Instagram implements InstagramDataProvider
 
     function getMediaByUrl($mediaUrl)
     {
+        if (filter_var($mediaUrl, FILTER_VALIDATE_URL) === false) {
+            throw new InvalidArgumentException('Malformed media url');
+        }
         $response = Request::get($mediaUrl);
         if ($response->code === 404) {
             throw new InstagramException('Media with given code does not exist.');
