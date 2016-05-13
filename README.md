@@ -47,7 +47,7 @@ echo $medias[0]->caption;
 $media = $instagram->getMediaByCode('BDs9iwfL7XA');
 
 $media = $instagram->getMediaByUrl('https://www.instagram.com/p/BDs9iwfL7XA/');
-echo $instagram->owner->username;
+echo $media->owner->username;
 
 ```
 
