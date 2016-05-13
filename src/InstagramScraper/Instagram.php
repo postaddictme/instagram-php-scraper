@@ -13,7 +13,7 @@ class Instagram implements InstagramDataProvider
     {
         $response = Request::get(self::INSTAGRAM_URL . $username);
         if ($response->code === 404) {
-            throw new InstagramException('Account with given username does not exist.');
+            throw new InstagramNotFoundException('Account with given username does not exist.');
         }
         if ($response->code !== 200) {
             throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
@@ -80,7 +80,7 @@ class Instagram implements InstagramDataProvider
         }
         $response = Request::get($mediaUrl);
         if ($response->code === 404) {
-            throw new InstagramException('Media with given code does not exist.');
+            throw new InstagramNotFoundException('Media with given code does not exist or account is private.');
         }
         if ($response->code !== 200) {
             throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
