@@ -9,7 +9,7 @@ class Instagram implements InstagramDataProvider
 {
     const INSTAGRAM_URL = 'https://www.instagram.com/';
 
-    function getAccount($username)
+    public function getAccount($username)
     {
         $response = Request::get(self::INSTAGRAM_URL . $username);
         if ($response->code === 404) {
@@ -36,7 +36,7 @@ class Instagram implements InstagramDataProvider
         return $json;
     }
 
-    function getMedias($username, $count = 20)
+    public function getMedias($username, $count = 20)
     {
         $index = 0;
         $medias = [];
@@ -68,12 +68,12 @@ class Instagram implements InstagramDataProvider
         return $medias;
     }
 
-    function getMediaByCode($mediaCode)
+    public function getMediaByCode($mediaCode)
     {
         return self::getMediaByUrl(self::INSTAGRAM_URL . 'p/' . $mediaCode);
     }
 
-    function getMediaByUrl($mediaUrl)
+    public function getMediaByUrl($mediaUrl)
     {
         if (filter_var($mediaUrl, FILTER_VALIDATE_URL) === false) {
             throw new InvalidArgumentException('Malformed media url');
