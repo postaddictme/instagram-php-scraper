@@ -51,21 +51,6 @@ class Media
         return strpos($imageUrl, '?ig_cache_key=') ? substr($imageUrl, 0, strpos($imageUrl, '?ig_cache_key=')) : $imageUrl;
     }
 
-    private static function getImageUrls($imageUrl)
-    {
-        $imageUrl = self::getCleanImageUrl($imageUrl);
-        $parts = explode('/', parse_url($imageUrl)['path']);
-        $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/s640x640/' . $parts[2] . '/' . $parts[3];
-        $urls = [
-            'standard' => $standard,
-            'low' => str_replace('640x640', '320x320', $standard),
-            'high' => str_replace('640x640', '1080x1080', $standard),
-            'thumbnail' => str_replace('640x640', '150x150', $standard)
-        ];
-        return $urls;
-    }
-
-
     public static function fromMediaPage($mediaArray)
     {
         $instance = new self();
@@ -88,5 +73,20 @@ class Media
         }
         $instance->owner = Account::fromMediaPage($mediaArray['owner']);
         return $instance;
+    }
+
+    private static function getImageUrls($imageUrl)
+    {
+        $imageUrl = self::getCleanImageUrl($imageUrl);
+        $imageUrl = str_replace('s480x480/', "", $imageUrl);
+        $parts = explode('/', parse_url($imageUrl)['path']);
+        $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/s640x640/' . $parts[2] . '/' . $parts[3];
+        $urls = [
+            'standard' => $standard,
+            'low' => str_replace('640x640', '320x320', $standard),
+            'high' => str_replace('640x640', '1080x1080', $standard),
+            'thumbnail' => str_replace('640x640', '150x150', $standard)
+        ];
+        return $urls;
     }
 }
