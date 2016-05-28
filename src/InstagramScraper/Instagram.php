@@ -32,8 +32,8 @@ class Instagram implements InstagramDataProvider
     private static function getJsonPayload($pageString)
     {
         $arr = explode('window._sharedData = ', $pageString);
-        $json = explode(';</script>', $arr[1])[0];
-        return $json;
+        $json = explode(';</script>', $arr[1]);
+        return $json[0];
     }
 
     public function getMedias($username, $count = 20)
