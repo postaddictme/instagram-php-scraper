@@ -8,32 +8,23 @@ use Unirest\Request;
 class Instagram implements InstagramDataProvider
 {
     const INSTAGRAM_URL = 'https://www.instagram.com/';
+    const PARTNER_PARAMETER = '/?__a=1';
 
     public function getAccount($username)
     {
-        $response = Request::get(self::INSTAGRAM_URL . $username);
+        $response = Request::get(self::INSTAGRAM_URL . $username . self::PARTNER_PARAMETER);
         if ($response->code === 404) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
         if ($response->code !== 200) {
             throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
         }
-        $json = self::getJsonPayload($response->body);
-        $userArray = json_decode($json, true);
-        if (!is_array($userArray)) {
-            throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
-        }
-        if (!isset($userArray['entry_data']['ProfilePage'])) {
+
+        $userArray = json_decode($response->raw_body, true);
+        if (!isset($userArray['user'])) {
             throw new InstagramException('Account with this username does not exist');
         }
-        return Account::fromAccountPage($userArray['entry_data']['ProfilePage'][0]['user']);
-    }
-
-    private static function getJsonPayload($pageString)
-    {
-        $arr = explode('window._sharedData = ', $pageString);
-        $json = explode(';</script>', $arr[1])[0];
-        return $json;
+        return Account::fromAccountPage($userArray['user']);
     }
 
     public function getMedias($username, $count = 20)
@@ -78,18 +69,59 @@ class Instagram implements InstagramDataProvider
         if (filter_var($mediaUrl, FILTER_VALIDATE_URL) === false) {
             throw new InvalidArgumentException('Malformed media url');
         }
-        $response = Request::get($mediaUrl);
+        // TODO: Check for last slash before PARTNER_PARAMETER 
+        $response = Request::get($mediaUrl . self::PARTNER_PARAMETER);
         if ($response->code === 404) {
             throw new InstagramNotFoundException('Media with given code does not exist or account is private.');
         }
         if ($response->code !== 200) {
             throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
         }
-        $json = self::getJsonPayload($response->body);
-        $mediaArray = json_decode($json, true);
-        if (!isset($mediaArray['entry_data']['PostPage'])) {
+        $mediaArray = json_decode($response->raw_body, true);
+        if (!isset($mediaArray['media'])) {
             throw new InstagramException('Media with this code does not exist');
         }
-        return Media::fromMediaPage($mediaArray['entry_data']['PostPage'][0]['media']);
+        return Media::fromMediaPage($mediaArray['media']);
     }
+
+    public function getMediasByTag($tag, $count = 12)
+    {
+        $url = 'https://www.instagram.com/explore/tags/' . $tag . '/?__a=1';
+        $index = 0;
+        $medias = [];
+        $maxId = '';
+        $hasNextPage = true;
+        while ($index < $count && $hasNextPage) {
+            $response = Request::get($url . '&max_id=' . $maxId);
+            if ($response->code !== 200) {
+                throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+            }
+
+            $arr = json_decode($response->raw_body, true);
+            if (!is_array($arr)) {
+                throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
+            }
+            if (count($arr['tag']['media']['count']) === 0) {
+                return [];
+            }
+            $nodes = $arr['tag']['media']['nodes'];
+            foreach ($nodes as $mediaArray) {
+                if ($index === $count) {
+                    return $medias;
+                }
+                $medias[] = Media::fromTagPage($mediaArray);
+                $index++;
+            }
+            $maxId = $nodes[count($nodes) - 1]['id'];
+            $hasNextPage = $arr['tag']['media']['page_info']['has_next_page'];
+        }
+        return $medias;
+    }
+
+    // TODO: Search by query: tags, users and places
+    public function searchByQuery($queryName)
+    {
+        //https://www.instagram.com/web/search/topsearch/?query
+    }
+
 }

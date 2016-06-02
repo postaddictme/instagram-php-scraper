@@ -18,6 +18,7 @@ class Media
     public $videoLowBandwidthUrl;
     public $code;
     public $owner;
+    public $ownerId;
 
     function __construct()
     {
@@ -88,5 +89,23 @@ class Media
             'thumbnail' => str_replace('640x640', '150x150', $standard)
         ];
         return $urls;
+    }
+
+    public static function fromTagPage($mediaArray)
+    {
+        $instance = new self();
+        $instance->code = $mediaArray['code'];
+        $instance->ownerId = $mediaArray['owner']['id'];
+        if (isset($mediaArray['caption'])) {
+            $instance->caption = $mediaArray['caption'];
+        }
+        $instance->createdTime = $mediaArray['date'];
+        $instance->imageThumbnailUrl = $mediaArray['thumbnail_src'];
+        if ($mediaArray['is_video']) {
+            $instance->type = 'video';
+        }
+        $instance->id = $mediaArray['id'];
+        $instance->imageStandardResolutionUrl = $mediaArray['display_src'];
+        return $instance;
     }
 }
