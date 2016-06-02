@@ -13,9 +13,12 @@ class Media
     public $imageStandardResolutionUrl;
     public $imageHighResolutionUrl;
     public $caption;
+    public $captionIsEdited;
+    public $isAd;
     public $videoLowResolutionUrl;
     public $videoStandardResolutionUrl;
     public $videoLowBandwidthUrl;
+    public $videoViews;
     public $code;
     public $owner;
     public $ownerId;
@@ -60,10 +63,17 @@ class Media
         if ($mediaArray['is_video']) {
             $instance->type = 'video';
             $instance->videoStandardResolutionUrl = $mediaArray['video_url'];
+            $instance->videoViews = $mediaArray['video_views'];
+        }
+        if (isset($mediaArray['caption_is_edited'])) {
+            $instance->captionIsEdited = $mediaArray['caption_is_edited'];
+        }
+        if (isset($mediaArray['is_ad'])) {
+            $instance->isAd = $mediaArray['is_ad'];
         }
         $instance->createdTime = $mediaArray['date'];
         $instance->code = $mediaArray['code'];
-        $instance->link = Instagram::INSTAGRAM_URL . 'p/' . $instance->code;
+        $instance->link = self::getMediaLink($instance->code);
         $images = self::getImageUrls($mediaArray['display_src']);
         $instance->imageStandardResolutionUrl = $images['standard'];
         $instance->imageLowResolutionUrl = $images['low'];
@@ -74,6 +84,11 @@ class Media
         }
         $instance->owner = Account::fromMediaPage($mediaArray['owner']);
         return $instance;
+    }
+
+    private static function getMediaLink($shorcode)
+    {
+        return str_replace('{code}', $shorcode, Endpoints::MEDIA_LINK);
     }
 
     private static function getImageUrls($imageUrl)
@@ -95,17 +110,20 @@ class Media
     {
         $instance = new self();
         $instance->code = $mediaArray['code'];
+        $instance->link = self::getMediaLink($instance->code);
         $instance->ownerId = $mediaArray['owner']['id'];
         if (isset($mediaArray['caption'])) {
             $instance->caption = $mediaArray['caption'];
         }
         $instance->createdTime = $mediaArray['date'];
         $instance->imageThumbnailUrl = $mediaArray['thumbnail_src'];
+        $instance->imageStandardResolutionUrl = $mediaArray['display_src'];
+        $instance->type = 'image';
         if ($mediaArray['is_video']) {
             $instance->type = 'video';
+            $instance->videoViews = $mediaArray['video_views'];
         }
         $instance->id = $mediaArray['id'];
-        $instance->imageStandardResolutionUrl = $mediaArray['display_src'];
         return $instance;
     }
 }
