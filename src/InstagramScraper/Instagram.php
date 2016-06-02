@@ -5,7 +5,7 @@ namespace InstagramScraper;
 use InvalidArgumentException;
 use Unirest\Request;
 
-class Instagram implements InstagramDataProvider
+class Instagram
 {
     const INSTAGRAM_URL = 'https://www.instagram.com/';
     const PARTNER_PARAMETER = '/?__a=1';
