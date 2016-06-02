@@ -49,5 +49,8 @@ $media = $instagram->getMediaByCode('BDs9iwfL7XA');
 $media = $instagram->getMediaByUrl('https://www.instagram.com/p/BDs9iwfL7XA/');
 echo $media->owner->username;
 
+$medias = $instagram->getMediasByTag('zara', 20);
+echo json_encode($medias);
+
 ```
 
