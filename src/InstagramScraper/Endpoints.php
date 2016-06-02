@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: raiym
- * Date: 6/2/16
- * Time: 6:48 PM
- */
 
 namespace InstagramScraper;
 
