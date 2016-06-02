@@ -4,16 +4,17 @@ namespace InstagramScraper;
 
 class Account
 {
+    public $id;
     public $username;
+    public $fullName;
+    public $profilePicUrl;
+    public $biography;
+    public $externalUrl;
     public $followsCount;
     public $followedByCount;
-    public $profilePicUrl;
-    public $id;
-    public $biography;
-    public $fullName;
     public $mediaCount;
     public $isPrivate;
-    public $externalUrl;
+    public $isVerified;
 
     function __construct()
     {
@@ -32,6 +33,7 @@ class Account
         $instance->mediaCount = $userArray['media']['count'];
         $instance->isPrivate = $userArray['is_private'];
         $instance->externalUrl = $userArray['external_url'];
+        $instance->isVerified = $userArray['is_verified'];
         return $instance;
     }
 
