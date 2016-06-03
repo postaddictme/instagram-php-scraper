@@ -73,7 +73,7 @@ class Media
         }
         $instance->createdTime = $mediaArray['date'];
         $instance->code = $mediaArray['code'];
-        $instance->link = self::getMediaLink($instance->code);
+        $instance->link = Endpoints::getMediaPageLink($instance->code);
         $images = self::getImageUrls($mediaArray['display_src']);
         $instance->imageStandardResolutionUrl = $images['standard'];
         $instance->imageLowResolutionUrl = $images['low'];
@@ -84,11 +84,6 @@ class Media
         }
         $instance->owner = Account::fromMediaPage($mediaArray['owner']);
         return $instance;
-    }
-
-    private static function getMediaLink($shorcode)
-    {
-        return str_replace('{code}', $shorcode, Endpoints::MEDIA_LINK);
     }
 
     private static function getImageUrls($imageUrl)
@@ -110,7 +105,7 @@ class Media
     {
         $instance = new self();
         $instance->code = $mediaArray['code'];
-        $instance->link = self::getMediaLink($instance->code);
+        $instance->link = Endpoints::getMediaPageLink($instance->code);
         $instance->ownerId = $mediaArray['owner']['id'];
         if (isset($mediaArray['caption'])) {
             $instance->caption = $mediaArray['caption'];
