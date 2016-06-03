@@ -7,12 +7,9 @@ use Unirest\Request;
 
 class Instagram
 {
-    const INSTAGRAM_URL = 'https://www.instagram.com/';
-    const PARTNER_PARAMETER = '/?__a=1';
-
     public function getAccount($username)
     {
-        $response = Request::get(self::INSTAGRAM_URL . $username . self::PARTNER_PARAMETER);
+        $response = Request::get(Endpoints::getAccountJsonLink($username));
         if ($response->code === 404) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
@@ -34,7 +31,7 @@ class Instagram
         $maxId = '';
         $isMoreAvailable = true;
         while ($index < $count && $isMoreAvailable) {
-            $response = Request::get(self::INSTAGRAM_URL . $username . '/media/?max_id=' . $maxId);
+            $response = Request::get(Endpoints::getAccountMediasJsonLink($username, $maxId));
             if ($response->code !== 200) {
                 throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
             }
@@ -61,7 +58,7 @@ class Instagram
 
     public function getMediaByCode($mediaCode)
     {
-        return self::getMediaByUrl(self::INSTAGRAM_URL . 'p/' . $mediaCode);
+        return self::getMediaByUrl(Endpoints::getMediaPageLink($mediaCode));
     }
 
     public function getMediaByUrl($mediaUrl)
@@ -69,8 +66,7 @@ class Instagram
         if (filter_var($mediaUrl, FILTER_VALIDATE_URL) === false) {
             throw new InvalidArgumentException('Malformed media url');
         }
-        // TODO: Check for last slash before PARTNER_PARAMETER 
-        $response = Request::get($mediaUrl . self::PARTNER_PARAMETER);
+        $response = Request::get(rtrim($mediaUrl, '/') . '/?__a=1');
         if ($response->code === 404) {
             throw new InstagramNotFoundException('Media with given code does not exist or account is private.');
         }
@@ -86,13 +82,12 @@ class Instagram
 
     public function getMediasByTag($tag, $count = 12)
     {
-        $url = 'https://www.instagram.com/explore/tags/' . $tag . '/?__a=1';
         $index = 0;
         $medias = [];
         $maxId = '';
         $hasNextPage = true;
         while ($index < $count && $hasNextPage) {
-            $response = Request::get($url . '&max_id=' . $maxId);
+            $response = Request::get(Endpoints::getMediasJsonByTagLink($tag, $maxId));
             if ($response->code !== 200) {
                 throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
             }
