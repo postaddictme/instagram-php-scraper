@@ -5,3 +5,4 @@ Version v0.2.0
 - Enh: New way of scraping data
 - Enh: New method getMediasByTag() available
 - Enh: Moved models and exceptions to own packages
+- Enh: Add Endpoints class to store and generate endpoint links
