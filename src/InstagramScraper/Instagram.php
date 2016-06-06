@@ -2,7 +2,10 @@
 
 namespace InstagramScraper;
 
-use InvalidArgumentException;
+use InstagramScraper\Exception\InstagramException;
+use InstagramScraper\Exception\InstagramNotFoundException;
+use InstagramScraper\Model\Account;
+use InstagramScraper\Model\Media;
 use Unirest\Request;
 
 class Instagram
@@ -67,7 +70,7 @@ class Instagram
     public function getMediaByUrl($mediaUrl)
     {
         if (filter_var($mediaUrl, FILTER_VALIDATE_URL) === false) {
-            throw new InvalidArgumentException('Malformed media url');
+            throw new \InvalidArgumentException('Malformed media url');
         }
         $response = Request::get(rtrim($mediaUrl, '/') . '/?__a=1');
         if ($response->code === 404) {

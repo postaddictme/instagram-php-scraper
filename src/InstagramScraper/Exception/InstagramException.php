@@ -1,6 +1,6 @@
 <?php
 
-namespace InstagramScraper;
+namespace InstagramScraper\Exception;
 
 class InstagramException extends \Exception
 {

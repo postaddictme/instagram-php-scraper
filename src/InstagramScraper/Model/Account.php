@@ -1,6 +1,6 @@
 <?php
 
-namespace InstagramScraper;
+namespace InstagramScraper\Model;
 
 class Account
 {

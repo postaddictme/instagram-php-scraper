@@ -1,6 +1,8 @@
 <?php
 
-namespace InstagramScraper;
+namespace InstagramScraper\Model;
+
+use InstagramScraper\Endpoints;
 
 class Media
 {
