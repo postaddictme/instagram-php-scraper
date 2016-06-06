@@ -1,6 +1,10 @@
                    Instagram PHP Scraper Change Log
                    ================================
 
+Version v0.2.4
+--------------
+- Bug: Fix when pagination return only first page and never the rest
+
 Version v0.2.3
 --------------
 - Bug: Require library with composer
