@@ -116,7 +116,7 @@ class Instagram
             if (count($nodes) == 0) {
                 return $medias;
             }
-            $maxId = $nodes[count($nodes) - 1]['id'];
+            $maxId = $arr['tag']['media']['page_info']['end_cursor'];
             $hasNextPage = $arr['tag']['media']['page_info']['has_next_page'];
         }
         return $medias;
