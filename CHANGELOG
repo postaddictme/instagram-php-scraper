@@ -1,5 +1,12 @@
                    Instagram PHP Scraper Change Log
                    ================================
+Version v0.2.2
+- Enh: Remove concatenation in constants to support PHP versions before 5.6
+- Bug: In pagination in getMediasByTag() and getMedias() methods
+
+Version v0.2.1
+- Bug: Include Endpoints class
+
 Version v0.2.0
 --------------
 - Enh: New way of scraping data
