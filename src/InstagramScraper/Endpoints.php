@@ -5,16 +5,14 @@ namespace InstagramScraper;
 class Endpoints
 {
     const BASE_URL = 'https://www.instagram.com';
-    const ACCOUNT_PAGE = self::BASE_URL . '/{username}';
-    const MEDIA_LINK = self::BASE_URL . '/p/{code}';
-
-    const ACCOUNT_MEDIAS = self::ACCOUNT_PAGE . '/media?max_id={max_id}';
-    const ACCOUNT_JSON_INFO = self::ACCOUNT_PAGE . '/?__a=1';
-    const MEDIA_JSON_INFO = self::MEDIA_LINK . '/?__a=1';
-    const MEDIA_JSON_BY_LOCATION_ID = self::BASE_URL . '/explore/locations/{facebookLocationId}/?__a=1';
-    const MEDIA_JSON_BY_TAG = self::BASE_URL . '/explore/tags/{tag}/?__a=1&max_id={max_id}';
-
-    const GENERAL_SEARCH = self::BASE_URL . '/web/search/topsearch/?query={query}';
+    const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
+    const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
+    const ACCOUNT_MEDIAS = 'https://www.instagram.com/{username}/media?max_id={max_id}';
+    const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
+    const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
+    const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{facebookLocationId}/?__a=1';
+    const MEDIA_JSON_BY_TAG = 'https://www.instagram.com/explore/tags/{tag}/?__a=1&max_id={max_id}';
+    const GENERAL_SEARCH = 'https://www.instagram.com/web/search/topsearch/?query={query}';
 
     public static function getAccountPageLink($username)
     {
