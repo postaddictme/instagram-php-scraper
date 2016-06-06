@@ -50,6 +50,9 @@ class Instagram
                 $medias[] = Media::fromApi($mediaArray);
                 $index++;
             }
+            if (count($arr['items']) == 0) {
+                return $medias;
+            }
             $maxId = $arr['items'][count($arr['items']) - 1]['id'];
             $isMoreAvailable = $arr['more_available'];
         }
@@ -106,6 +109,9 @@ class Instagram
                 }
                 $medias[] = Media::fromTagPage($mediaArray);
                 $index++;
+            }
+            if (count($nodes) == 0) {
+                return $medias;
             }
             $maxId = $nodes[count($nodes) - 1]['id'];
             $hasNextPage = $arr['tag']['media']['page_info']['has_next_page'];
