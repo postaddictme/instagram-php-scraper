@@ -101,4 +101,17 @@ class Account
         $instance->isPrivate = $userArray['is_private'];
         return $instance;
     }
+
+    public static function fromSearchPage($userArray)
+    {
+        $instance = new self();
+        $instance->username = $userArray['username'];
+        $instance->profilePicUrl = $userArray['profile_pic_url'];
+        $instance->id = $userArray['pk'];
+        $instance->fullName = $userArray['full_name'];
+        $instance->isPrivate = $userArray['is_private'];
+        $instance->isVerified = $userArray['is_verified'];
+        $instance->followedByCount = $userArray['follower_count'];
+        return $instance;
+    }
 }

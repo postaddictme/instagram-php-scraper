@@ -6,6 +6,7 @@ use InstagramScraper\Exception\InstagramException;
 use InstagramScraper\Exception\InstagramNotFoundException;
 use InstagramScraper\Model\Account;
 use InstagramScraper\Model\Media;
+use InstagramScraper\Model\Tag;
 use Unirest\Request;
 
 class Instagram
@@ -122,10 +123,53 @@ class Instagram
         return $medias;
     }
 
-    // TODO: Search by query: tags, users and places
-    public function searchByQuery($queryName)
+    public function searchAccountsByUsername($username)
     {
-        //https://www.instagram.com/web/search/topsearch/?query
+        $response = Request::get(Endpoints::getGeneralSearchJsonLink($username));
+        if ($response->code === 404) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+
+        $jsonResponse = json_decode($response->raw_body, true);
+        if (!isset($jsonResponse['status']) || $jsonResponse['status'] != 'ok') {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+        if (!isset($jsonResponse['users']) || count($jsonResponse['users']) == 0) {
+            return [];
+        }
+
+        $accounts = [];
+        foreach ($jsonResponse['users'] as $jsonAccount) {
+            $accounts[] = Account::fromSearchPage($jsonAccount['user']);
+        }
+        return $accounts;
     }
 
+    public function searchTagsByTagName($tag)
+    {
+        $response = Request::get(Endpoints::getGeneralSearchJsonLink($tag));
+        if ($response->code === 404) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+
+        $jsonResponse = json_decode($response->raw_body, true);
+        if (!isset($jsonResponse['status']) || $jsonResponse['status'] != 'ok') {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+
+        if (!isset($jsonResponse['hashtags']) || count($jsonResponse['hashtags']) == 0) {
+            return [];
+        }
+        $hashtags = [];
+        foreach ($jsonResponse['hashtags'] as $jsonHashtag) {
+            $hashtags[] = Tag::fromSearchPage($jsonHashtag['hashtag']);
+        }
+        return $hashtags;
+    }
 }
