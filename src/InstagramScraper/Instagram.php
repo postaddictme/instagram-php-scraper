@@ -172,4 +172,21 @@ class Instagram
         }
         return $hashtags;
     }
+
+    public function getTopMediasByTagName($tagName)
+    {
+        $response = Request::get(Endpoints::getMediasJsonByTagLink($tagName, ''));
+        if ($response->code === 404) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+        $jsonResponse = json_decode($response->raw_body, true);
+        $medias = [];
+        foreach ($jsonResponse['tag']['top_posts']['nodes'] as $mediaArray) {
+            $medias[] = Media::fromTagPage($mediaArray);
+        }
+        return $medias;
+    }
 }
