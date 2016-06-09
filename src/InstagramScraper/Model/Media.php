@@ -113,8 +113,8 @@ class Media
             $instance->caption = $mediaArray['caption'];
         }
         $instance->createdTime = $mediaArray['date'];
-        $instance->imageThumbnailUrl = $mediaArray['thumbnail_src'];
-        $instance->imageStandardResolutionUrl = $mediaArray['display_src'];
+        $instance->imageThumbnailUrl = self::getCleanImageUrl($mediaArray['thumbnail_src']);
+        $instance->imageStandardResolutionUrl = self::getCleanImageUrl($mediaArray['display_src']);
         $instance->type = 'image';
         if ($mediaArray['is_video']) {
             $instance->type = 'video';
