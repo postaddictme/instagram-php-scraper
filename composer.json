@@ -16,7 +16,7 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "mashape/unirest-php": "^3.0"
+    "mashape/unirest-php": "3.0.*"
   },
   "autoload": {
     "psr-0": {
