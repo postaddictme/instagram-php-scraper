@@ -91,9 +91,17 @@ class Media
     private static function getImageUrls($imageUrl)
     {
         $imageUrl = self::getCleanImageUrl($imageUrl);
-        $imageUrl = str_replace('s480x480/', "", $imageUrl);
         $parts = explode('/', parse_url($imageUrl)['path']);
-        $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/s640x640/' . $parts[2] . '/' . $parts[3];
+        if (sizeof($parts) == 4){
+            $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/s640x640/' . $parts[2] . '/' . $parts[3];
+        } else {
+            if (isset($parts[4]) && $parts[4][0] == 'p') {
+                $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/p640x640/' . $parts[3] . '/' . $parts[5];
+            } else {
+                $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/s640x640/' . $parts[3] . '/' . $parts[5];
+            }
+        }
+
         $urls = [
             'standard' => $standard,
             'low' => str_replace('640x640', '320x320', $standard),
