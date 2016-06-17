@@ -153,12 +153,14 @@ class Media
 
     public static function getLinkFromId($id)
     {
-        $code = self::getCodeFromId($id);
+        $code = Media::getCodeFromId($id);
         return Endpoints::getMediaPageLink($code);
     }
 
     public static function getCodeFromId($id)
     {
+        $parts = explode('_', $id);
+        $id = $parts[0];
         $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
         $shortenedId = '';
         while ($id > 0) {
