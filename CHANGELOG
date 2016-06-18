@@ -1,5 +1,14 @@
                    Instagram PHP Scraper Change Log
                    ================================
+Version v0.2.6
+--------------
+- Enh: Include Tag class
+- Enh: Clean image urls in fromTagPage() method
+- Enh: Add getTopMediasByTagName() method
+- Enh: New type of URLs
+- Enh: Add methods: Media::getIdFromCode()
+- Enh: Add methods: Instagram::getMediaById()
+- Enh: Fixes #15. Add likesCount, commentsCount properties.
 
 Version v0.2.5
 --------------
