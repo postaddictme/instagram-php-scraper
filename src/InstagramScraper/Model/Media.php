@@ -24,6 +24,8 @@ class Media
     public $code;
     public $owner;
     public $ownerId;
+    public $likesCount;
+    public $commentsCount;
 
     function __construct()
     {
@@ -37,6 +39,8 @@ class Media
         $instance->createdTime = $mediaArray['created_time'];
         $instance->code = $mediaArray['code'];
         $instance->link = $mediaArray['link'];
+        $instance->commentsCount = $mediaArray['comments']['count'];
+        $instance->likesCount = $mediaArray['likes']['count'];
         $instance->imageLowResolutionUrl = self::getCleanImageUrl($mediaArray['images']['low_resolution']['url']);
         $instance->imageThumbnailUrl = self::getCleanImageUrl($mediaArray['images']['thumbnail']['url']);
         $instance->imageStandardResolutionUrl = self::getCleanImageUrl($mediaArray['images']['standard_resolution']['url']);
@@ -45,6 +49,7 @@ class Media
             $instance->caption = $mediaArray['caption']['text'];
         }
         if ($instance->type === 'video') {
+            $instance->videoViews = $mediaArray['video_views'];
             $instance->videoLowResolutionUrl = $mediaArray['videos']['low_resolution']['url'];
             $instance->videoStandardResolutionUrl = $mediaArray['videos']['standard_resolution']['url'];
             $instance->videoLowBandwidthUrl = $mediaArray['videos']['low_bandwidth']['url'];
@@ -76,6 +81,8 @@ class Media
         $instance->createdTime = $mediaArray['date'];
         $instance->code = $mediaArray['code'];
         $instance->link = Endpoints::getMediaPageLink($instance->code);
+        $instance->commentsCount = $mediaArray['comments']['count'];
+        $instance->likesCount = $mediaArray['likes']['count'];
         $images = self::getImageUrls($mediaArray['display_src']);
         $instance->imageStandardResolutionUrl = $images['standard'];
         $instance->imageLowResolutionUrl = $images['low'];
@@ -116,6 +123,8 @@ class Media
         $instance = new self();
         $instance->code = $mediaArray['code'];
         $instance->link = Endpoints::getMediaPageLink($instance->code);
+        $instance->commentsCount = $mediaArray['comments']['count'];
+        $instance->likesCount = $mediaArray['likes']['count'];
         $instance->ownerId = $mediaArray['owner']['id'];
         if (isset($mediaArray['caption'])) {
             $instance->caption = $mediaArray['caption'];
