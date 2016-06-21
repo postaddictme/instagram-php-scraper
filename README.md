@@ -88,6 +88,11 @@ echo json_encode($medias);
 $medias = $instagram->getTopMediasByTagName('durov');
 ```
 
+### Get media by id
+```php
+$media = $instagram->getMediaById(1270593720437182847)
+```
+
 ### Convert media it to shortcode
 ```php
 echo 'CODE: ' . Media::getCodeFromId('1270593720437182847_3');
