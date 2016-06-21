@@ -189,4 +189,10 @@ class Instagram
         }
         return $medias;
     }
+
+    public function getMediaById($mediaId)
+    {
+        $mediaLink = Media::getLinkFromId($mediaId);
+        return self::getMediaByUrl($mediaLink);
+    }
 }
