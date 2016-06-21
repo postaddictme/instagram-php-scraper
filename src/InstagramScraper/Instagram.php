@@ -28,6 +28,29 @@ class Instagram
         return Account::fromAccountPage($userArray['user']);
     }
 
+    public function getAccountById($id)
+    {
+
+        if (!is_numeric($id)) {
+            throw new \InvalidArgumentException('User id must be integer or integer wrapped in string');
+        }
+        $response = Request::get(Endpoints::getAccountJsonInfoLinkByAccountId($id));
+        if ($response->code === 404) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+        $userArray = json_decode($response->raw_body, true);
+        if ($userArray['status'] === 'fail') {
+            throw new InstagramException($userArray['message']);
+        }
+        if (!isset($userArray['username'])) {
+            throw new InstagramNotFoundException('User with this id not found');
+        }
+        return Account::fromAccountPage($userArray);
+    }
+
     public function getMedias($username, $count = 20)
     {
         $index = 0;
