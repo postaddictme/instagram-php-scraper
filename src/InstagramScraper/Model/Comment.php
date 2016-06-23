@@ -11,4 +11,18 @@ class Comment
 
     public $user;
 
+    function __construct()
+    {
+    }
+
+    public static function fromApi($commentArray)
+    {
+        $instance = new self();
+        $instance->text = $commentArray['text'];
+        $instance->createdAt = $commentArray['created_at'];
+        $instance->id = $commentArray['id'];
+        $instance->user = Account::fromAccountPage($commentArray['user']);
+        return $instance;
+    }
+
 }
