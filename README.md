@@ -7,12 +7,11 @@
 ```php
 use InstagramScraper\Instagram;
 
-$instagram = new Instagram();
 ```
 
 ### Get account info
 ```php
-$account = $instagram->getAccount('kevin');
+$account = Instagram::getAccount('kevin');
 /*
 Available properties: 
     $username;
@@ -28,10 +27,15 @@ Available properties:
 */
 echo $account->followedByCount;
 ```
+### Get account info by userId
+```php
+$account = Instagram::getAccountById(193886659);
+echo $account->username;
+```
 
 ### Search users by username
 ```php
-$medias = $instagram->searchAccountsByUsername('durov');
+$medias = Instagram::searchAccountsByUsername('durov');
 echo '<pre>';
 echo json_encode($medias);
 echo '</pre><br/>';
@@ -39,7 +43,7 @@ echo '</pre><br/>';
 
 ### Get account medias
 ```php
-$medias = $instagram->getMedias('kevin', 150);
+$medias = Instagram::getMedias('kevin', 150);
 
 /*
 Available properties: 
@@ -63,34 +67,34 @@ echo $medias[0]->caption;
 
 ### Get media by code
 ```php
-$media = $instagram->getMediaByCode('BDs9iwfL7XA');
+$media = Instagram::getMediaByCode('BDs9iwfL7XA');
 ```
 
 ### Get media by url
 ```php
-$media = $instagram->getMediaByUrl('https://www.instagram.com/p/BDs9iwfL7XA/');
+$media = Instagram::getMediaByUrl('https://www.instagram.com/p/BDs9iwfL7XA/');
 echo $media->owner->username;
 ```
 
 ### Get media by id
 ```php
-$media = $instagram->getMediaById(1042815830884781756);
+$media = Instagram::getMediaById(1042815830884781756);
 ```
 
 ### Search medias by tag name
 ```php
-$medias = $instagram->getMediasByTag('zara', 30);
+$medias = Instagram::getMediasByTag('zara', 30);
 echo json_encode($medias);
 ```
 
 ### Get top medias by tag name
 ```php
-$medias = $instagram->getTopMediasByTagName('durov');
+$medias = Instagram::getTopMediasByTagName('durov');
 ```
 
 ### Get media by id
 ```php
-$media = $instagram->getMediaById(1270593720437182847)
+$media = Instagram::getMediaById(1270593720437182847)
 ```
 
 ### Convert media id to shortcode
@@ -108,4 +112,15 @@ echo 'CODE: ' . Media::getCodeFromId(1270593720437182847);
 ```php
 echo 'Media id: ' . Media::getIdFromCode('BGiDkHAgBF_');
 // Media id: 1270593720437182847
+```
+
+### Get media comments by shortcode
+```php
+$comments = Instagram::getCommentsByCode('BG3Iz-No1IZ');
+```
+
+
+### Get media comments by id
+```php
+$comments = Instagram::getMediaCommentsById('1130748710921700586', 10000)
 ```
