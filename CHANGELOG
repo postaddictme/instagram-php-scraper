@@ -1,5 +1,11 @@
                    Instagram PHP Scraper Change Log
                    ================================
+Version v0.2.7
+--------------
+- Enh: Change all methods in Instagram class to static
+- Enh: Add Instagram::getMediaCommentsByCode(). From now you can download ALL comments from media. (Tested on 8000 comments)
+- Enh: Add Instagram::getMediaCommentsById(). Same as above but with mediaId.
+
 Version v0.2.6
 --------------
 - Enh: Include Tag class
