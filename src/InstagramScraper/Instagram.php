@@ -12,6 +12,8 @@ use Unirest\Request;
 
 class Instagram
 {
+    const MAX_COMMENTS_PER_REQUEST = 300;
+
     public static function getAccount($username)
     {
         $response = Request::get(Endpoints::getAccountJsonLink($username));
@@ -221,49 +223,45 @@ class Instagram
 
     public static function getMediaCommentsByCode($code, $count = 10, $maxId = null)
     {
-        $numberOfCommentsToRetreive = $count;
-        $index = 0;
-        $maxCommentsPerRequest = 9999;
-        $remain = 0;
-        if ($count > $maxCommentsPerRequest) {
-            $remain = $count - $maxCommentsPerRequest;
-            $count = $maxCommentsPerRequest;
-        }
-
-        if (!isset($maxId)) {
-            $response = Request::get(Endpoints::getLastCommentsByCodeLink($code, $count));
-        } else {
-            $response = Request::get(Endpoints::getCommentsBeforeCommentIdByCode($code, $count, $maxId));
-        }
-
-        if ($response->code === 404) {
-            throw new InstagramNotFoundException('Account with given username does not exist.');
-        }
-        if ($response->code !== 200) {
-            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
-        }
-        $jsonResponse = json_decode($response->raw_body, true);
-        $commentsCount = $jsonResponse['comments']['count'];
-        $nodes = $jsonResponse['comments']['nodes'];
+        $remain = $count;
         $comments = [];
-        foreach ($nodes as $commentArray) {
-            $comments[] = Comment::fromApi($commentArray);
-        }
-
-        if ($count <= $maxCommentsPerRequest) {
-            return $comments;
-        }
-        $index = $count;
-        $hasPrevious = $jsonResponse['comments']['page_info']['has_previous_page'];
-        $maxId = $jsonResponse['comments']['nodes'][$index - 1]['id'];
-        while ($hasPrevious && $index < $numberOfCommentsToRetreive) {
-            if ($remain > $maxCommentsPerRequest) {
-                $response = Request::get(Endpoints::getCommentsBeforeCommentIdByCode($code, $maxCommentsPerRequest, $maxId));
-                $remain -= $maxCommentsPerRequest;
+        $index = 0;
+        $hasPrevious = true;
+        while ($hasPrevious && $index < $count) {
+            if ($remain > self::MAX_COMMENTS_PER_REQUEST) {
+                $numberOfCommentsToRetreive = self::MAX_COMMENTS_PER_REQUEST;
+                $remain -= self::MAX_COMMENTS_PER_REQUEST;
+                $index += self::MAX_COMMENTS_PER_REQUEST;
             } else {
-                $response = Request::get(Endpoints::getCommentsBeforeCommentIdByCode($code, $remain, $maxId));
+                $numberOfCommentsToRetreive = $remain;
+                $index += $remain;
+                $remain = 0;
             }
-
+            if (!isset($maxId)) {
+                $response = Request::get(Endpoints::getLastCommentsByCodeLink($code, $numberOfCommentsToRetreive));
+            } else {
+                $response = Request::get(Endpoints::getCommentsBeforeCommentIdByCode($code, $numberOfCommentsToRetreive, $maxId));
+            }
+            if ($response->code === 404) {
+                throw new InstagramNotFoundException('Account with given username does not exist.');
+            }
+            if ($response->code !== 200) {
+                throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+            }
+            $jsonResponse = json_decode($response->raw_body, true);
+            $nodes = $jsonResponse['comments']['nodes'];
+            foreach ($nodes as $commentArray) {
+                $comments[] = Comment::fromApi($commentArray);
+            }
+            $hasPrevious = $jsonResponse['comments']['page_info']['has_previous_page'];
+            $numberOfComments = $jsonResponse['comments']['count'];
+            if ($count > $numberOfComments) {
+                $count = $numberOfComments;
+            }
+            if (sizeof($nodes) == 0) {
+                return $comments;
+            }
+            $maxId = $nodes[sizeof($nodes) - 1]['id'];
         }
         return $comments;
     }
