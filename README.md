@@ -116,9 +116,8 @@ echo 'Media id: ' . Media::getIdFromCode('BGiDkHAgBF_');
 
 ### Get media comments by shortcode
 ```php
-$comments = Instagram::getCommentsByCode('BG3Iz-No1IZ');
+$comments = Instagram::getMediaCommentsByCode('BG3Iz-No1IZ', 8000);
 ```
-
 
 ### Get media comments by id
 ```php
