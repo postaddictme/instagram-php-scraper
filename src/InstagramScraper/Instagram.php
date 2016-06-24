@@ -12,7 +12,7 @@ use Unirest\Request;
 
 class Instagram
 {
-    public function getAccount($username)
+    public static function getAccount($username)
     {
         $response = Request::get(Endpoints::getAccountJsonLink($username));
         if ($response->code === 404) {
@@ -29,7 +29,7 @@ class Instagram
         return Account::fromAccountPage($userArray['user']);
     }
 
-    public function getAccountById($id)
+    public static function getAccountById($id)
     {
 
         if (!is_numeric($id)) {
@@ -52,7 +52,7 @@ class Instagram
         return Account::fromAccountPage($userArray);
     }
 
-    public function getMedias($username, $count = 20)
+    public static function getMedias($username, $count = 20)
     {
         $index = 0;
         $medias = [];
@@ -87,12 +87,12 @@ class Instagram
         return $medias;
     }
 
-    public function getMediaByCode($mediaCode)
+    public static function getMediaByCode($mediaCode)
     {
         return self::getMediaByUrl(Endpoints::getMediaPageLink($mediaCode));
     }
 
-    public function getMediaByUrl($mediaUrl)
+    public static function getMediaByUrl($mediaUrl)
     {
         if (filter_var($mediaUrl, FILTER_VALIDATE_URL) === false) {
             throw new \InvalidArgumentException('Malformed media url');
@@ -111,7 +111,7 @@ class Instagram
         return Media::fromMediaPage($mediaArray['media']);
     }
 
-    public function getMediasByTag($tag, $count = 12, $maxId = '')
+    public static function getMediasByTag($tag, $count = 12, $maxId = '')
     {
         $index = 0;
         $medias = [];
@@ -146,7 +146,7 @@ class Instagram
         return $medias;
     }
 
-    public function searchAccountsByUsername($username)
+    public static function searchAccountsByUsername($username)
     {
         $response = Request::get(Endpoints::getGeneralSearchJsonLink($username));
         if ($response->code === 404) {
@@ -171,7 +171,7 @@ class Instagram
         return $accounts;
     }
 
-    public function searchTagsByTagName($tag)
+    public static function searchTagsByTagName($tag)
     {
         $response = Request::get(Endpoints::getGeneralSearchJsonLink($tag));
         if ($response->code === 404) {
@@ -196,7 +196,7 @@ class Instagram
         return $hashtags;
     }
 
-    public function getTopMediasByTagName($tagName)
+    public static function getTopMediasByTagName($tagName)
     {
         $response = Request::get(Endpoints::getMediasJsonByTagLink($tagName, ''));
         if ($response->code === 404) {
@@ -213,13 +213,13 @@ class Instagram
         return $medias;
     }
 
-    public function getMediaById($mediaId)
+    public static function getMediaById($mediaId)
     {
         $mediaLink = Media::getLinkFromId($mediaId);
         return self::getMediaByUrl($mediaLink);
     }
 
-    public function getMediaCommentsByCode($code, $count = 10, $maxId = null)
+    public static function getMediaCommentsByCode($code, $count = 10, $maxId = null)
     {
         $numberOfCommentsToRetreive = $count;
         $index = 0;
@@ -266,7 +266,5 @@ class Instagram
 
         }
         return $comments;
-
-
     }
 }
