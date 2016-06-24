@@ -221,6 +221,12 @@ class Instagram
         return self::getMediaByUrl($mediaLink);
     }
 
+    public static function getMediaCommentsById($mediaId, $count = 10, $maxId = null)
+    {
+        $code = Media::getCodeFromId($mediaId);
+        return self::getMediaCommentsByCode($code, $count, $maxId);
+    }
+
     public static function getMediaCommentsByCode($code, $count = 10, $maxId = null)
     {
         $remain = $count;
