@@ -42,7 +42,6 @@ class Media
         $instance->link = $mediaArray['link'];
         $instance->commentsCount = $mediaArray['comments']['count'];
         $instance->likesCount = $mediaArray['likes']['count'];
-        $instance->locationName = $mediaArray['location']['name'];
         $instance->imageLowResolutionUrl = self::getCleanImageUrl($mediaArray['images']['low_resolution']['url']);
         $instance->imageThumbnailUrl = self::getCleanImageUrl($mediaArray['images']['thumbnail']['url']);
         $instance->imageStandardResolutionUrl = self::getCleanImageUrl($mediaArray['images']['standard_resolution']['url']);
@@ -56,6 +55,9 @@ class Media
             $instance->videoStandardResolutionUrl = $mediaArray['videos']['standard_resolution']['url'];
             $instance->videoLowBandwidthUrl = $mediaArray['videos']['low_bandwidth']['url'];
         }
+        if (isset($mediaArray['location'])) {
+			$instance->locationName = $mediaArray['location']['name'];
+		}
         return $instance;
     }
 
@@ -85,7 +87,6 @@ class Media
         $instance->link = Endpoints::getMediaPageLink($instance->code);
         $instance->commentsCount = $mediaArray['comments']['count'];
         $instance->likesCount = $mediaArray['likes']['count'];
-        $instance->locationName = $mediaArray['location']['name'];
         $images = self::getImageUrls($mediaArray['display_src']);
         $instance->imageStandardResolutionUrl = $images['standard'];
         $instance->imageLowResolutionUrl = $images['low'];
@@ -94,6 +95,9 @@ class Media
         if (isset($mediaArray['caption'])) {
             $instance->caption = $mediaArray['caption'];
         }
+        if (isset($mediaArray['location'])) {
+			$instance->locationName = $mediaArray['location']['name'];
+		}
         $instance->owner = Account::fromMediaPage($mediaArray['owner']);
         return $instance;
     }
