@@ -25,6 +25,7 @@ class Media
     public $owner;
     public $ownerId;
     public $likesCount;
+    public $locationName;
     public $commentsCount;
 
     function __construct()
@@ -54,6 +55,9 @@ class Media
             $instance->videoStandardResolutionUrl = $mediaArray['videos']['standard_resolution']['url'];
             $instance->videoLowBandwidthUrl = $mediaArray['videos']['low_bandwidth']['url'];
         }
+        if (isset($mediaArray['location'])) {
+		$instance->locationName = $mediaArray['location']['name'];
+	}
         return $instance;
     }
 
@@ -91,6 +95,9 @@ class Media
         if (isset($mediaArray['caption'])) {
             $instance->caption = $mediaArray['caption'];
         }
+        if (isset($mediaArray['location'])) {
+		$instance->locationName = $mediaArray['location']['name'];
+	}
         $instance->owner = Account::fromMediaPage($mediaArray['owner']);
         return $instance;
     }
