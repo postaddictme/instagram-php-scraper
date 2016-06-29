@@ -25,6 +25,7 @@ class Media
     public $owner;
     public $ownerId;
     public $likesCount;
+    public $locationName;
     public $commentsCount;
 
     function __construct()
@@ -41,6 +42,7 @@ class Media
         $instance->link = $mediaArray['link'];
         $instance->commentsCount = $mediaArray['comments']['count'];
         $instance->likesCount = $mediaArray['likes']['count'];
+        $instance->locationName = $mediaArray['location']['name'];
         $instance->imageLowResolutionUrl = self::getCleanImageUrl($mediaArray['images']['low_resolution']['url']);
         $instance->imageThumbnailUrl = self::getCleanImageUrl($mediaArray['images']['thumbnail']['url']);
         $instance->imageStandardResolutionUrl = self::getCleanImageUrl($mediaArray['images']['standard_resolution']['url']);
@@ -83,6 +85,7 @@ class Media
         $instance->link = Endpoints::getMediaPageLink($instance->code);
         $instance->commentsCount = $mediaArray['comments']['count'];
         $instance->likesCount = $mediaArray['likes']['count'];
+        $instance->locationName = $mediaArray['location']['name'];
         $images = self::getImageUrls($mediaArray['display_src']);
         $instance->imageStandardResolutionUrl = $images['standard'];
         $instance->imageLowResolutionUrl = $images['low'];
