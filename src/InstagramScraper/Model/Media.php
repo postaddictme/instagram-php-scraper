@@ -50,7 +50,9 @@ class Media
             $instance->caption = $mediaArray['caption']['text'];
         }
         if ($instance->type === 'video') {
-            $instance->videoViews = $mediaArray['video_views'];
+            if (isset($mediaArray['video_views'])) {
+                $instance->videoViews = $mediaArray['video_views'];
+            }
             $instance->videoLowResolutionUrl = $mediaArray['videos']['low_resolution']['url'];
             $instance->videoStandardResolutionUrl = $mediaArray['videos']['standard_resolution']['url'];
             $instance->videoLowBandwidthUrl = $mediaArray['videos']['low_bandwidth']['url'];
