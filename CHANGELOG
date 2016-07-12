@@ -1,6 +1,19 @@
                    Instagram PHP Scraper Change Log
                    ================================
-Version v0.2.7
+
+Version v0.3.2
+--------------
+- Enh: Add phpunit tests
+- Bug: Check if video views exist in Media::fromApi() method
+- Enh: Add getLocationTopMediasById() method
+- Enh: Add getLocationMediasById() method
+- Enh: Add Location model and getLocationById method
+
+Version v0.3.1
+--------------
+- Enh: Add locationName property to Media
+
+Version v0.3.0
 --------------
 - Enh: Change all methods in Instagram class to static
 - Enh: Add Instagram::getMediaCommentsByCode(). From now you can download ALL comments from media. (Tested on 8000 comments)

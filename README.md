@@ -123,3 +123,18 @@ $comments = Instagram::getMediaCommentsByCode('BG3Iz-No1IZ', 8000);
 ```php
 $comments = Instagram::getMediaCommentsById('1130748710921700586', 10000)
 ```
+
+### Get location id
+```php
+$medias = Instagram::getLocationById(1);
+```
+
+### Get location top medias by location id
+```php
+$medias = Instagram::getLocationTopMediasById(1);
+```
+
+### Get location medias by location id
+```php
+$medias = Instagram::getLocationMediasById(1);
+```
