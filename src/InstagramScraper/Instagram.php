@@ -271,4 +271,22 @@ class Instagram
         }
         return $comments;
     }
+
+    public static function getLocationTopMediasByFacebookLocationId($facebookLocationId)
+    {
+        $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId));
+        if ($response->code === 404) {
+            throw new InstagramNotFoundException('Location with this id doesn\'t exist');
+        }
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+        $jsonResponse = json_decode($response->raw_body, true);
+        $nodes = $jsonResponse['location']['top_posts']['nodes'];
+        $medias = [];
+        foreach ($nodes as $mediaArray) {
+            $medias[] = Media::fromTagPage($mediaArray);
+        }
+        return $medias;
+    }
 }
