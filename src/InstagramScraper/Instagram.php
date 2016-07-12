@@ -55,11 +55,10 @@ class Instagram
         return Account::fromAccountPage($userArray);
     }
 
-    public static function getMedias($username, $count = 20)
+    public static function getMedias($username, $count = 20, $maxId = '')
     {
         $index = 0;
         $medias = [];
-        $maxId = '';
         $isMoreAvailable = true;
         while ($index < $count && $isMoreAvailable) {
             $response = Request::get(Endpoints::getAccountMediasJsonLink($username, $maxId));
