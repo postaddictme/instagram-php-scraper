@@ -51,4 +51,10 @@ class InstagramTest extends TestCase
         $medias = Instagram::getLocationMediasById(1);
         $this->assertEquals(12, count($medias));
     }
+
+    public function testGetLocationById()
+    {
+        $location = Instagram::getLocationById(1);
+        $this->assertEquals('Dog Patch Labs', $location->name);
+    }
 }

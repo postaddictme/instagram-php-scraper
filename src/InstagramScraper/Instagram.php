@@ -6,6 +6,7 @@ use InstagramScraper\Exception\InstagramException;
 use InstagramScraper\Exception\InstagramNotFoundException;
 use InstagramScraper\Model\Account;
 use InstagramScraper\Model\Comment;
+use InstagramScraper\Model\Location;
 use InstagramScraper\Model\Media;
 use InstagramScraper\Model\Tag;
 use Unirest\Request;
@@ -316,5 +317,18 @@ class Instagram
             $offset = $arr['location']['media']['page_info']['end_cursor'];
         }
         return $medias;
+    }
+
+    public static function getLocationById($facebookLocationId)
+    {
+        $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId));
+        if ($response->code === 404) {
+            throw new InstagramNotFoundException('Location with this id doesn\'t exist');
+        }
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+        $jsonResponse = json_decode($response->raw_body, true);
+        return Location::makeLocation($jsonResponse['location']);
     }
 }
