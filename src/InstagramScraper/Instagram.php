@@ -272,7 +272,7 @@ class Instagram
         return $comments;
     }
 
-    public static function getLocationTopMediasByFacebookLocationId($facebookLocationId)
+    public static function getLocationTopMediasById($facebookLocationId)
     {
         $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId));
         if ($response->code === 404) {
@@ -286,6 +286,34 @@ class Instagram
         $medias = [];
         foreach ($nodes as $mediaArray) {
             $medias[] = Media::fromTagPage($mediaArray);
+        }
+        return $medias;
+    }
+
+    public static function getLocationMediasById($facebookLocationId, $quantity = 12, $offset = '')
+    {
+        $index = 0;
+        $medias = [];
+        $hasNext = true;
+        while ($index < $quantity && $hasNext) {
+            $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId, $offset));
+            if ($response->code !== 200) {
+                throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+            }
+            $arr = json_decode($response->raw_body, true);
+            $nodes = $arr['location']['media']['nodes'];
+            foreach ($nodes as $mediaArray) {
+                if ($index === $quantity) {
+                    return $medias;
+                }
+                $medias[] = Media::fromTagPage($mediaArray);
+                $index++;
+            }
+            if (count($nodes) == 0) {
+                return $medias;
+            }
+            $hasNext = $arr['location']['media']['page_info']['has_next_page'];
+            $offset = $arr['location']['media']['page_info']['end_cursor'];
         }
         return $medias;
     }
