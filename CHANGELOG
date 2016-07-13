@@ -1,5 +1,9 @@
                    Instagram PHP Scraper Change Log
                    ================================
+Version v0.3.3
+--------------
+- Bug: Include class Location and Comment in InstagramScraper.php
+- Enh: Add locationId
 
 Version v0.3.2
 --------------
