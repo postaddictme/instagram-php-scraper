@@ -58,8 +58,10 @@ class Media
             $instance->videoStandardResolutionUrl = $mediaArray['videos']['standard_resolution']['url'];
             $instance->videoLowBandwidthUrl = $mediaArray['videos']['low_bandwidth']['url'];
         }
-        if (isset($mediaArray['location'])) {
+        if (isset($mediaArray['location']['id'])) {
             $instance->locationId = $mediaArray['location']['id'];
+        }
+        if (isset($mediaArray['location']['name'])) {
             $instance->locationName = $mediaArray['location']['name'];
         }
         return $instance;
@@ -99,8 +101,10 @@ class Media
         if (isset($mediaArray['caption'])) {
             $instance->caption = $mediaArray['caption'];
         }
-        if (isset($mediaArray['location'])) {
+        if (isset($mediaArray['location']['id'])) {
             $instance->locationId = $mediaArray['location']['id'];
+        }
+        if (isset($mediaArray['location']['name'])) {
             $instance->locationName = $mediaArray['location']['name'];
         }
         $instance->owner = Account::fromMediaPage($mediaArray['owner']);
