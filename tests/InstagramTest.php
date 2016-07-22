@@ -57,4 +57,10 @@ class InstagramTest extends TestCase
         $location = Instagram::getLocationById(1);
         $this->assertEquals('Dog Patch Labs', $location->name);
     }
+
+    public function testGetLastLikes()
+    {
+        $users = Instagram::getLastLikesByCode('BHaRdodBouH');
+        $this->assertEquals(10, sizeof($users));
+    }
 }

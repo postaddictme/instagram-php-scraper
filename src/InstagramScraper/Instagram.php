@@ -330,4 +330,21 @@ class Instagram
         $jsonResponse = json_decode($response->raw_body, true);
         return Location::makeLocation($jsonResponse['location']);
     }
+
+    public static function getLastLikesByCode($code)
+    {
+        $response = Request::get(Endpoints::getLastLikesByCodeLink($code));
+        if ($response->code === 404) {
+            throw new InstagramNotFoundException('Media with this shortcode doesn\'t exist');
+        }
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+        $jsonResponse = json_decode($response->raw_body, true);
+        $users = [];
+        foreach ($jsonResponse['likes']['nodes'] as $userArray) {
+            $users[] = Account::fromAccountPage($userArray['user']);
+        }
+        return $users;
+    }
 }
