@@ -28,6 +28,12 @@ class InstagramTest extends TestCase
         $this->assertEquals(80, sizeof($medias));
     }
 
+    public function testGet1000Medias()
+    {
+        $medias = Instagram::getMedias('kevin', 1000);
+        $this->assertEquals(1000, sizeof($medias));
+    }
+
     public function testGetMediaByCode()
     {
         $media = Instagram::getMediaByCode('BHaRdodBouH');
@@ -56,11 +62,5 @@ class InstagramTest extends TestCase
     {
         $location = Instagram::getLocationById(1);
         $this->assertEquals('Dog Patch Labs', $location->name);
-    }
-
-    public function testGetLastLikes()
-    {
-        $users = Instagram::getLastLikesByCode('BHaRdodBouH');
-        $this->assertEquals(10, sizeof($users));
     }
 }

@@ -22,7 +22,7 @@ class Instagram
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
         if ($response->code !== 200) {
-            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
         }
 
         $userArray = json_decode($response->raw_body, true);
@@ -43,7 +43,7 @@ class Instagram
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
         if ($response->code !== 200) {
-            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
         }
         $userArray = json_decode($response->raw_body, true);
         if ($userArray['status'] === 'fail') {
@@ -63,12 +63,12 @@ class Instagram
         while ($index < $count && $isMoreAvailable) {
             $response = Request::get(Endpoints::getAccountMediasJsonLink($username, $maxId));
             if ($response->code !== 200) {
-                throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
             }
 
             $arr = json_decode($response->raw_body, true);
             if (!is_array($arr)) {
-                throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
             }
             if (count($arr['items']) === 0) {
                 return [];
@@ -104,7 +104,7 @@ class Instagram
             throw new InstagramNotFoundException('Media with given code does not exist or account is private.');
         }
         if ($response->code !== 200) {
-            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
         }
         $mediaArray = json_decode($response->raw_body, true);
         if (!isset($mediaArray['media'])) {
@@ -121,7 +121,7 @@ class Instagram
         while ($index < $count && $hasNextPage) {
             $response = Request::get(Endpoints::getMediasJsonByTagLink($tag, $maxId));
             if ($response->code !== 200) {
-                throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
             }
 
             $arr = json_decode($response->raw_body, true);
@@ -155,7 +155,7 @@ class Instagram
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
         if ($response->code !== 200) {
-            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
         }
 
         $jsonResponse = json_decode($response->raw_body, true);
@@ -180,7 +180,7 @@ class Instagram
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
         if ($response->code !== 200) {
-            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
         }
 
         $jsonResponse = json_decode($response->raw_body, true);
@@ -205,7 +205,7 @@ class Instagram
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
         if ($response->code !== 200) {
-            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
         }
         $jsonResponse = json_decode($response->raw_body, true);
         $medias = [];
@@ -252,7 +252,7 @@ class Instagram
                 throw new InstagramNotFoundException('Account with given username does not exist.');
             }
             if ($response->code !== 200) {
-                throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
             }
             $jsonResponse = json_decode($response->raw_body, true);
             $nodes = $jsonResponse['comments']['nodes'];
@@ -279,7 +279,7 @@ class Instagram
             throw new InstagramNotFoundException('Location with this id doesn\'t exist');
         }
         if ($response->code !== 200) {
-            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
         }
         $jsonResponse = json_decode($response->raw_body, true);
         $nodes = $jsonResponse['location']['top_posts']['nodes'];
@@ -298,7 +298,7 @@ class Instagram
         while ($index < $quantity && $hasNext) {
             $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId, $offset));
             if ($response->code !== 200) {
-                throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
             }
             $arr = json_decode($response->raw_body, true);
             $nodes = $arr['location']['media']['nodes'];
@@ -325,7 +325,7 @@ class Instagram
             throw new InstagramNotFoundException('Location with this id doesn\'t exist');
         }
         if ($response->code !== 200) {
-            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
         }
         $jsonResponse = json_decode($response->raw_body, true);
         return Location::makeLocation($jsonResponse['location']);
@@ -338,7 +338,7 @@ class Instagram
             throw new InstagramNotFoundException('Media with this shortcode doesn\'t exist');
         }
         if ($response->code !== 200) {
-            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
         }
         $jsonResponse = json_decode($response->raw_body, true);
         $users = [];
