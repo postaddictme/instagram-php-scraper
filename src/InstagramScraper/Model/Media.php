@@ -119,9 +119,9 @@ class Media
             $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/s640x640/' . $parts[2] . '/' . $parts[3];
         } else {
             if (isset($parts[4]) && $parts[4][0] == 'p') {
-                $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/p640x640/' . $parts[3] . '/' . $parts[5];
+                $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/p640x640/' . $parts[3] . '/' . $parts[4];
             } else {
-                $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/s640x640/' . $parts[3] . '/' . $parts[5];
+                $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/s640x640/' . $parts[3] . '/' . $parts[4];
             }
         }
 
