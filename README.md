@@ -65,6 +65,19 @@ echo $medias[0]->caption;
 
 ```
 
+### Paginate medias
+```php
+$result = Instagram::getPaginateMedias('kevin');
+$medias = $result['medias']
+
+if($result['hasNextPage'] === true) {
+    $result = Instagram::getPaginateMedias('kevin', $result['maxId']);
+    $medias = array_merge($medias, $result['medias']);
+}
+
+echo json_encode($medias);
+```
+
 ### Get media by code
 ```php
 $media = Instagram::getMediaByCode('BDs9iwfL7XA');
@@ -89,11 +102,11 @@ echo json_encode($medias);
 
 ### Paginate medias by tag name
 ```php
-$result = Instagram::getMediasByTag('zara', 12, '', true);
+$result = Instagram::getPaginateMediasByTag('zara');
 $medias = $result['medias']
 
 if($result['hasNextPage'] === true) {
-    $result = Instagram::getMediasByTag('zara', 12, $result['maxId'], true);
+    $result = Instagram::getPaginateMediasByTag('zara', $result['maxId']);
     $medias = array_merge($medias, $result['medias']);
 }
 

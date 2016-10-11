@@ -89,6 +89,49 @@ class Instagram
         return $medias;
     }
 
+    public static function getPaginateMedias($username, $maxId = '')
+    {
+        $hasNextPage = true;
+        $medias = [];
+
+        $toReturn = [
+            'medias'      => $medias,
+            'maxId'       => $maxId,
+            'hasNextPage' => $hasNextPage
+        ];
+
+        $response = Request::get(Endpoints::getAccountMediasJsonLink($username, $maxId));
+
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
+        }
+
+        $arr = json_decode($response->raw_body, true);
+
+        if (!is_array($arr)) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
+        }
+
+        if (count($arr['items']) === 0) {
+            return $toReturn;
+        }
+
+        foreach ($arr['items'] as $mediaArray) {
+            $medias[] = Media::fromApi($mediaArray);
+        }
+
+        $maxId = $arr['items'][count($arr['items']) - 1]['id'];
+        $hasNextPage = $arr['more_available'];
+
+        $toReturn = [
+            'medias'      => $medias,
+            'maxId'       => $maxId,
+            'hasNextPage' => $hasNextPage
+        ];
+
+        return $toReturn;
+    }
+
     public static function getMediaByCode($mediaCode)
     {
         return self::getMediaByUrl(Endpoints::getMediaPageLink($mediaCode));
@@ -113,7 +156,7 @@ class Instagram
         return Media::fromMediaPage($mediaArray['media']);
     }
 
-    public static function getMediasByTag($tag, $count = 12, $maxId = '', $toObject = false)
+    public static function getMediasByTag($tag, $count = 12, $maxId = '')
     {
         $index = 0;
         $medias = [];
@@ -145,16 +188,54 @@ class Instagram
             $maxId = $arr['tag']['media']['page_info']['end_cursor'];
             $hasNextPage = $arr['tag']['media']['page_info']['has_next_page'];
         }
+        return $medias;
+    }
 
-        if($toObject === true) {
-            $toReturn = [
-                'medias'      => $medias,
-                'maxId'       => $maxId,
-                'hasNextPage' => $hasNextPage
-            ];
-        } else {
-            $toReturn = $medias;
+    public static function getPaginateMediasByTag($tag, $maxId = '')
+    {
+        $hasNextPage = true;
+        $medias = [];
+
+        $toReturn = [
+            'medias'      => $medias,
+            'maxId'       => $maxId,
+            'hasNextPage' => $hasNextPage
+        ];
+
+        $response = Request::get(Endpoints::getMediasJsonByTagLink($tag, $maxId));
+
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
         }
+
+        $arr = json_decode($response->raw_body, true);
+
+        if (!is_array($arr)) {
+            throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
+        }
+
+        if (count($arr['tag']['media']['count']) === 0) {
+            return $toReturn;
+        }
+
+        $nodes = $arr['tag']['media']['nodes'];
+
+        if (count($nodes) == 0) {
+            return $toReturn;
+        }
+
+        foreach ($nodes as $mediaArray) {
+            $medias[] = Media::fromTagPage($mediaArray);
+        }
+
+        $maxId = $arr['tag']['media']['page_info']['end_cursor'];
+        $hasNextPage = $arr['tag']['media']['page_info']['has_next_page'];
+
+        $toReturn = [
+            'medias'      => $medias,
+            'maxId'       => $maxId,
+            'hasNextPage' => $hasNextPage
+        ];
 
         return $toReturn;
     }
