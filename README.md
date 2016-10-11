@@ -87,6 +87,19 @@ $medias = Instagram::getMediasByTag('zara', 30);
 echo json_encode($medias);
 ```
 
+### Paginate medias by tag name
+```php
+$result = Instagram::getMediasByTag('zara', 12, '', true);
+$medias = $result['medias']
+
+if($result['hasNextPage'] === true) {
+    $result = Instagram::getMediasByTag('zara', 12, $result['maxId'], true);
+    $medias = array_merge($medias, $result['medias']);
+}
+
+echo json_encode($medias);
+```
+
 ### Get top medias by tag name
 ```php
 $medias = Instagram::getTopMediasByTagName('durov');

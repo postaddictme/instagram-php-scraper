@@ -113,7 +113,7 @@ class Instagram
         return Media::fromMediaPage($mediaArray['media']);
     }
 
-    public static function getMediasByTag($tag, $count = 12, $maxId = '')
+    public static function getMediasByTag($tag, $count = 12, $maxId = '', $toObject = false)
     {
         $index = 0;
         $medias = [];
@@ -145,7 +145,18 @@ class Instagram
             $maxId = $arr['tag']['media']['page_info']['end_cursor'];
             $hasNextPage = $arr['tag']['media']['page_info']['has_next_page'];
         }
-        return $medias;
+
+        if($toObject === true) {
+            $toReturn = [
+                'medias'      => $medias,
+                'maxId'       => $maxId,
+                'hasNextPage' => $hasNextPage
+            ];
+        } else {
+            $toReturn = $medias;
+        }
+
+        return $toReturn;
     }
 
     public static function searchAccountsByUsername($username)
