@@ -58,7 +58,7 @@ class Instagram
         return Account::fromAccountPage($userArray);
     }
 
-    private function getContentsFromUrl($parameters)
+    private static function getContentsFromUrl($parameters)
     {
         if (!function_exists('curl_init')) {
             return false;
@@ -79,7 +79,7 @@ class Instagram
         return $output;
     }
 
-    private function generateRandomString($length = 10)
+    private static function generateRandomString($length = 10)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
