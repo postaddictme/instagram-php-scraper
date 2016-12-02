@@ -113,23 +113,13 @@ class Media
 
     private static function getImageUrls($imageUrl)
     {
-        $imageUrl = self::getCleanImageUrl($imageUrl);
         $parts = explode('/', parse_url($imageUrl)['path']);
-        if (sizeof($parts) == 4) {
-            $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/s640x640/' . $parts[2] . '/' . $parts[3];
-        } else {
-            if (isset($parts[4]) && $parts[4][0] == 'p') {
-                $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/p640x640/' . $parts[3] . '/' . $parts[4];
-            } else {
-                $standard = 'https://scontent.cdninstagram.com/' . $parts[1] . '/s640x640/' . $parts[3] . '/' . $parts[4];
-            }
-        }
-
+        $imageName = $parts[sizeof($parts) - 1];
         $urls = [
-            'standard' => $standard,
-            'low' => str_replace('640x640', '320x320', $standard),
-            'high' => str_replace('640x640', '1080x1080', $standard),
-            'thumbnail' => str_replace('640x640', '150x150', $standard)
+            'standard' => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
+            'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
+            'high' => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
+            'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName
         ];
         return $urls;
     }
