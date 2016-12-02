@@ -43,10 +43,11 @@ class Media
         $instance->link = $mediaArray['link'];
         $instance->commentsCount = $mediaArray['comments']['count'];
         $instance->likesCount = $mediaArray['likes']['count'];
-        $instance->imageLowResolutionUrl = self::getCleanImageUrl($mediaArray['images']['low_resolution']['url']);
-        $instance->imageThumbnailUrl = self::getCleanImageUrl($mediaArray['images']['thumbnail']['url']);
-        $instance->imageStandardResolutionUrl = self::getCleanImageUrl($mediaArray['images']['standard_resolution']['url']);
-        $instance->imageHighResolutionUrl = str_replace('320x320', '1080x1080', $instance->imageLowResolutionUrl);
+        $images = self::getImageUrls($mediaArray['images']['standard_resolution']['url']);
+        $instance->imageLowResolutionUrl = $images['low'];
+        $instance->imageThumbnailUrl = $images['thumbnail'];
+        $instance->imageStandardResolutionUrl = $images['standard'];
+        $instance->imageHighResolutionUrl = $images['high'];
         if (isset($mediaArray['caption'])) {
             $instance->caption = $mediaArray['caption']['text'];
         }
@@ -67,9 +68,17 @@ class Media
         return $instance;
     }
 
-    private static function getCleanImageUrl($imageUrl)
+    private static function getImageUrls($imageUrl)
     {
-        return strpos($imageUrl, '?ig_cache_key=') ? substr($imageUrl, 0, strpos($imageUrl, '?ig_cache_key=')) : $imageUrl;
+        $parts = explode('/', parse_url($imageUrl)['path']);
+        $imageName = $parts[sizeof($parts) - 1];
+        $urls = [
+            'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
+            'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName,
+            'standard' => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
+            'high' => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName
+        ];
+        return $urls;
     }
 
     public static function fromMediaPage($mediaArray)
@@ -111,19 +120,6 @@ class Media
         return $instance;
     }
 
-    private static function getImageUrls($imageUrl)
-    {
-        $parts = explode('/', parse_url($imageUrl)['path']);
-        $imageName = $parts[sizeof($parts) - 1];
-        $urls = [
-            'standard' => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
-            'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
-            'high' => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
-            'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName
-        ];
-        return $urls;
-    }
-
     public static function fromTagPage($mediaArray)
     {
         $instance = new self();
@@ -136,8 +132,11 @@ class Media
             $instance->caption = $mediaArray['caption'];
         }
         $instance->createdTime = $mediaArray['date'];
-        $instance->imageThumbnailUrl = self::getCleanImageUrl($mediaArray['thumbnail_src']);
-        $instance->imageStandardResolutionUrl = self::getCleanImageUrl($mediaArray['display_src']);
+        $images = self::getImageUrls($mediaArray['display_src']);
+        $instance->imageStandardResolutionUrl = $images['standard'];
+        $instance->imageLowResolutionUrl = $images['low'];
+        $instance->imageHighResolutionUrl = $images['high'];
+        $instance->imageThumbnailUrl = $images['thumbnail'];
         $instance->type = 'image';
         if ($mediaArray['is_video']) {
             $instance->type = 'video';
