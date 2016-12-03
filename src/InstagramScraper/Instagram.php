@@ -37,17 +37,7 @@ class Instagram
         if (!is_numeric($id)) {
             throw new \InvalidArgumentException('User id must be integer or integer wrapped in string');
         }
-
         $parameters = Endpoints::getAccountJsonInfoLinkByAccountId($id);
-//        self::getContentsFromUrl($parameters);
-
-//        $response = Request::get(Endpoints::getAccountJsonInfoLinkByAccountId($id));
-//        if ($response->code === 404) {
-//            throw new InstagramNotFoundException('Account with given username does not exist.');
-//        }
-//        if ($response->code !== 200) {
-//            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
-//        }
         $userArray = json_decode(self::getContentsFromUrl($parameters), true);
         if ($userArray['status'] === 'fail') {
             throw new InstagramException($userArray['message']);
@@ -371,19 +361,11 @@ class Instagram
                 $remain = 0;
             }
             if (!isset($maxId)) {
-//                $response = Request::get(Endpoints::getLastCommentsByCodeLink($code, $numberOfCommentsToRetreive));
                 $parameters = Endpoints::getLastCommentsByCodeLink($code, $numberOfCommentsToRetreive);
 
             } else {
-//                $response = Request::get(Endpoints::getCommentsBeforeCommentIdByCode($code, $numberOfCommentsToRetreive, $maxId));
                 $parameters = Endpoints::getCommentsBeforeCommentIdByCode($code, $numberOfCommentsToRetreive, $maxId);
             }
-//            if ($response->code === 404) {
-//                throw new InstagramNotFoundException('Account with given username does not exist.');
-//            }
-//            if ($response->code !== 200) {
-//                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
-//            }
             $jsonResponse = json_decode(self::getContentsFromUrl($parameters), true);
             $nodes = $jsonResponse['comments']['nodes'];
             foreach ($nodes as $commentArray) {
@@ -459,22 +441,5 @@ class Instagram
         }
         $jsonResponse = json_decode($response->raw_body, true);
         return Location::makeLocation($jsonResponse['location']);
-    }
-
-    public static function getLastLikesByCode($code)
-    {
-        $response = Request::get(Endpoints::getLastLikesByCodeLink($code));
-        if ($response->code === 404) {
-            throw new InstagramNotFoundException('Media with this shortcode doesn\'t exist');
-        }
-        if ($response->code !== 200) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
-        }
-        $jsonResponse = json_decode($response->raw_body, true);
-        $users = [];
-        foreach ($jsonResponse['likes']['nodes'] as $userArray) {
-            $users[] = Account::fromAccountPage($userArray['user']);
-        }
-        return $users;
     }
 }

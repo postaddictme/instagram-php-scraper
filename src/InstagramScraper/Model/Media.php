@@ -73,8 +73,8 @@ class Media
         $parts = explode('/', parse_url($imageUrl)['path']);
         $imageName = $parts[sizeof($parts) - 1];
         $urls = [
-            'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
             'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName,
+            'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
             'standard' => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
             'high' => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName
         ];
