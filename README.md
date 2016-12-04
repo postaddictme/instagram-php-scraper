@@ -35,9 +35,9 @@ echo $account->username;
 
 ### Search users by username
 ```php
-$medias = Instagram::searchAccountsByUsername('durov');
+$users = Instagram::searchAccountsByUsername('durov');
 echo '<pre>';
-echo json_encode($medias);
+echo json_encode($users);
 echo '</pre><br/>';
 ```
 
@@ -56,9 +56,20 @@ Available properties:
     $imageStandardResolutionUrl;
     $imageHighResolutionUrl;
     $caption;
+    $captionIsEdited;
+    $isAd;
     $videoLowResolutionUrl;
     $videoStandardResolutionUrl;
     $videoLowBandwidthUrl;
+    $videoViews;
+    $code;
+    $owner;
+    $ownerId;
+    $likesCount;
+    $locationId;
+    $locationName;
+    $commentsCount;
+    
 */
 echo $medias[0]->imageHighResolutionUrl;
 echo $medias[0]->caption;
