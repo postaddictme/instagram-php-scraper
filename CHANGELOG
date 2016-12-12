@@ -1,5 +1,38 @@
                    Instagram PHP Scraper Change Log
                    ================================
+Version v0.4.5
+--------------
+- Enh: BIG thing. Get best resolutions for medias possible
+
+Version v0.4.4
+--------------
+- Bug: Image urls broken for some medias in getMediaByCode()
+
+Version v0.4.3
+--------------
+- Enh: Make methods getContentsFromUrl() and generateRandomString() static
+
+Version v0.4.2
+--------------
+- Bug: Fix 405 error with fetching accounts by id
+- Bug: Fix 405 error with fetching comments by id
+
+Version v0.4.1
+--------------
+- Enh: Url encode endpoints to support for example Japan language
+
+Version v0.4.0
+--------------
+- Enh: New methods to paginate medias getPaginateMedias() and getPaginateMediasByTag()
+
+Version v0.3.5
+--------------
+- Enh: Convenient media pagination getMediasByTag()
+
+Version v0.3.4
+--------------
+- Bug: Fix media urls
+
 Version v0.3.3
 --------------
 - Bug: Include class Location and Comment in InstagramScraper.php
