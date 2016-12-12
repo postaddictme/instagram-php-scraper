@@ -175,3 +175,6 @@ $medias = Instagram::getLocationTopMediasById(1);
 ```php
 $medias = Instagram::getLocationMediasById(1);
 ```
+
+### Other
+Java library: https://github.com/postaddictme/instagram-java-scraper
