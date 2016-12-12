@@ -168,12 +168,12 @@ class Media
         $parts = explode('_', $id);
         $id = $parts[0];
         $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-        $shortenedId = '';
+        $code = '';
         while ($id > 0) {
             $remainder = $id % 64;
             $id = ($id - $remainder) / 64;
-            $shortenedId = $alphabet{$remainder} . $shortenedId;
+            $code = $alphabet{$remainder} . $code;
         };
-        return $shortenedId;
+        return $code;
     }
 }
