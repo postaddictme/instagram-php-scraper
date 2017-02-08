@@ -228,13 +228,15 @@ class Instagram
             $medias[] = Media::fromTagPage($mediaArray);
         }
 
-        $maxId = $arr['tag']['media']['page_info']['end_cursor'];
+        $maxId       = $arr['tag']['media']['page_info']['end_cursor'];
         $hasNextPage = $arr['tag']['media']['page_info']['has_next_page'];
+        $count       = $arr['tag']['media']['count'];
 
         $toReturn = [
             'medias'      => $medias,
+            'count'       => $count,
             'maxId'       => $maxId,
-            'hasNextPage' => $hasNextPage
+            'hasNextPage' => $hasNextPage,
         ];
 
         return $toReturn;
