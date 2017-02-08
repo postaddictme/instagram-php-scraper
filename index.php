@@ -3,13 +3,14 @@ error_reporting(-1);
 
 require_once 'vendor/autoload.php';
 require_once 'src/InstagramScraper.php';
-use InstagramScraper\Exception\InstagramException;
+
 use InstagramScraper\Instagram;
 
-$instagram = new Instagram();
 try {
-    $medias = Instagram::getMedias('kevin', 1000);
-    echo $medias[998]->imageThumbnailUrl;
+//    $medias = Instagram::getMedias('kevin', 1497);
+//    echo json_encode($medias[1497]);
+    $media = Instagram::getMediaByCode('BL0k1EXhElI');
+    echo json_encode($media);
 } catch (\Exception $ex) {
     print_r($ex);
 }
