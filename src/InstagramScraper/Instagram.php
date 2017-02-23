@@ -185,6 +185,7 @@ class Instagram
     {
         $index = 0;
         $medias = [];
+        $mediaIds = [];
         $hasNextPage = true;
         while ($index < $count && $hasNextPage) {
             $response = Request::get(Endpoints::getMediasJsonByTagLink($tag, $maxId));
@@ -204,7 +205,12 @@ class Instagram
                 if ($index === $count) {
                     return $medias;
                 }
-                $medias[] = Media::fromTagPage($mediaArray);
+                $media = Media::fromTagPage($mediaArray);
+                if (in_array($media->id, $mediaIds)) {
+                    return $medias;
+                }
+                $mediaIds[] = $media->id;
+                $medias[] = $media;
                 $index++;
             }
             if (count($nodes) == 0) {
@@ -253,14 +259,14 @@ class Instagram
             $medias[] = Media::fromTagPage($mediaArray);
         }
 
-        $maxId       = $arr['tag']['media']['page_info']['end_cursor'];
+        $maxId = $arr['tag']['media']['page_info']['end_cursor'];
         $hasNextPage = $arr['tag']['media']['page_info']['has_next_page'];
-        $count       = $arr['tag']['media']['count'];
+        $count = $arr['tag']['media']['count'];
 
         $toReturn = [
-            'medias'      => $medias,
-            'count'       => $count,
-            'maxId'       => $maxId,
+            'medias' => $medias,
+            'count' => $count,
+            'maxId' => $maxId,
             'hasNextPage' => $hasNextPage,
         ];
 

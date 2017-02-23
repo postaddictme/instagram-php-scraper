@@ -9,8 +9,9 @@ use InstagramScraper\Instagram;
 try {
 //    $medias = Instagram::getMedias('kevin', 1497);
 //    echo json_encode($medias[1497]);
-    $media = Instagram::getMediaByCode('BL0k1EXhElI');
-    echo json_encode($media);
+    $medias = InstagramScraper\Instagram::getMediasByTag('paveldurov', 300);
+    echo sizeof($medias) . '\n';
+//    echo json_encode($medias);
 } catch (\Exception $ex) {
     print_r($ex);
 }
