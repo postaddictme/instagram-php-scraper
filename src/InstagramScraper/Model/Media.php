@@ -55,9 +55,11 @@ class Media
             if (isset($mediaArray['video_views'])) {
                 $instance->videoViews = $mediaArray['video_views'];
             }
-            $instance->videoLowResolutionUrl = $mediaArray['videos']['low_resolution']['url'];
-            $instance->videoStandardResolutionUrl = $mediaArray['videos']['standard_resolution']['url'];
-            $instance->videoLowBandwidthUrl = $mediaArray['videos']['low_bandwidth']['url'];
+            if (isset($mediaArray['videos'])) {
+                $instance->videoLowResolutionUrl = $mediaArray['videos']['low_resolution']['url'];
+                $instance->videoStandardResolutionUrl = $mediaArray['videos']['standard_resolution']['url'];
+                $instance->videoLowBandwidthUrl = $mediaArray['videos']['low_bandwidth']['url'];
+            }
         }
         if (isset($mediaArray['location']['id'])) {
             $instance->locationId = $mediaArray['location']['id'];
