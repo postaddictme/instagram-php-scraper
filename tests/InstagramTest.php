@@ -3,6 +3,7 @@
 require '../vendor/autoload.php';
 
 use InstagramScraper\Instagram;
+use InstagramScraper\Model\Media;
 use PHPUnit\Framework\TestCase;
 
 
@@ -62,5 +63,21 @@ class InstagramTest extends TestCase
     {
         $location = Instagram::getLocationById(1);
         $this->assertEquals('Dog Patch Labs', $location->name);
+    }
+
+    public function testGetIdFromCode()
+    {
+        $code = Media::getCodeFromId('1270593720437182847');
+        $this->assertEquals('BGiDkHAgBF_', $code);
+        $code = Media::getCodeFromId('1270593720437182847_3');
+        $this->assertEquals('BGiDkHAgBF_', $code);
+        $code = Media::getCodeFromId(1270593720437182847);
+        $this->assertEquals('BGiDkHAgBF_', $code);
+    }
+
+    public function testGetCodeFromId()
+    {
+        $id = Media::getIdFromCode('BGiDkHAgBF_');
+        $this->assertEquals(1270593720437182847, $id);
     }
 }
