@@ -11,7 +11,7 @@ if you need to get medias by tags or locations:
 ```php
 $instagram = Instagram::withCredentials('username', 'password');
 $instagram->login();
-// And then you be able to query instagram with newly updated methods. (Notice that these methods are not static anymore)
+// And then you will be able to query instagram with newly updated methods. (Notice that these methods are not static anymore)
 
 $user = $instagram->getAccountById(3);
 $medias $instagram->getLocationTopMediasById(1)
