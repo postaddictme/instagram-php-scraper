@@ -17,7 +17,7 @@ $user = $instagram->getAccountById(3);
 $medias $instagram->getLocationTopMediasById(1)
 $medias = $instagram->getLocationMediasById(1);
 $location $instagram->getLocationById(1);
-$medias = self::$instagram->getTopMediasByTagName('hello');
+$medias = $instagram->getTopMediasByTagName('hello');
 ```
 
 Be carefull with login method. I am planning to implement session caching soon
