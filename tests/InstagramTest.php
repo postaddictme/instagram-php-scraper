@@ -10,9 +10,10 @@ use PHPUnit\Framework\TestCase;
 class InstagramTest extends TestCase
 {
     private static $instagram;
+
     public static function setUpBeforeClass()
     {
-        self::$instagram= Instagram::withCredentials('PASTE USERNAME', 'PASTE PASSWORD');
+        self::$instagram = Instagram::withCredentials('PASTE USERNAME', 'PASTE PASSWORD');
         self::$instagram->login();
 
     }
@@ -72,6 +73,12 @@ class InstagramTest extends TestCase
     {
         $location = self::$instagram->getLocationById(1);
         $this->assertEquals('Dog Patch Labs', $location->name);
+    }
+
+    public function testGetMediaByTag()
+    {
+        $medias = self::$instagram->getTopMediasByTagName('hello');
+        echo json_encode($medias);
     }
 
     public function testGetIdFromCode()
