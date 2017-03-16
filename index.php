@@ -1,21 +1,39 @@
 <?php
-error_reporting(-1);
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 
 require_once 'vendor/autoload.php';
-require_once 'src/InstagramScraper.php';
+//require_once 'src/InstagramScraper.php';
 
 use InstagramScraper\Instagram;
-
-try {
-//    $medias = Instagram::getMedias('kevin', 1497);
-//    echo json_encode($medias[1497]);
-    $medias = InstagramScraper\Instagram::getMediasByTag('paveldurov', 300);
-    echo sizeof($medias) . '\n';
-//    echo json_encode($medias);
-} catch (\Exception $ex) {
-    print_r($ex);
-}
-
+use Unirest\Request;
+//const    MAIN_URL = "https://www.instagram.com",
+//LOGIN_URL = "https://www.instagram.com/accounts/login/ajax/";
+////echo 'Hello </br>';
+////$response = Request::get(MAIN_URL);
+//$response = Request::get(MAIN_URL);
+//
+//$cookie = $response->headers['Set-Cookie'];
+//$cookie[0] = explode(';', $cookie[0])[0] ;
+//$cookie[1] = explode(';', $cookie[1])[0] ;
+//$cookie[2] = explode(';', $cookie[2])[0] ;
+//$h = '';
+//$crfs = '';
+//foreach ($cookie as $c) {
+//    if (strpos($c, 'sessionid') !== false) {
+//        continue;
+//    }
+//    if (strpos($c, 'csrf') !== false) {
+//        $crfs = explode('=',$c)[1];
+//    }
+//
+//    $h = $h . $c . ';';
+//}
+//
+////echo $crfs;
+//$headers = ['cookie' => $h, 'referer' => 'https://www.instagram.com/', 'x-csrftoken' => $crfs];
+//$response = Request::post(LOGIN_URL, $headers, ['username' => 'debugposter8', 'password' => 'vilka121']);
+//echo json_encode($response);
 
 //echo Media::getIdFromCode('z-arAqi4DP') . '<br/>';
 //echo Media::getCodeFromId('936303077400215759_123123');
@@ -23,3 +41,8 @@ try {
 //echo shorten(936303077400215759);
 
 //echo json_encode($instagram->getMediaById('936303077400215759_123123123'));
+
+$instagram = Instagram::withCredentials('debugposter8', 'vilka121');
+$instagram->login();
+
+echo json_encode($instagram->getTopMediasByTagName('hello'));

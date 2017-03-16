@@ -9,6 +9,14 @@ use PHPUnit\Framework\TestCase;
 
 class InstagramTest extends TestCase
 {
+    private static $instagram;
+    public static function setUpBeforeClass()
+    {
+        self::$instagram= Instagram::withCredentials('PASTE USERNAME', 'PASTE PASSWORD');
+        self::$instagram->login();
+
+    }
+
     public function testGetAccountByUsername()
     {
         $account = Instagram::getAccount('kevin');
@@ -18,7 +26,8 @@ class InstagramTest extends TestCase
 
     public function testGetAccountById()
     {
-        $account = Instagram::getAccountById(3);
+
+        $account = self::$instagram->getAccountById(3);
         $this->assertEquals('kevin', $account->username);
         $this->assertEquals('3', $account->id);
     }
@@ -49,19 +58,19 @@ class InstagramTest extends TestCase
 
     public function testGetLocationTopMediasById()
     {
-        $medias = Instagram::getLocationTopMediasById(1);
+        $medias = self::$instagram->getLocationTopMediasById(1);
         $this->assertEquals(9, count($medias));
     }
 
     public function testGetLocationMediasById()
     {
-        $medias = Instagram::getLocationMediasById(1);
+        $medias = self::$instagram->getLocationMediasById(1);
         $this->assertEquals(12, count($medias));
     }
 
     public function testGetLocationById()
     {
-        $location = Instagram::getLocationById(1);
+        $location = self::$instagram->getLocationById(1);
         $this->assertEquals('Dog Patch Labs', $location->name);
     }
 
