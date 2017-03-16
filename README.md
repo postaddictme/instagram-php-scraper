@@ -1,6 +1,28 @@
 # instagram-php-scraper
 # Usage
 
+#v0.5.0
+Important update: 
+
+First of all thank you guys for your suggestions and support. 
+This is *not final* fix for getting medias by tags and locations. 
+
+if you need to get medias by tags or locations:
+```php
+$instagram = Instagram::withCredentials('username', 'password');
+$instagram->login();
+// And then you be able to query instagram with newly updated methods. (Notice that these methods are not static anymore)
+
+$user = $instagram->getAccountById(3);
+$medias $instagram->getLocationTopMediasById(1)
+$medias = $instagram->getLocationMediasById(1);
+$location $instagram->getLocationById(1);
+$medias = self::$instagram->getTopMediasByTagName('hello');
+```
+
+Be carefull with login method. I am planning to implement session caching soon
+ 
+
 `composer require raiym/instagram-php-scraper`
 
 
