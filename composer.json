@@ -16,7 +16,8 @@
   ],
   "require": {
     "php": ">=5.4.0",
-    "mashape/unirest-php": "3.0.*"
+    "mashape/unirest-php": "3.0.*",
+    "phpFastCache/phpFastCache": "5.0.*"
   },
   "require-dev": {
     "phpunit/phpunit": "5.5.*"

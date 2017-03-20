@@ -13,7 +13,7 @@ class InstagramTest extends TestCase
 
     public static function setUpBeforeClass()
     {
-        self::$instagram = Instagram::withCredentials('PASTE USERNAME', 'PASTE PASSWORD');
+        self::$instagram = Instagram::withCredentials('PASTE_LOGIN', 'PASTE_PASSWORD');
         self::$instagram->login();
 
     }
@@ -39,10 +39,10 @@ class InstagramTest extends TestCase
         $this->assertEquals(80, sizeof($medias));
     }
 
-    public function testGet1000Medias()
+    public function testGet100Medias()
     {
-        $medias = Instagram::getMedias('kevin', 1000);
-        $this->assertEquals(1000, sizeof($medias));
+        $medias = Instagram::getMedias('kevin', 100);
+        $this->assertEquals(100, sizeof($medias));
     }
 
     public function testGetMediaByCode()

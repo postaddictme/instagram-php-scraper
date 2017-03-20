@@ -6,7 +6,7 @@ require_once 'vendor/autoload.php';
 //require_once 'src/InstagramScraper.php';
 
 use InstagramScraper\Instagram;
-use Unirest\Request;
+
 //const    MAIN_URL = "https://www.instagram.com",
 //LOGIN_URL = "https://www.instagram.com/accounts/login/ajax/";
 ////echo 'Hello </br>';
@@ -32,7 +32,7 @@ use Unirest\Request;
 //
 ////echo $crfs;
 //$headers = ['cookie' => $h, 'referer' => 'https://www.instagram.com/', 'x-csrftoken' => $crfs];
-//$response = Request::post(LOGIN_URL, $headers, ['username' => 'debugposter8', 'password' => 'vilka121']);
+//$response = Request::post(LOGIN_URL, $headers, ['username' => 'debugposter8', 'password' => 'wrong']);
 //echo json_encode($response);
 
 //echo Media::getIdFromCode('z-arAqi4DP') . '<br/>';
@@ -42,7 +42,8 @@ use Unirest\Request;
 
 //echo json_encode($instagram->getMediaById('936303077400215759_123123123'));
 
-$instagram = Instagram::withCredentials('debugposter8', 'vilka121');
+$instagram = Instagram::withCredentials('PASTE_LOGIN', 'PASTE_PASSWORD');
 $instagram->login();
+echo __DIR__;
 
-echo json_encode($instagram->getTopMediasByTagName('hello'));
+//echo json_encode($instagram->getTopMediasByTagName('hello'));

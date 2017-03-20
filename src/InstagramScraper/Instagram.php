@@ -10,12 +10,13 @@ use InstagramScraper\Model\Comment;
 use InstagramScraper\Model\Location;
 use InstagramScraper\Model\Media;
 use InstagramScraper\Model\Tag;
+use phpFastCache\CacheManager;
 use Unirest\Request;
 
 class Instagram
 {
     const MAX_COMMENTS_PER_REQUEST = 300;
-
+    private static $instanceCache;
     public $sessionUsername;
     public $sessionPassword;
     public $sessionId;
@@ -26,8 +27,16 @@ class Instagram
     {
     }
 
-    public static function withCredentials($username, $password)
+    public static function withCredentials($username, $password, $sessionFolder = null)
     {
+        if (is_null($sessionFolder)) {
+            $sessionFolder = __DIR__ . DIRECTORY_SEPARATOR . 'sessions' . DIRECTORY_SEPARATOR;
+        }
+        // load cache
+        CacheManager::setDefaultConfig([
+            'path' => $sessionFolder
+        ]);
+        self::$instanceCache = CacheManager::getInstance('files');
         $instance = new self();
         $instance->sessionUsername = $username;
         $instance->sessionPassword = $password;
@@ -274,24 +283,29 @@ class Instagram
         return $output;
     }
 
-    private static function generateRandomString($length = 10)
-    {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
-        }
-        return $randomString;
-    }
-
     public function getAccountById($id)
     {
         if (!is_numeric($id)) {
             throw new \InvalidArgumentException('User id must be integer or integer wrapped in string');
         }
+        $cachedString = self::$instanceCache->getItem($this->sessionUsername);
+        $session = $cachedString->get();
+
         $parameters = Endpoints::getAccountJsonInfoLinkByAccountId($id);
-        $userArray = json_decode(self::getContentsFromUrl($parameters), true);
+
+        $response = Request::post(Endpoints::INSTAGRAM_QUERY_URL, $this->generateHeaders($session), ['q' => $parameters]);
+
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
+        }
+
+        $cookies = self::parseCookies($response->headers['Set-Cookie']);
+        $this->csrfToken = $cookies['csrftoken'];
+        $session['csrftoken'] = $this->csrfToken;
+        $cachedString->set($session);
+        self::$instanceCache->save($cachedString);
+
+        $userArray = json_decode($response->raw_body, true);
         if ($userArray['status'] === 'fail') {
             throw new InstagramException($userArray['message']);
         }
@@ -301,21 +315,47 @@ class Instagram
         return Account::fromAccountPage($userArray);
     }
 
+    private function generateHeaders($session)
+    {
+        $cookies = '';
+        foreach ($session as $key => $value) {
+            $cookies .= "$key=$value; ";
+        }
+        $headers = ['cookie' => $cookies, 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $this->csrfToken];
+        return $headers;
+    }
+
+    private static function parseCookies($rawCookies)
+    {
+        $cookies = [];
+        foreach ($rawCookies as $c) {
+            $c = explode(';', $c)[0];
+            $parts = explode('=', $c);
+            if (sizeof($parts) >= 2 && !is_null($parts[1])) {
+                $cookies[$parts[0]] = $parts[1];
+            }
+        }
+        return $cookies;
+    }
+
     public function getMediasByTag($tag, $count = 12, $maxId = '')
     {
+        $cachedString = self::$instanceCache->getItem($this->sessionUsername);
+        $session = $cachedString->get();
         $index = 0;
         $medias = [];
         $mediaIds = [];
         $hasNextPage = true;
         while ($index < $count && $hasNextPage) {
-            $headers = ['cookie' => "csrftoken=$this->csrfToken; sessionid=$this->sessionId;", 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $this->csrfToken];
-            $response = Request::get(Endpoints::getMediasJsonByTagLink($tag, $maxId), $headers);
+            $response = Request::get(Endpoints::getMediasJsonByTagLink($tag, $maxId), $this->generateHeaders($session));
             if ($response->code !== 200) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
             }
             $cookies = self::parseCookies($response->headers['Set-Cookie']);
             $this->csrfToken = $cookies['csrftoken'];
-
+            $session['csrftoken'] = $this->csrfToken;
+            $cachedString->set($session);
+            self::$instanceCache->save($cachedString);
             $arr = json_decode($response->raw_body, true);
             if (!is_array($arr)) {
                 throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
@@ -345,17 +385,6 @@ class Instagram
         return $medias;
     }
 
-    private static function parseCookies($rawCookies)
-    {
-        $cookies = [];
-        foreach ($rawCookies as $c) {
-            $c = explode(';', $c)[0];
-            $parts = explode('=', $c);
-            $cookies[$parts[0]] = $parts[1];
-        }
-        return $cookies;
-    }
-
     public function getPaginateMediasByTag($tag, $maxId = '')
     {
         $hasNextPage = true;
@@ -366,8 +395,9 @@ class Instagram
             'maxId' => $maxId,
             'hasNextPage' => $hasNextPage
         ];
-        $headers = ['cookie' => "csrftoken=$this->csrfToken; sessionid=$this->sessionId;", 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $this->csrfToken];
-        $response = Request::get(Endpoints::getMediasJsonByTagLink($tag, $maxId), $headers);
+        $cachedString = self::$instanceCache->getItem($this->sessionUsername);
+        $session = $cachedString->get();
+        $response = Request::get(Endpoints::getMediasJsonByTagLink($tag, $maxId), $this->generateHeaders($session));
 
         if ($response->code !== 200) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
@@ -375,6 +405,9 @@ class Instagram
 
         $cookies = self::parseCookies($response->headers['Set-Cookie']);
         $this->csrfToken = $cookies['csrftoken'];
+        $session['csrftoken'] = $this->csrfToken;
+        $cachedString->set($session);
+        self::$instanceCache->save($cachedString);
 
         $arr = json_decode($response->raw_body, true);
 
@@ -412,8 +445,9 @@ class Instagram
 
     public function getTopMediasByTagName($tagName)
     {
-        $headers = ['cookie' => "csrftoken=$this->csrfToken; sessionid=$this->sessionId;", 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $this->csrfToken];
-        $response = Request::get(Endpoints::getMediasJsonByTagLink($tagName, ''), $headers);
+        $cachedString = self::$instanceCache->getItem($this->sessionUsername);
+        $session = $cachedString->get();
+        $response = Request::get(Endpoints::getMediasJsonByTagLink($tagName, ''), $this->generateHeaders($session));
         if ($response->code === 404) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
@@ -422,6 +456,9 @@ class Instagram
         }
         $cookies = self::parseCookies($response->headers['Set-Cookie']);
         $this->csrfToken = $cookies['csrftoken'];
+        $session['csrftoken'] = $this->csrfToken;
+        $cachedString->set($session);
+        self::$instanceCache->save($cachedString);
         $jsonResponse = json_decode($response->raw_body, true);
         $medias = [];
         foreach ($jsonResponse['tag']['top_posts']['nodes'] as $mediaArray) {
@@ -432,8 +469,9 @@ class Instagram
 
     public function getLocationTopMediasById($facebookLocationId)
     {
-        $headers = ['cookie' => "csrftoken=$this->csrfToken; sessionid=$this->sessionId;", 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $this->csrfToken];
-        $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId), $headers);
+        $cachedString = self::$instanceCache->getItem($this->sessionUsername);
+        $session = $cachedString->get();
+        $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId), $this->generateHeaders($session));
         if ($response->code === 404) {
             throw new InstagramNotFoundException('Location with this id doesn\'t exist');
         }
@@ -442,6 +480,9 @@ class Instagram
         }
         $cookies = self::parseCookies($response->headers['Set-Cookie']);
         $this->csrfToken = $cookies['csrftoken'];
+        $session['csrftoken'] = $this->csrfToken;
+        $cachedString->set($session);
+        self::$instanceCache->save($cachedString);
         $jsonResponse = json_decode($response->raw_body, true);
         $nodes = $jsonResponse['location']['top_posts']['nodes'];
         $medias = [];
@@ -453,17 +494,22 @@ class Instagram
 
     public function getLocationMediasById($facebookLocationId, $quantity = 12, $offset = '')
     {
+        $cachedString = self::$instanceCache->getItem($this->sessionUsername);
+        $session = $cachedString->get();
+
         $index = 0;
         $medias = [];
         $hasNext = true;
         while ($index < $quantity && $hasNext) {
-            $headers = ['cookie' => "csrftoken=$this->csrfToken; sessionid=$this->sessionId;", 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $this->csrfToken];
-            $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId, $offset), $headers);
+            $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId, $offset), $this->generateHeaders($session));
             if ($response->code !== 200) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
             }
             $cookies = self::parseCookies($response->headers['Set-Cookie']);
             $this->csrfToken = $cookies['csrftoken'];
+            $session['csrftoken'] = $this->csrfToken;
+            $cachedString->set($session);
+            self::$instanceCache->save($cachedString);
             $arr = json_decode($response->raw_body, true);
             $nodes = $arr['location']['media']['nodes'];
             foreach ($nodes as $mediaArray) {
@@ -484,8 +530,10 @@ class Instagram
 
     public function getLocationById($facebookLocationId)
     {
-        $headers = ['cookie' => "csrftoken=$this->csrfToken; sessionid=$this->sessionId;", 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $this->csrfToken];
-        $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId), $headers);
+        $cachedString = self::$instanceCache->getItem($this->sessionUsername);
+        $session = $cachedString->get();
+
+        $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId), $this->generateHeaders($session));
         if ($response->code === 404) {
             throw new InstagramNotFoundException('Location with this id doesn\'t exist');
         }
@@ -494,32 +542,59 @@ class Instagram
         }
         $cookies = self::parseCookies($response->headers['Set-Cookie']);
         $this->csrfToken = $cookies['csrftoken'];
+        $session['csrftoken'] = $this->csrfToken;
+        $cachedString->set($session);
+        self::$instanceCache->save($cachedString);
         $jsonResponse = json_decode($response->raw_body, true);
         return Location::makeLocation($jsonResponse['location']);
     }
 
-    public function login()
+    public function login($force = false)
     {
-        // TODO: cache session
-        // TODO: load cached session
-        // TODO: Force login flag
         if ($this->sessionUsername == null || $this->sessionPassword == null) {
             throw new InstagramAuthException("User credentials not provided");
         }
-        $response = Request::get(Endpoints::BASE_URL);
+
+        $cachedString = self::$instanceCache->getItem($this->sessionUsername);
+        $session = $cachedString->get();
+        if ($force || !$this->isLoggedIn($session)) {
+            $response = Request::get(Endpoints::BASE_URL);
+            if ($response->code !== 200) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
+            }
+            $cookies = self::parseCookies($response->headers['Set-Cookie']);
+            $this->csrfToken = $cookies['csrftoken'];
+            $this->mid = $cookies['mid'];
+            $headers = ['cookie' => "csrftoken=$this->csrfToken; mid=$this->mid;", 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $this->csrfToken];
+            $response = Request::post(Endpoints::LOGIN_URL, $headers, ['username' => $this->sessionUsername, 'password' => $this->sessionPassword]);
+            if ($response->code !== 200) {
+                throw new InstagramAuthException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
+            }
+            $cookies = self::parseCookies($response->headers['Set-Cookie']);
+            $cookies['mid'] = $this->mid;
+            $this->csrfToken = $cookies['csrftoken'];
+            $this->sessionId = $cookies['sessionid'];
+            $cachedString->set($cookies);
+            self::$instanceCache->save($cachedString);
+        }
+    }
+
+    public function isLoggedIn($session)
+    {
+        if (is_null($session) || !isset($session['sessionid'])) {
+            return false;
+        }
+        $this->sessionId = $session['sessionid'];
+        $this->csrfToken = $session['csrftoken'];
+        $headers = ['cookie' => "csrftoken=$this->csrfToken; sessionid=$this->sessionId;", 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $this->csrfToken];
+        $response = Request::get(Endpoints::BASE_URL, $headers);
         if ($response->code !== 200) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
+            return false;
         }
         $cookies = self::parseCookies($response->headers['Set-Cookie']);
-        $this->csrfToken = $cookies['csrftoken'];
-        $this->mid = $cookies['mid'];
-        $headers = ['cookie' => "csrftoken=$this->csrfToken; mid=$this->mid;", 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $this->csrfToken];
-        $response = Request::post(Endpoints::LOGIN_URL, $headers, ['username' => $this->sessionUsername, 'password' => $this->sessionPassword]);
-        if ($response->code !== 200) {
-            throw new InstagramAuthException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
+        if (!isset($cookies['ds_user_id'])) {
+            return false;
         }
-        $cookies = self::parseCookies($response->headers['Set-Cookie']);
-        $this->csrfToken = $cookies['csrftoken'];
-        $this->sessionId = $cookies['sessionid'];
+        return true;
     }
 }
