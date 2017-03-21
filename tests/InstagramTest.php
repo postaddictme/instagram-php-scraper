@@ -4,6 +4,7 @@ require '../vendor/autoload.php';
 
 use InstagramScraper\Instagram;
 use InstagramScraper\Model\Media;
+use phpFastCache\CacheManager;
 use PHPUnit\Framework\TestCase;
 
 
@@ -13,7 +14,12 @@ class InstagramTest extends TestCase
 
     public static function setUpBeforeClass()
     {
-        self::$instagram = Instagram::withCredentials('PASTE_LOGIN', 'PASTE_PASSWORD');
+        $sessionFolder = __DIR__ . DIRECTORY_SEPARATOR . 'sessions' . DIRECTORY_SEPARATOR;
+        CacheManager::setDefaultConfig([
+            'path' => $sessionFolder
+        ]);
+        $instanceCache = CacheManager::getInstance('files');
+        self::$instagram = Instagram::withCredentials('USERNAME', 'PASSWORD', $instanceCache);
         self::$instagram->login();
 
     }
