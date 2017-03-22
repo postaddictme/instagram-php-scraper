@@ -285,6 +285,10 @@ class Instagram
 
     private static function parseCookies($rawCookies)
     {
+        if(!is_array($rawCookies)){
+            $rawCookies = [$rawCookies];
+        }
+        
         $cookies = [];
         foreach ($rawCookies as $c) {
             $c = explode(';', $c)[0];
