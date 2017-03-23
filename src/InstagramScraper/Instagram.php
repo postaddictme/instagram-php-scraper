@@ -222,7 +222,6 @@ class Instagram
 
     private function generateHeaders($session)
     {
-//        var_dump($session);
         $cookies = '';
         foreach ($session as $key => $value) {
             $cookies .= "$key=$value; ";
@@ -285,10 +284,10 @@ class Instagram
 
     private static function parseCookies($rawCookies)
     {
-        if(!is_array($rawCookies)){
+        if (!is_array($rawCookies)) {
             $rawCookies = [$rawCookies];
         }
-        
+
         $cookies = [];
         foreach ($rawCookies as $c) {
             $c = explode(';', $c)[0];
