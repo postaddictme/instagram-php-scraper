@@ -524,9 +524,15 @@ class Instagram
             $csrfToken = $cookies['csrftoken'];
             $headers = ['cookie' => "csrftoken=$csrfToken; mid=$mid;", 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $csrfToken];
             $response = Request::post(Endpoints::LOGIN_URL, $headers, ['username' => $this->sessionUsername, 'password' => $this->sessionPassword]);
+            
             if ($response->code !== 200) {
-                throw new InstagramAuthException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
+                if((is_string($response->code) || is_numeric($response->code)) && is_string($response->body)) {
+                    throw new InstagramAuthException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
+                } else {
+                    throw new InstagramAuthException('Something went wrong. Please report issue.');
+                }
             }
+            
             $cookies = self::parseCookies($response->headers['Set-Cookie']);
             $cookies['mid'] = $mid;
             $cachedString->set($cookies);
