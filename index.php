@@ -42,8 +42,8 @@ use InstagramScraper\Instagram;
 
 //echo json_encode($instagram->getMediaById('936303077400215759_123123123'));
 
-$instagram = Instagram::withCredentials('PASTE_LOGIN', 'PASTE_PASSWORD');
-$instagram->login();
+$media = Instagram::getMediaByCode('BQ6W8k6goDE');
+var_dump($media);
 echo __DIR__;
 
 //echo json_encode($instagram->getTopMediasByTagName('hello'));
