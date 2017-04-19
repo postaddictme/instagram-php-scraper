@@ -5,11 +5,11 @@ namespace InstagramScraper\Model;
 
 class Comment
 {
+    public $id;
     public $text;
     public $createdAt;
-    public $id;
 
-    public $user;
+    public $owner;
 
     function __construct()
     {
@@ -18,10 +18,10 @@ class Comment
     public static function fromApi($commentArray)
     {
         $instance = new self();
-        $instance->text = $commentArray['text'];
-        $instance->createdAt = $commentArray['created_at'];
         $instance->id = $commentArray['id'];
-        $instance->user = Account::fromAccountPage($commentArray['user']);
+        $instance->createdAt = $commentArray['created_at'];
+        $instance->text = $commentArray['text'];
+        $instance->owner = Account::fromAccountPage($commentArray['user']);
         return $instance;
     }
 
