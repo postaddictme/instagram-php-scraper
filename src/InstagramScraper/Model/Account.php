@@ -95,7 +95,12 @@ class Account
     {
         $instance = new self();
         $instance->id = $userArray['id'];
-        $instance->profilePicUrl = $userArray['profile_pic_url'];
+        if (isset($userArray['profile_pic_url'])) {
+            $instance->profilePicUrl = $userArray['profile_pic_url'];
+        }
+        if (isset($userArray['profile_picture'])) {
+            $instance->profilePicUrl = $userArray['profile_picture'];
+        }
         $instance->username = $userArray['username'];
         $instance->fullName = $userArray['full_name'];
         if (isset($userArray['is_private'])) {
