@@ -99,7 +99,7 @@ class Media
         if ($mediaArray['is_video']) {
             $instance->type = 'video';
             $instance->videoStandardResolutionUrl = $mediaArray['video_url'];
-            $instance->videoViews = $mediaArray['video_views'];
+            $instance->videoViews = $mediaArray['video_view_count'];
         }
         if (isset($mediaArray['caption_is_edited'])) {
             $instance->captionIsEdited = $mediaArray['caption_is_edited'];
