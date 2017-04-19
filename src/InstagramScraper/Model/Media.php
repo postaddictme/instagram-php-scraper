@@ -73,6 +73,8 @@ class Media
         if (isset($mediaArray['location']['name'])) {
             $instance->locationName = $mediaArray['location']['name'];
         }
+        $instance->owner = Account::fromMediaPage($mediaArray['user']);
+        $instance->ownerId = $instance->owner->id;
         return $instance;
     }
 

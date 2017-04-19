@@ -98,7 +98,9 @@ class Account
         $instance->profilePicUrl = $userArray['profile_pic_url'];
         $instance->username = $userArray['username'];
         $instance->fullName = $userArray['full_name'];
-        $instance->isPrivate = $userArray['is_private'];
+        if (isset($userArray['is_private'])) {
+            $instance->isPrivate = $userArray['is_private'];
+        }
         return $instance;
     }
 
