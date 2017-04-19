@@ -19,7 +19,7 @@ class Location
 
     public static function makeLocation($locationArray)
     {
-        $instance = new Location();
+        $instance = new self();
         $instance->id = $locationArray['id'];
         $instance->hasPublicPage = $locationArray['has_public_page'];
         if (isset($locationArray['name'])) {
