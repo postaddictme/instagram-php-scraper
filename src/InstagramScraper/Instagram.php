@@ -113,10 +113,10 @@ class Instagram
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
         }
         $mediaArray = json_decode($response->raw_body, true);
-        if (!isset($mediaArray['media'])) {
+        if (!isset($mediaArray['graphql']['shortcode_media'])) {
             throw new InstagramException('Media with this code does not exist');
         }
-        return Media::fromMediaPage($mediaArray['media']);
+        return Media::fromMediaPage($mediaArray['graphql']['shortcode_media']);
     }
 
     public static function searchAccountsByUsername($username)

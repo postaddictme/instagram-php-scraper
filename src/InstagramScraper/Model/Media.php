@@ -6,7 +6,14 @@ use InstagramScraper\Endpoints;
 
 class Media
 {
+    const TYPE_IMAGE = 'image';
+    const TYPE_VIDEO = 'video';
+    const TYPE_SIDECAR = 'sidecar';
+
+
     public $id;
+    public $shortcode;
+
     public $createdTime;
     public $type;
     public $link;
@@ -21,7 +28,6 @@ class Media
     public $videoStandardResolutionUrl;
     public $videoLowBandwidthUrl;
     public $videoViews;
-    public $code;
     public $owner;
     public $ownerId;
     public $likesCount;
@@ -39,7 +45,7 @@ class Media
         $instance->id = $mediaArray['id'];
         $instance->type = $mediaArray['type'];
         $instance->createdTime = $mediaArray['created_time'];
-        $instance->code = $mediaArray['code'];
+        $instance->shortcode = $mediaArray['code'];
         $instance->link = $mediaArray['link'];
         $instance->commentsCount = $mediaArray['comments']['count'];
         $instance->likesCount = $mediaArray['likes']['count'];
@@ -99,18 +105,18 @@ class Media
         if (isset($mediaArray['is_ad'])) {
             $instance->isAd = $mediaArray['is_ad'];
         }
-        $instance->createdTime = $mediaArray['date'];
-        $instance->code = $mediaArray['code'];
-        $instance->link = Endpoints::getMediaPageLink($instance->code);
-        $instance->commentsCount = $mediaArray['comments']['count'];
-        $instance->likesCount = $mediaArray['likes']['count'];
-        $images = self::getImageUrls($mediaArray['display_src']);
+        $instance->createdTime = $mediaArray['taken_at_timestamp'];
+        $instance->shortcode = $mediaArray['shortcode'];
+        $instance->link = Endpoints::getMediaPageLink($instance->shortcode);
+        $instance->commentsCount = $mediaArray['edge_media_to_comment']['count'];
+        $instance->likesCount = $mediaArray['edge_media_preview_like']['count'];
+        $images = self::getImageUrls($mediaArray['display_url']);
         $instance->imageStandardResolutionUrl = $images['standard'];
         $instance->imageLowResolutionUrl = $images['low'];
         $instance->imageHighResolutionUrl = $images['high'];
         $instance->imageThumbnailUrl = $images['thumbnail'];
-        if (isset($mediaArray['caption'])) {
-            $instance->caption = $mediaArray['caption'];
+        if (isset($mediaArray['edge_media_to_caption']['edges'][0]['node']['text'])) {
+            $instance->caption = $mediaArray['edge_media_to_caption']['edges'][0]['node']['text'];
         }
         if (isset($mediaArray['location']['id'])) {
             $instance->locationId = $mediaArray['location']['id'];
@@ -125,8 +131,8 @@ class Media
     public static function fromTagPage($mediaArray)
     {
         $instance = new self();
-        $instance->code = $mediaArray['code'];
-        $instance->link = Endpoints::getMediaPageLink($instance->code);
+        $instance->shortcode = $mediaArray['code'];
+        $instance->link = Endpoints::getMediaPageLink($instance->shortcode);
         $instance->commentsCount = $mediaArray['comments']['count'];
         $instance->likesCount = $mediaArray['likes']['count'];
         $instance->ownerId = $mediaArray['owner']['id'];

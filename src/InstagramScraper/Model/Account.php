@@ -94,9 +94,9 @@ class Account
     public static function fromMediaPage($userArray)
     {
         $instance = new self();
-        $instance->username = $userArray['username'];
-        $instance->profilePicUrl = $userArray['profile_pic_url'];
         $instance->id = $userArray['id'];
+        $instance->profilePicUrl = $userArray['profile_pic_url'];
+        $instance->username = $userArray['username'];
         $instance->fullName = $userArray['full_name'];
         $instance->isPrivate = $userArray['is_private'];
         return $instance;
