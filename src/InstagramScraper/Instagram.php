@@ -222,11 +222,14 @@ class Instagram
 
     private function generateHeaders($session)
     {
-        $cookies = '';
-        foreach ($session as $key => $value) {
-            $cookies .= "$key=$value; ";
+        $headers = [];
+        if($session) {
+            $cookies = '';
+            foreach ($session as $key => $value) {
+                $cookies .= "$key=$value; ";
+            }
+            $headers = ['cookie' => $cookies, 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $session['csrftoken']];
         }
-        $headers = ['cookie' => $cookies, 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $session['csrftoken']];
         return $headers;
     }
 
