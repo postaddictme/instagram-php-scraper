@@ -15,11 +15,11 @@ class Endpoints
     const MEDIA_JSON_BY_TAG = 'https://www.instagram.com/explore/tags/{tag}/?__a=1&max_id={max_id}';
     const GENERAL_SEARCH = 'https://www.instagram.com/web/search/topsearch/?query={query}';
     const ACCOUNT_JSON_INFO_BY_ID = 'ig_user({userId}){id,username,external_url,full_name,profile_pic_url,biography,followed_by{count},follows{count},media{count},is_private,is_verified}';
-    const LAST_COMMENTS_BY_CODE = 'ig_shortcode({{code}}){comments.last({{count}}){count,nodes{id,created_at,text,user{id,profile_pic_url,username,follows{count},followed_by{count},biography,full_name,media{count},is_private,external_url,is_verified}},page_info}}';
-    const COMMENTS_BEFORE_COMMENT_ID_BY_CODE = 'ig_shortcode({{code}}){comments.before({{commentId}},{{count}}){count,nodes{id,created_at,text,user{id,profile_pic_url,username,follows{count},followed_by{count},biography,full_name,media{count},is_private,external_url,is_verified}},page_info}}';
+    const COMMENTS_BEFORE_COMMENT_ID_BY_CODE = 'https://www.instagram.com/graphql/query/?query_id=17852405266163336&shortcode={{shortcode}}&first={{count}}&after={{commentId}}';
     const LAST_LIKES_BY_CODE = 'ig_shortcode({{code}}){likes{nodes{id,user{id,profile_pic_url,username,follows{count},followed_by{count},biography,full_name,media{count},is_private,external_url,is_verified}},page_info}}';
 
     const INSTAGRAM_QUERY_URL = 'https://www.instagram.com/query/';
+    const INSTAGRAM_GRAPHQL_QUERY_URL = 'https://www.instagram.com/graphql/query/';
     const INSTAGRAM_CDN_URL = 'https://scontent.cdninstagram.com/';
 
     public static function getAccountPageLink($username)
@@ -70,16 +70,9 @@ class Endpoints
         return str_replace('{query}', urlencode($query), Endpoints::GENERAL_SEARCH);
     }
 
-    public static function getLastCommentsByCodeLink($code, $count)
-    {
-        $url = str_replace('{{code}}', urlencode($code), Endpoints::LAST_COMMENTS_BY_CODE);
-        return str_replace('{{count}}', urlencode($count), $url);
-
-    }
-
     public static function getCommentsBeforeCommentIdByCode($code, $count, $commentId)
     {
-        $url = str_replace('{{code}}', urlencode($code), Endpoints::COMMENTS_BEFORE_COMMENT_ID_BY_CODE);
+        $url = str_replace('{{shortcode}}', urlencode($code), Endpoints::COMMENTS_BEFORE_COMMENT_ID_BY_CODE);
         $url = str_replace('{{count}}', urlencode($count), $url);
         return str_replace('{{commentId}}', urlencode($commentId), $url);
     }

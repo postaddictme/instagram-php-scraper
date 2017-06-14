@@ -74,6 +74,15 @@ class Account
     {
     }
 
+    public static function fromComment($userArray)
+    {
+        $instance = new self();
+        $instance->id = $userArray['id'];
+        $instance->profilePicUrl = $userArray['profile_pic_url'];
+        $instance->username = $userArray['username'];
+        return $instance;
+    }
+
     public static function fromAccountPage($userArray)
     {
         $instance = new self();

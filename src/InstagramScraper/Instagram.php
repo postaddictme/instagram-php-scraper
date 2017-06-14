@@ -223,7 +223,7 @@ class Instagram
     private function generateHeaders($session)
     {
         $headers = [];
-        if($session) {
+        if ($session) {
             $cookies = '';
             foreach ($session as $key => $value) {
                 $cookies .= "$key=$value; ";
@@ -256,31 +256,30 @@ class Instagram
                 $remain = 0;
             }
             if (!isset($maxId)) {
-                $parameters = Endpoints::getLastCommentsByCodeLink($code, $numberOfCommentsToRetreive);
+                $maxId = '';
 
-            } else {
-                $parameters = Endpoints::getCommentsBeforeCommentIdByCode($code, $numberOfCommentsToRetreive, $maxId);
             }
-            $response = Request::post(Endpoints::INSTAGRAM_QUERY_URL, $this->generateHeaders($this->userSession), ['q' => $parameters]);
+            $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($code, $numberOfCommentsToRetreive, $maxId);
+            $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession));
             if ($response->code !== 200) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
             }
             $cookies = self::parseCookies($response->headers['Set-Cookie']);
             $this->userSession['csrftoken'] = $cookies['csrftoken'];
             $jsonResponse = json_decode($response->raw_body, true);
-            $nodes = $jsonResponse['comments']['nodes'];
+            $nodes = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['edges'];
             foreach ($nodes as $commentArray) {
-                $comments[] = Comment::fromApi($commentArray);
+                $comments[] = Comment::fromApi($commentArray['node']);
             }
-            $hasPrevious = $jsonResponse['comments']['page_info']['has_previous_page'];
-            $numberOfComments = $jsonResponse['comments']['count'];
+            $hasPrevious = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['has_next_page'];
+            $numberOfComments = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['count'];
             if ($count > $numberOfComments) {
                 $count = $numberOfComments;
             }
             if (sizeof($nodes) == 0) {
                 return $comments;
             }
-            $maxId = $nodes[sizeof($nodes) - 1]['id'];
+            $maxId = $nodes[sizeof($nodes) - 1]['node']['id'];
         }
         return $comments;
     }

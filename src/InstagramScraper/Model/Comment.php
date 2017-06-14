@@ -21,7 +21,7 @@ class Comment
         $instance->id = $commentArray['id'];
         $instance->createdAt = $commentArray['created_at'];
         $instance->text = $commentArray['text'];
-        $instance->owner = Account::fromAccountPage($commentArray['user']);
+        $instance->owner = Account::fromComment($commentArray['owner']);
         return $instance;
     }
 
