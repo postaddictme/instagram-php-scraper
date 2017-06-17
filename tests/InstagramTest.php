@@ -19,7 +19,7 @@ class InstagramTest extends TestCase
             'path' => $sessionFolder
         ]);
         $instanceCache = CacheManager::getInstance('files');
-        self::$instagram = Instagram::withCredentials('USERNAME', 'PASSWORD', $instanceCache);
+        self::$instagram = Instagram::withCredentials('raiym', 'math071312', $instanceCache);
         self::$instagram->login();
 
     }

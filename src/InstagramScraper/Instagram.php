@@ -95,30 +95,6 @@ class Instagram
         return $medias;
     }
 
-    public static function getMediaByCode($mediaCode)
-    {
-        return self::getMediaByUrl(Endpoints::getMediaPageLink($mediaCode));
-    }
-
-    public static function getMediaByUrl($mediaUrl)
-    {
-        if (filter_var($mediaUrl, FILTER_VALIDATE_URL) === false) {
-            throw new \InvalidArgumentException('Malformed media url');
-        }
-        $response = Request::get(rtrim($mediaUrl, '/') . '/?__a=1');
-        if ($response->code === 404) {
-            throw new InstagramNotFoundException('Media with given code does not exist or account is private.');
-        }
-        if ($response->code !== 200) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
-        }
-        $mediaArray = json_decode($response->raw_body, true);
-        if (!isset($mediaArray['graphql']['shortcode_media'])) {
-            throw new InstagramException('Media with this code does not exist');
-        }
-        return Media::fromMediaPage($mediaArray['graphql']['shortcode_media']);
-    }
-
     public static function searchAccountsByUsername($username)
     {
         // TODO: Add tests and auth
@@ -171,10 +147,42 @@ class Instagram
         return $hashtags;
     }
 
-    public static function getMediaById($mediaId)
+    public function getMediaById($mediaId)
     {
         $mediaLink = Media::getLinkFromId($mediaId);
         return self::getMediaByUrl($mediaLink);
+    }
+
+    public function getMediaByUrl($mediaUrl)
+    {
+        if (filter_var($mediaUrl, FILTER_VALIDATE_URL) === false) {
+            throw new \InvalidArgumentException('Malformed media url');
+        }
+        $response = Request::get(rtrim($mediaUrl, '/') . '/?__a=1', $this->generateHeaders($this->userSession));
+        if ($response->code === 404) {
+            throw new InstagramNotFoundException('Media with given code does not exist or account is private.');
+        }
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
+        }
+        $mediaArray = json_decode($response->raw_body, true);
+        if (!isset($mediaArray['graphql']['shortcode_media'])) {
+            throw new InstagramException('Media with this code does not exist');
+        }
+        return Media::fromMediaPage($mediaArray['graphql']['shortcode_media']);
+    }
+
+    private function generateHeaders($session)
+    {
+        $headers = [];
+        if ($session) {
+            $cookies = '';
+            foreach ($session as $key => $value) {
+                $cookies .= "$key=$value; ";
+            }
+            $headers = ['cookie' => $cookies, 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $session['csrftoken']];
+        }
+        return $headers;
     }
 
     public function getPaginateMedias($username, $maxId = '')
@@ -218,19 +226,6 @@ class Instagram
         ];
 
         return $toReturn;
-    }
-
-    private function generateHeaders($session)
-    {
-        $headers = [];
-        if ($session) {
-            $cookies = '';
-            foreach ($session as $key => $value) {
-                $cookies .= "$key=$value; ";
-            }
-            $headers = ['cookie' => $cookies, 'referer' => Endpoints::BASE_URL . '/', 'x-csrftoken' => $session['csrftoken']];
-        }
-        return $headers;
     }
 
     public function getMediaCommentsById($mediaId, $count = 10, $maxId = null)
@@ -307,9 +302,10 @@ class Instagram
             throw new \InvalidArgumentException('User id must be integer or integer wrapped in string');
         }
 
-        $parameters = Endpoints::getAccountJsonInfoLinkByAccountId($id);
-
-        $response = Request::post(Endpoints::INSTAGRAM_QUERY_URL, $this->generateHeaders($this->userSession), ['q' => $parameters]);
+        $p['id'] = $id;
+        $p['first'] = 1;
+        $url = Endpoints::getGraphQlUrl(InstagramQueryId::USER_MEDIAS, $p);
+        $response = Request::get($url, $this->generateHeaders($this->userSession));
 
         if ($response->code !== 200) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
@@ -322,10 +318,24 @@ class Instagram
         if ($userArray['status'] === 'fail') {
             throw new InstagramException($userArray['message']);
         }
-        if (!isset($userArray['username'])) {
-            throw new InstagramNotFoundException('User with this id not found');
+        if (!isset($userArray['data']['user']) || $userArray['data']['user'] == null) {
+            throw new InstagramNotFoundException("User with this id not found");
         }
-        return Account::fromAccountPage($userArray);
+        $edges = $userArray['data']['user']['edge_owner_to_timeline_media']['edges'];
+        if (sizeof($edges) == 0) {
+            throw new InstagramNotFoundException("User exists but library could not pull information about user");
+        }
+        $shortcode = $edges[0]['node']['shortcode'];
+
+        $media = $this->getMediaByCode($shortcode);
+        return $media->owner;
+    }
+
+    // TODO: use new
+
+    public function getMediaByCode($mediaCode)
+    {
+        return $this->getMediaByUrl(Endpoints::getMediaPageLink($mediaCode));
     }
 
     public function getMediasByTag($tag, $count = 12, $maxId = '')

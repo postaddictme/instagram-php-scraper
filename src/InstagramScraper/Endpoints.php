@@ -17,10 +17,22 @@ class Endpoints
     const ACCOUNT_JSON_INFO_BY_ID = 'ig_user({userId}){id,username,external_url,full_name,profile_pic_url,biography,followed_by{count},follows{count},media{count},is_private,is_verified}';
     const COMMENTS_BEFORE_COMMENT_ID_BY_CODE = 'https://www.instagram.com/graphql/query/?query_id=17852405266163336&shortcode={{shortcode}}&first={{count}}&after={{commentId}}';
     const LAST_LIKES_BY_CODE = 'ig_shortcode({{code}}){likes{nodes{id,user{id,profile_pic_url,username,follows{count},followed_by{count},biography,full_name,media{count},is_private,external_url,is_verified}},page_info}}';
-
+    const FOLLOWING_URL = 'https://www.instagram.com/graphql/query/?query_id=17874545323001329&id={{accountId}}&first={{count}}';
+    const FOLLOWERS_URL = 'https://www.instagram.com/graphql/query/?query_id=17851374694183129&id={{accountId}}&first={{count}}';
+    const FOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/follow/';
+    const UNFOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/unfollow/';
+    const USER_FEED = 'https://www.instagram.com/graphql/query/?query_id=17861995474116400&fetch_media_item_count=12&fetch_media_item_cursor=&fetch_comment_count=4&fetch_like=10';
+    const USER_FEED2 = 'https://www.instagram.com/?__a=1';
     const INSTAGRAM_QUERY_URL = 'https://www.instagram.com/query/';
-    const INSTAGRAM_GRAPHQL_QUERY_URL = 'https://www.instagram.com/graphql/query/';
     const INSTAGRAM_CDN_URL = 'https://scontent.cdninstagram.com/';
+
+    const ACCOUNT_MEDIAS2 = 'https://www.instagram.com/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
+
+    // Look alike??
+    const URL_SIMILAR = 'https://www.instagram.com/graphql/query/?query_id=17845312237175864&id=4663052';
+
+    const GRAPH_QL_QUERY_URL = 'https://www.instagram.com/graphql/query/?query_id={{queryId}}';
+
 
     public static function getAccountPageLink($username)
     {
@@ -81,6 +93,14 @@ class Endpoints
     {
         $url = str_replace('{{code}}', urlencode($code), Endpoints::LAST_LIKES_BY_CODE);
         return $url;
+    }
 
+    public static function getGraphQlUrl($queryId, $parameters)
+    {
+        $url = str_replace('{{queryId}}', urlencode($queryId), Endpoints::GRAPH_QL_QUERY_URL);
+        foreach ($parameters as $key => $value) {
+            $url .= "&$key=$value";
+        }
+        return $url;
     }
 }
