@@ -19,7 +19,7 @@ class InstagramTest extends TestCase
             'path' => $sessionFolder
         ]);
         $instanceCache = CacheManager::getInstance('files');
-        self::$instagram = Instagram::withCredentials('raiym', 'math071312', $instanceCache);
+        self::$instagram = Instagram::withCredentials('USERNAME', 'PASSWORD', $instanceCache);
         self::$instagram->login();
 
     }
@@ -53,13 +53,13 @@ class InstagramTest extends TestCase
 
     public function testGetMediaByCode()
     {
-        $media = Instagram::getMediaByCode('BHaRdodBouH');
+        $media = self::$instagram->getMediaByCode('BHaRdodBouH');
         $this->assertEquals('kevin', $media->owner->username);
     }
 
     public function testGetMediaByUrl()
     {
-        $media = Instagram::getMediaByUrl('https://www.instagram.com/p/BHaRdodBouH');
+        $media = self::$instagram->getMediaByUrl('https://www.instagram.com/p/BHaRdodBouH');
         $this->assertEquals('kevin', $media->owner->username);
     }
 
