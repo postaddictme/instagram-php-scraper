@@ -9,7 +9,8 @@ class Media
     const TYPE_IMAGE = 'image';
     const TYPE_VIDEO = 'video';
     const TYPE_SIDECAR = 'sidecar';
-
+	const TYPE_CAROUSEL = 'carousel';
+	
 
     public $id;
     public $shortcode;
@@ -21,6 +22,7 @@ class Media
     public $imageThumbnailUrl;
     public $imageStandardResolutionUrl;
     public $imageHighResolutionUrl;
+	public $carouselMedia;
     public $caption;
     public $captionIsEdited;
     public $isAd;
@@ -54,6 +56,34 @@ class Media
         $instance->imageThumbnailUrl = $images['thumbnail'];
         $instance->imageStandardResolutionUrl = $images['standard'];
         $instance->imageHighResolutionUrl = $images['high'];
+		if(isset($mediaArray["carousel_media"])){
+			$instance->carouselMedia = array();
+			foreach($mediaArray["carousel_media"] as $carouselArray){
+				$carouselMedia = new CarouselMedia();
+				$carouselMedia->type = $carouselArray['type'];
+				
+				if (isset($carouselArray['images'])) {
+					$carouselImages = self::getImageUrls($carouselArray['images']['standard_resolution']['url']);
+					$carouselMedia->imageLowResolutionUrl = $carouselImages['low'];
+					$carouselMedia->imageThumbnailUrl = $carouselImages['thumbnail'];
+					$carouselMedia->imageStandardResolutionUrl = $carouselImages['standard'];
+					$carouselMedia->imageHighResolutionUrl = $carouselImages['high'];
+				}
+				
+				if ($carouselMedia->type === 'video') {
+					if (isset($mediaArray['video_views'])) {
+						$carouselMedia->videoViews = $carouselArray['video_views'];
+					}
+					if (isset($carouselArray['videos'])) {
+						$carouselMedia->videoLowResolutionUrl = $carouselArray['videos']['low_resolution']['url'];
+						$carouselMedia->videoStandardResolutionUrl = $carouselArray['videos']['standard_resolution']['url'];
+						$carouselMedia->videoLowBandwidthUrl = $carouselArray['videos']['low_bandwidth']['url'];
+					}
+				}
+				array_push($instance->carouselMedia, $carouselMedia);
+			}
+		}
+		
         if (isset($mediaArray['caption'])) {
             $instance->caption = $mediaArray['caption']['text'];
         }
@@ -147,6 +177,7 @@ class Media
         $instance->imageLowResolutionUrl = $images['low'];
         $instance->imageHighResolutionUrl = $images['high'];
         $instance->imageThumbnailUrl = $images['thumbnail'];
+		$instance->carouselMedia = $mediaArray["carousel_media"];
         $instance->type = 'image';
         if ($mediaArray['is_video']) {
             $instance->type = 'video';
