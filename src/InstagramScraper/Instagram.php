@@ -298,13 +298,14 @@ class Instagram
 
     public function getAccountById($id)
     {
+        // Use the follow page to get the account. The follow url will redirect to the home page for the user,
+        // which has the username embedded in the url.
+
         if (!is_numeric($id)) {
             throw new \InvalidArgumentException('User id must be integer or integer wrapped in string');
         }
 
-        $p['id'] = $id;
-        $p['first'] = 1;
-        $url = Endpoints::getGraphQlUrl(InstagramQueryId::USER_MEDIAS, $p);
+        $url = Endpoints::getFollowUrl($id);
         $response = Request::get($url, $this->generateHeaders($this->userSession));
 
         if ($response->code !== 200) {
@@ -314,21 +315,12 @@ class Instagram
         $cookies = self::parseCookies($response->headers['Set-Cookie']);
         $this->userSession['csrftoken'] = $cookies['csrftoken'];
 
-        $userArray = json_decode($response->raw_body, true);
-        if ($userArray['status'] === 'fail') {
-            throw new InstagramException($userArray['message']);
-        }
-        if (!isset($userArray['data']['user']) || $userArray['data']['user'] == null) {
-            throw new InstagramNotFoundException("User with this id not found");
-        }
-        $edges = $userArray['data']['user']['edge_owner_to_timeline_media']['edges'];
-        if (sizeof($edges) == 0) {
-            throw new InstagramNotFoundException("User exists but library could not pull information about user");
-        }
-        $shortcode = $edges[0]['node']['shortcode'];
+        // Get the username from the response url.
+        $responseUrl = $response->headers['Location'];
+        $urlParts = explode('/', rtrim($responseUrl, '/'));
+        $username = end($urlParts);
 
-        $media = $this->getMediaByCode($shortcode);
-        return $media->owner;
+        return self::getAccount($username);
     }
 
     // TODO: use new
