@@ -27,8 +27,8 @@ class InstagramTest extends TestCase
     public function testGetAccountByUsername()
     {
         $account = Instagram::getAccount('kevin');
-        $this->assertEquals('kevin', $account->username);
-        $this->assertEquals('3', $account->id);
+        $this->assertEquals('kevin', $account->getUsername());
+        $this->assertEquals('3', $account->getId());
     }
 
     public function testGetAccountById()

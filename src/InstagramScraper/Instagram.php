@@ -21,10 +21,13 @@ class Instagram
     public $sessionPassword;
     public $userSession;
 
-    public function __construct()
-    {
-    }
-
+    /**
+     * @param      $username
+     * @param      $password
+     * @param null $sessionFolder
+     *
+     * @return Instagram
+     */
     public static function withCredentials($username, $password, $sessionFolder = null)
     {
         if (is_null($sessionFolder)) {
@@ -44,6 +47,13 @@ class Instagram
         return $instance;
     }
 
+    /**
+     * @param $username
+     *
+     * @return Account
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
     public static function getAccount($username)
     {
         $response = Request::get(Endpoints::getAccountJsonLink($username));
@@ -61,6 +71,14 @@ class Instagram
         return Account::fromAccountPage($userArray['user']);
     }
 
+    /**
+     * @param        $username
+     * @param int    $count
+     * @param string $maxId
+     *
+     * @return array
+     * @throws InstagramException
+     */
     public static function getMedias($username, $count = 20, $maxId = '')
     {
         $index = 0;
@@ -356,10 +374,10 @@ class Instagram
                     return $medias;
                 }
                 $media = Media::fromTagPage($mediaArray);
-                if (in_array($media->id, $mediaIds)) {
+                if (in_array($media->getId(), $mediaIds)) {
                     return $medias;
                 }
-                $mediaIds[] = $media->id;
+                $mediaIds[] = $media->getId();
                 $medias[] = $media;
                 $index++;
             }

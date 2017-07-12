@@ -8,72 +8,89 @@ class Account
      * User id
      * @var string
      */
-    public $id;
+    private $id = '';
 
     /**
      * Username
      * @var string
      */
-    public $username;
+    private $username = '';
 
     /**
      * Full name
      * @var string
      */
-    public $fullName;
+    private $fullName = '';
 
     /**
      * Profile picture url
      * @var string
      */
-    public $profilePicUrl;
+    private $profilePicUrl = '';
 
     /**
      * Information filled by user
      * @var string
      */
-    public $biography;
+    private $biography = '';
 
     /**
      * Url provided by user in profile
      * @var string
      */
-    public $externalUrl;
+    private $externalUrl = '';
 
     /**
      * Number of subscriptions
      * @var integer
      */
-    public $followsCount;
+    private $followsCount = 0;
 
     /**
      * Number of followers
      * @var integer
      */
-    public $followedByCount;
+    private $followedByCount = 0;
 
     /**
      * Number of medias published by user
      * @var integer
      */
-    public $mediaCount;
+    private $mediaCount = 0;
 
     /**
      * true if account is private
      * @var boolean
      */
-    public $isPrivate;
+    private $isPrivate = false;
 
     /**
      * true if verified by Instagram as celebrity
      * @var boolean
      */
-    public $isVerified;
+    private $isVerified = false;
 
-    function __construct()
+    /**
+     * @return string
+     */
+    public function getUsername()
     {
+        return $this->username;
     }
 
+    /**
+     * @return string
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param array $userArray
+     *
+     * @return Account
+     */
     public static function fromComment($userArray)
     {
         $instance = new self();
@@ -83,6 +100,11 @@ class Account
         return $instance;
     }
 
+    /**
+     * @param array $userArray
+     *
+     * @return Account
+     */
     public static function fromAccountPage($userArray)
     {
         $instance = new self();
@@ -100,6 +122,11 @@ class Account
         return $instance;
     }
 
+    /**
+     * @param array $userArray
+     *
+     * @return Account
+     */
     public static function fromMediaPage($userArray)
     {
         $instance = new self();
@@ -117,7 +144,11 @@ class Account
         }
         return $instance;
     }
-
+    /**
+     * @param array $userArray
+     *
+     * @return Account
+     */
     public static function fromSearchPage($userArray)
     {
         $instance = new self();
