@@ -103,4 +103,9 @@ class Endpoints
         }
         return $url;
     }
+
+    public static function getFollowUrl($accountId){
+        $url = str_replace('{{accountId}}', urlencode($accountId), Endpoints::FOLLOW_URL);
+        return $url;
+    }
 }
