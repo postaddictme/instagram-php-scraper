@@ -334,25 +334,7 @@ class Media
         if (isset($mediaArray["carousel_media"])) {
             $instance->carouselMedia = [];
             foreach ($mediaArray["carousel_media"] as $carouselArray) {
-                $carouselMedia = new CarouselMedia();
-                $carouselMedia->setType($carouselArray['type']);
-
-                if (isset($carouselArray['images'])) {
-                    $carouselImages = self::getImageUrls($carouselArray['images']['standard_resolution']['url']);
-                    $carouselMedia->setImageLowResolutionUrl($carouselImages['low'])->setImageThumbnailUrl($carouselImages['thumbnail'])->setImageStandardResolutionUrl($carouselImages['standard'])->setImageHighResolutionUrl($carouselImages['high']);
-                }
-
-                if ($carouselMedia->getType() === self::TYPE_VIDEO) {
-                    if (isset($mediaArray['video_views'])) {
-                        $carouselMedia->setVideoViews($carouselArray['video_views']);
-                    }
-                    if (isset($carouselArray['videos'])) {
-                        $carouselMedia->setVideoLowResolutionUrl($carouselArray['videos']['low_resolution']['url']);
-                        $carouselMedia->setVideoStandardResolutionUrl($carouselArray['videos']['standard_resolution']['url']);
-                        $carouselMedia->setVideoLowBandwidthUrl($carouselArray['videos']['low_bandwidth']['url']);
-                    }
-                }
-                array_push($instance->carouselMedia, $carouselMedia);
+                self::setCarouselMedia($mediaArray, $carouselArray, $instance);
             }
         }
 
@@ -376,7 +358,7 @@ class Media
             $instance->locationName = $mediaArray['location']['name'];
         }
         $instance->owner = Account::fromMediaPage($mediaArray['user']);
-        $instance->ownerId = $instance->owner->getId();
+        $instance->ownerId = $instance->getOwner()->getId();
         return $instance;
     }
 
@@ -399,28 +381,7 @@ class Media
             $instance->type = self::TYPE_CAROUSEL;
             $instance->carouselMedia = [];
             foreach ($mediaArray["carousel_media"] as $carouselArray) {
-                $carouselMedia = new CarouselMedia();
-                $carouselMedia->setType($carouselArray['type']);
-
-                if (isset($carouselArray['images'])) {
-                    $carouselImages = self::getImageUrls($carouselArray['images']['standard_resolution']['url']);
-                    $carouselMedia->setImageLowResolutionUrl($carouselImages['low']);
-                    $carouselMedia->setImageThumbnailUrl($carouselImages['thumbnail']);
-                    $carouselMedia->setImageStandardResolutionUrl($carouselImages['standard']);
-                    $carouselMedia->setImageHighResolutionUrl($carouselImages['high']);
-                }
-
-                if ($carouselMedia->getType() === self::TYPE_VIDEO) {
-                    if (isset($mediaArray['video_views'])) {
-                        $carouselMedia->setVideoViews($carouselArray['video_views']);
-                    }
-                    if (isset($carouselArray['videos'])) {
-                        $carouselMedia->setVideoLowResolutionUrl($carouselArray['videos']['low_resolution']['url']);
-                        $carouselMedia->setVideoStandardResolutionUrl($carouselArray['videos']['standard_resolution']['url']);
-                        $carouselMedia->setVideoLowBandwidthUrl($carouselArray['videos']['low_bandwidth']['url']);
-                    }
-                }
-                array_push($instance->carouselMedia, $carouselMedia);
+                $mediaArray = self::setCarouselMedia($mediaArray, $carouselArray, $instance);
             }
         }
         if (isset($mediaArray['caption_is_edited'])) {
@@ -483,28 +444,7 @@ class Media
             $instance->type = self::TYPE_CAROUSEL;
             $instance->carouselMedia = [];
             foreach ($mediaArray["carousel_media"] as $carouselArray) {
-                $carouselMedia = new CarouselMedia();
-                $carouselMedia->setType($carouselArray['type']);
-
-                if (isset($carouselArray['images'])) {
-                    $carouselImages = self::getImageUrls($carouselArray['images']['standard_resolution']['url']);
-                    $carouselMedia->setImageLowResolutionUrl($carouselImages['low']);
-                    $carouselMedia->setImageThumbnailUrl($carouselImages['thumbnail']);
-                    $carouselMedia->setImageStandardResolutionUrl($carouselImages['standard']);
-                    $carouselMedia->setImageHighResolutionUrl($carouselImages['high']);
-                }
-
-                if ($carouselMedia->getType() === self::TYPE_VIDEO) {
-                    if (isset($mediaArray['video_views'])) {
-                        $carouselMedia->setVideoViews($carouselArray['video_views']);
-                    }
-                    if (isset($carouselArray['videos'])) {
-                        $carouselMedia->setVideoLowResolutionUrl($carouselArray['videos']['low_resolution']['url']);
-                        $carouselMedia->setVideoStandardResolutionUrl($carouselArray['videos']['standard_resolution']['url']);
-                        $carouselMedia->setVideoLowBandwidthUrl($carouselArray['videos']['low_bandwidth']['url']);
-                    }
-                }
-                array_push($instance->carouselMedia, $carouselMedia);
+                $mediaArray = self::setCarouselMedia($mediaArray, $carouselArray, $instance);
             }
         }
         $instance->id = $mediaArray['id'];
@@ -572,5 +512,39 @@ class Media
             'high'      => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
         ];
         return $urls;
+    }
+
+    /**
+     * @param $mediaArray
+     * @param $carouselArray
+     * @param $instance
+     *
+     * @return mixed
+     */
+    private static function setCarouselMedia($mediaArray, $carouselArray, $instance)
+    {
+        $carouselMedia = new CarouselMedia();
+        $carouselMedia->setType($carouselArray['type']);
+
+        if (isset($carouselArray['images'])) {
+            $carouselImages = self::getImageUrls($carouselArray['images']['standard_resolution']['url']);
+            $carouselMedia->setImageLowResolutionUrl($carouselImages['low']);
+            $carouselMedia->setImageThumbnailUrl($carouselImages['thumbnail']);
+            $carouselMedia->setImageStandardResolutionUrl($carouselImages['standard']);
+            $carouselMedia->setImageHighResolutionUrl($carouselImages['high']);
+        }
+
+        if ($carouselMedia->getType() === self::TYPE_VIDEO) {
+            if (isset($mediaArray['video_views'])) {
+                $carouselMedia->setVideoViews($carouselArray['video_views']);
+            }
+            if (isset($carouselArray['videos'])) {
+                $carouselMedia->setVideoLowResolutionUrl($carouselArray['videos']['low_resolution']['url']);
+                $carouselMedia->setVideoStandardResolutionUrl($carouselArray['videos']['standard_resolution']['url']);
+                $carouselMedia->setVideoLowBandwidthUrl($carouselArray['videos']['low_bandwidth']['url']);
+            }
+        }
+        array_push($instance->carouselMedia, $carouselMedia);
+        return $mediaArray;
     }
 }
