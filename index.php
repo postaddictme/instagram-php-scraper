@@ -7,7 +7,7 @@ require_once 'vendor/autoload.php';
 
 use InstagramScraper\Instagram;
 
-$username = 'victoria.guryanova';
+$username = 'kevin';
 
 $account = Instagram::getAccount($username);
 var_dump($account);
