@@ -8,14 +8,49 @@ class CarouselMedia
     const TYPE_VIDEO = 'video';
     const TYPE_SIDECAR = 'sidecar';
 
+    /**
+     * @var string
+     */
     private $type;
+
+    /**
+     * @var string
+     */
     private $imageLowResolutionUrl;
+
+    /**
+     * @var string
+     */
     private $imageThumbnailUrl;
+
+    /**
+     * @var string
+     */
     private $imageStandardResolutionUrl;
+
+    /**
+     * @var string
+     */
     private $imageHighResolutionUrl;
+
+    /**
+     * @var string
+     */
     private $videoLowResolutionUrl;
+
+    /**
+     * @var string
+     */
     private $videoStandardResolutionUrl;
+
+    /**
+     * @var string
+     */
     private $videoLowBandwidthUrl;
+
+    /**
+     * @var
+     */
     private $videoViews;
 
     /**

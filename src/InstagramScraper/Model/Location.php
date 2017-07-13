@@ -5,18 +5,41 @@ namespace InstagramScraper\Model;
 
 class Location
 {
-    public $id;
-    public $hasPublicPage;
-    public $name;
-    public $slug;
+    /**
+     * @var
+     */
+    private $id;
 
-    public $lng;
-    public $lat;
+    /**
+     * @var
+     */
+    private $hasPublicPage;
 
-    function __construct()
-    {
-    }
+    /**
+     * @var
+     */
+    private $name;
 
+    /**
+     * @var
+     */
+    private $slug;
+
+    /**
+     * @var
+     */
+    private $lng;
+
+    /**
+     * @var
+     */
+    private $lat;
+
+    /**
+     * @param array $locationArray
+     *
+     * @return Location
+     */
     public static function makeLocation($locationArray)
     {
         $instance = new self();

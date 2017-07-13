@@ -5,14 +5,26 @@ namespace InstagramScraper\Model;
 
 class Tag
 {
-    public $mediaCount;
-    public $name;
-    public $id;
+    /**
+     * @var
+     */
+    private $mediaCount;
 
-    function __construct()
-    {
-    }
+    /**
+     * @var
+     */
+    private $name;
 
+    /**
+     * @var
+     */
+    private $id;
+
+    /**
+     * @param $tagArray
+     *
+     * @return Tag
+     */
     public static function fromSearchPage($tagArray)
     {
         $instance = new self();

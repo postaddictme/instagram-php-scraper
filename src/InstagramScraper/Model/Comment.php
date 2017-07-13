@@ -5,16 +5,31 @@ namespace InstagramScraper\Model;
 
 class Comment
 {
-    public $id;
-    public $text;
-    public $createdAt;
+    /**
+     * @var
+     */
+    private $id;
 
-    public $owner;
+    /**
+     * @var
+     */
+    private $text;
 
-    function __construct()
-    {
-    }
+    /**
+     * @var
+     */
+    private $createdAt;
 
+    /**
+     * @var
+     */
+    private $owner;
+
+    /**
+     * @param $commentArray
+     *
+     * @return Comment
+     */
     public static function fromApi($commentArray)
     {
         $instance = new self();
