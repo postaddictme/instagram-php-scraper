@@ -309,7 +309,7 @@ class Instagram
         $response = Request::get($url, $this->generateHeaders($this->userSession));
 
         if ($response->code !== 200) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->raw_body . ' Something went wrong. Please report issue.');
         }
 
         $cookies = self::parseCookies($response->headers['Set-Cookie']);
