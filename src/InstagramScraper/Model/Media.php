@@ -342,7 +342,7 @@ class Media
                     $carouselMedia->setImageLowResolutionUrl($carouselImages['low'])->setImageThumbnailUrl($carouselImages['thumbnail'])->setImageStandardResolutionUrl($carouselImages['standard'])->setImageHighResolutionUrl($carouselImages['high']);
                 }
 
-                if ($carouselMedia->getType() === 'video') {
+                if ($carouselMedia->getType() === self::TYPE_VIDEO) {
                     if (isset($mediaArray['video_views'])) {
                         $carouselMedia->setVideoViews($carouselArray['video_views']);
                     }
@@ -359,7 +359,7 @@ class Media
         if (isset($mediaArray['caption'])) {
             $instance->caption = $mediaArray['caption']['text'];
         }
-        if ($instance->type === 'video') {
+        if ($instance->type === self::TYPE_VIDEO) {
             if (isset($mediaArray['video_views'])) {
                 $instance->videoViews = $mediaArray['video_views'];
             }
@@ -389,14 +389,14 @@ class Media
     {
         $instance = new self();
         $instance->id = $mediaArray['id'];
-        $instance->type = 'image';
+        $instance->type = self::TYPE_IMAGE;
         if ($mediaArray['is_video']) {
-            $instance->type = 'video';
+            $instance->type = self::TYPE_VIDEO;
             $instance->videoStandardResolutionUrl = $mediaArray['video_url'];
             $instance->videoViews = $mediaArray['video_view_count'];
         }
         if (isset($mediaArray["carousel_media"])) {
-            $instance->type = 'carousel';
+            $instance->type = self::TYPE_CAROUSEL;
             $instance->carouselMedia = [];
             foreach ($mediaArray["carousel_media"] as $carouselArray) {
                 $carouselMedia = new CarouselMedia();
@@ -410,7 +410,7 @@ class Media
                     $carouselMedia->setImageHighResolutionUrl($carouselImages['high']);
                 }
 
-                if ($carouselMedia->getType() === 'video') {
+                if ($carouselMedia->getType() === self::TYPE_VIDEO) {
                     if (isset($mediaArray['video_views'])) {
                         $carouselMedia->setVideoViews($carouselArray['video_views']);
                     }
@@ -474,13 +474,13 @@ class Media
         $instance->imageLowResolutionUrl = $images['low'];
         $instance->imageHighResolutionUrl = $images['high'];
         $instance->imageThumbnailUrl = $images['thumbnail'];
-        $instance->type = 'image';
+        $instance->type = self::TYPE_IMAGE;
         if ($mediaArray['is_video']) {
-            $instance->type = 'video';
+            $instance->type = self::TYPE_VIDEO;
             $instance->videoViews = $mediaArray['video_views'];
         }
         if (isset($mediaArray["carousel_media"])) {
-            $instance->type = 'carousel';
+            $instance->type = self::TYPE_CAROUSEL;
             $instance->carouselMedia = [];
             foreach ($mediaArray["carousel_media"] as $carouselArray) {
                 $carouselMedia = new CarouselMedia();
@@ -494,7 +494,7 @@ class Media
                     $carouselMedia->setImageHighResolutionUrl($carouselImages['high']);
                 }
 
-                if ($carouselMedia->getType() === 'video') {
+                if ($carouselMedia->getType() === self::TYPE_VIDEO) {
                     if (isset($mediaArray['video_views'])) {
                         $carouselMedia->setVideoViews($carouselArray['video_views']);
                     }

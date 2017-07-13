@@ -4,10 +4,6 @@ namespace InstagramScraper\Model;
 
 class CarouselMedia
 {
-    const TYPE_IMAGE = 'image';
-    const TYPE_VIDEO = 'video';
-    const TYPE_SIDECAR = 'sidecar';
-
     /**
      * @var string
      */
