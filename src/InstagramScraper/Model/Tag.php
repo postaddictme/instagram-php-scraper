@@ -6,19 +6,43 @@ namespace InstagramScraper\Model;
 class Tag
 {
     /**
-     * @var
+     * @var int
      */
     private $mediaCount;
 
     /**
-     * @var
+     * @var string
      */
     private $name;
 
     /**
-     * @var
+     * @var int
      */
     private $id;
+
+    /**
+     * @return int
+     */
+    public function getMediaCount()
+    {
+        return $this->mediaCount;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 
     /**
      * @param $tagArray

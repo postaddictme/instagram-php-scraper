@@ -7,13 +7,25 @@ require_once 'vendor/autoload.php';
 
 use InstagramScraper\Instagram;
 
-$username = 'kevin';
+//$username = 'kevin';
+//
+//$account = Instagram::getAccount($username);
+//var_dump($account);
+//
+//$medias = Instagram::getMedias($username);
+//if (!empty($medias)) {
+//    /**
+//     * @var \InstagramScraper\Model\Media $media
+//     */
+//    foreach ($medias as $media) {
+//        var_dump($media);
+//    }
+//} else {
+//    print 'medias array is empty';
+//}
 
-$account = Instagram::getAccount($username);
-var_dump($account);
+//$account = Instagram::searchAccountsByUsername($username);
+//var_dump($account);
 
-$account = Instagram::getMedias($username);
-var_dump($account);
-
-$account = Instagram::searchAccountsByUsername($username);
+$account = Instagram::searchTagsByTagName('питер');
 var_dump($account);
