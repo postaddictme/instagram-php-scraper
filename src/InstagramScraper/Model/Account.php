@@ -87,6 +87,78 @@ class Account
     }
 
     /**
+     * @return string
+     */
+    public function getFullName()
+    {
+        return $this->fullName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProfilePicUrl()
+    {
+        return $this->profilePicUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBiography()
+    {
+        return $this->biography;
+    }
+
+    /**
+     * @return string
+     */
+    public function getExternalUrl()
+    {
+        return $this->externalUrl;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFollowsCount()
+    {
+        return $this->followsCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFollowedByCount()
+    {
+        return $this->followedByCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMediaCount()
+    {
+        return $this->mediaCount;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrivate()
+    {
+        return $this->isPrivate;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVerified()
+    {
+        return $this->isVerified;
+    }
+
+    /**
      * @param array $userArray
      *
      * @return Account

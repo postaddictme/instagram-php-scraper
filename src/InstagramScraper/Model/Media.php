@@ -9,103 +9,107 @@ class Media
     const TYPE_IMAGE = 'image';
     const TYPE_VIDEO = 'video';
     const TYPE_SIDECAR = 'sidecar';
-	const TYPE_CAROUSEL = 'carousel';
+    const TYPE_CAROUSEL = 'carousel';
 
     /**
-     * @var
+     * @var string
      */
-    private $id;
+    private $id = '';
 
     /**
-     * @var
+     * @var string
      */
-    private $shortCode;
+    private $shortCode = '';
 
     /**
-     * @var
+     * @var int
      */
-    private $createdTime;
+    private $createdTime = 0;
 
     /**
-     * @var
+     * @var string
      */
-    private $type;
+    private $type = '';
 
     /**
-     * @var
+     * @var string
      */
-    private $link;
+    private $link = '';
 
     /**
-     * @var
+     * @var string
      */
-    private $imageLowResolutionUrl;
+    private $imageLowResolutionUrl = '';
 
     /**
-     * @var
+     * @var string
      */
-    private $imageThumbnailUrl;
+    private $imageThumbnailUrl = '';
 
     /**
-     * @var
+     * @var string
      */
-    private $imageStandardResolutionUrl;
+    private $imageStandardResolutionUrl = '';
 
     /**
-     * @var
+     * @var string
      */
-    private $imageHighResolutionUrl;
+    private $imageHighResolutionUrl = '';
 
     /**
-     * @var
+     * @var array
      */
-	private $carouselMedia;
+    private $carouselMedia = [];
 
     /**
-     * @var
+     * @var string
      */
-    private $caption;
+    private $caption = '';
 
     /**
-     * @var
+     * @var bool
      */
-    private $captionIsEdited;
+    private $isCaptionEdited = false;
 
     /**
-     * @var
+     * @var bool
      */
-    private $isAd;
+    private $isAd = false;
 
     /**
-     * @var
+     * @var string
      */
-    private $videoLowResolutionUrl;
+    private $videoLowResolutionUrl = '';
 
     /**
-     * @var
+     * @var string
      */
-    private $videoStandardResolutionUrl;
+    private $videoStandardResolutionUrl = '';
 
     /**
-     * @var
+     * @var string
      */
-    private $videoLowBandwidthUrl;
+    private $videoLowBandwidthUrl = '';
 
     /**
-     * @var
+     * @var int
      */
-    private $videoViews;
+    private $videoViews = 0;
 
     /**
-     * @var
+     * @var Account
      */
     private $owner;
 
     /**
-     * @var
+     * @var int
      */
-    private $ownerId;
-    private $likesCount;
+    private $ownerId = 0;
+
+    /**
+     * @var int
+     */
+    private $likesCount = 0;
 
     /**
      * @var
@@ -113,14 +117,14 @@ class Media
     private $locationId;
 
     /**
-     * @var
+     * @var string
      */
-    private $locationName;
+    private $locationName = '';
 
     /**
-     * @var
+     * @var string
      */
-    private $commentsCount;
+    private $commentsCount = 0;
 
     /**
      * @return mixed
@@ -130,6 +134,188 @@ class Media
         return $this->id;
     }
 
+    /**
+     * @return string
+     */
+    public function getShortCode()
+    {
+        return $this->shortCode;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCreatedTime()
+    {
+        return $this->createdTime;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLink()
+    {
+        return $this->link;
+    }
+
+    /**
+     * @return string
+     */
+    public function getImageLowResolutionUrl()
+    {
+        return $this->imageLowResolutionUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getImageThumbnailUrl()
+    {
+        return $this->imageThumbnailUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getImageStandardResolutionUrl()
+    {
+        return $this->imageStandardResolutionUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getImageHighResolutionUrl()
+    {
+        return $this->imageHighResolutionUrl;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCarouselMedia()
+    {
+        return $this->carouselMedia;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCaption()
+    {
+        return $this->caption;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCaptionEdited()
+    {
+        return $this->isCaptionEdited;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAd()
+    {
+        return $this->isAd;
+    }
+
+    /**
+     * @return string
+     */
+    public function getVideoLowResolutionUrl()
+    {
+        return $this->videoLowResolutionUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getVideoStandardResolutionUrl()
+    {
+        return $this->videoStandardResolutionUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getVideoLowBandwidthUrl()
+    {
+        return $this->videoLowBandwidthUrl;
+    }
+
+    /**
+     * @return int
+     */
+    public function getVideoViews()
+    {
+        return $this->videoViews;
+    }
+
+    /**
+     * @return Account
+     */
+    public function getOwner()
+    {
+        return $this->owner;
+    }
+
+    /**
+     * @return int
+     */
+    public function getOwnerId()
+    {
+        return $this->ownerId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLikesCount()
+    {
+        return $this->likesCount;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLocationId()
+    {
+        return $this->locationId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocationName()
+    {
+        return $this->locationName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCommentsCount()
+    {
+        return $this->commentsCount;
+    }
+
+    /**
+     * @param array $mediaArray
+     *
+     * @return Media
+     */
     public static function fromApi($mediaArray)
     {
         $instance = new self();
@@ -145,34 +331,30 @@ class Media
         $instance->imageThumbnailUrl = $images['thumbnail'];
         $instance->imageStandardResolutionUrl = $images['standard'];
         $instance->imageHighResolutionUrl = $images['high'];
-		if(isset($mediaArray["carousel_media"])){
-			$instance->carouselMedia = array();
-			foreach($mediaArray["carousel_media"] as $carouselArray){
-				$carouselMedia = new CarouselMedia();
-				$carouselMedia->setType($carouselArray['type']);
+        if (isset($mediaArray["carousel_media"])) {
+            $instance->carouselMedia = [];
+            foreach ($mediaArray["carousel_media"] as $carouselArray) {
+                $carouselMedia = new CarouselMedia();
+                $carouselMedia->setType($carouselArray['type']);
 
-				if (isset($carouselArray['images'])) {
-					$carouselImages = self::getImageUrls($carouselArray['images']['standard_resolution']['url']);
-					$carouselMedia
-                        ->setImageLowResolutionUrl($carouselImages['low'])
-                        ->setImageThumbnailUrl($carouselImages['thumbnail'])
-                        ->setImageStandardResolutionUrl($carouselImages['standard'])
-                        ->setImageHighResolutionUrl($carouselImages['high']);
-				}
+                if (isset($carouselArray['images'])) {
+                    $carouselImages = self::getImageUrls($carouselArray['images']['standard_resolution']['url']);
+                    $carouselMedia->setImageLowResolutionUrl($carouselImages['low'])->setImageThumbnailUrl($carouselImages['thumbnail'])->setImageStandardResolutionUrl($carouselImages['standard'])->setImageHighResolutionUrl($carouselImages['high']);
+                }
 
-				if ($carouselMedia->getType() === 'video') {
-					if (isset($mediaArray['video_views'])) {
-						$carouselMedia->setVideoViews($carouselArray['video_views']);
-					}
-					if (isset($carouselArray['videos'])) {
-						$carouselMedia->setVideoLowResolutionUrl($carouselArray['videos']['low_resolution']['url']);
-						$carouselMedia->setVideoStandardResolutionUrl($carouselArray['videos']['standard_resolution']['url']);
-						$carouselMedia->setVideoLowBandwidthUrl($carouselArray['videos']['low_bandwidth']['url']);
-					}
-				}
-				array_push($instance->carouselMedia, $carouselMedia);
-			}
-		}
+                if ($carouselMedia->getType() === 'video') {
+                    if (isset($mediaArray['video_views'])) {
+                        $carouselMedia->setVideoViews($carouselArray['video_views']);
+                    }
+                    if (isset($carouselArray['videos'])) {
+                        $carouselMedia->setVideoLowResolutionUrl($carouselArray['videos']['low_resolution']['url']);
+                        $carouselMedia->setVideoStandardResolutionUrl($carouselArray['videos']['standard_resolution']['url']);
+                        $carouselMedia->setVideoLowBandwidthUrl($carouselArray['videos']['low_bandwidth']['url']);
+                    }
+                }
+                array_push($instance->carouselMedia, $carouselMedia);
+            }
+        }
 
         if (isset($mediaArray['caption'])) {
             $instance->caption = $mediaArray['caption']['text'];
@@ -198,19 +380,11 @@ class Media
         return $instance;
     }
 
-    private static function getImageUrls($imageUrl)
-    {
-        $parts = explode('/', parse_url($imageUrl)['path']);
-        $imageName = $parts[sizeof($parts) - 1];
-        $urls = [
-            'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName,
-            'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
-            'standard' => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
-            'high' => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName
-        ];
-        return $urls;
-    }
-
+    /**
+     * @param array $mediaArray
+     *
+     * @return Media
+     */
     public static function fromMediaPage($mediaArray)
     {
         $instance = new self();
@@ -221,36 +395,36 @@ class Media
             $instance->videoStandardResolutionUrl = $mediaArray['video_url'];
             $instance->videoViews = $mediaArray['video_view_count'];
         }
-		if(isset($mediaArray["carousel_media"])){
-			$instance->type = 'carousel';
-			$instance->carouselMedia = array();
-			foreach($mediaArray["carousel_media"] as $carouselArray){
-				$carouselMedia = new CarouselMedia();
-				$carouselMedia->setType($carouselArray['type']);
+        if (isset($mediaArray["carousel_media"])) {
+            $instance->type = 'carousel';
+            $instance->carouselMedia = [];
+            foreach ($mediaArray["carousel_media"] as $carouselArray) {
+                $carouselMedia = new CarouselMedia();
+                $carouselMedia->setType($carouselArray['type']);
 
-				if (isset($carouselArray['images'])) {
-					$carouselImages = self::getImageUrls($carouselArray['images']['standard_resolution']['url']);
-					$carouselMedia->setImageLowResolutionUrl($carouselImages['low']);
-					$carouselMedia->setImageThumbnailUrl($carouselImages['thumbnail']);
-					$carouselMedia->setImageStandardResolutionUrl($carouselImages['standard']);
-					$carouselMedia->setImageHighResolutionUrl($carouselImages['high']);
-				}
+                if (isset($carouselArray['images'])) {
+                    $carouselImages = self::getImageUrls($carouselArray['images']['standard_resolution']['url']);
+                    $carouselMedia->setImageLowResolutionUrl($carouselImages['low']);
+                    $carouselMedia->setImageThumbnailUrl($carouselImages['thumbnail']);
+                    $carouselMedia->setImageStandardResolutionUrl($carouselImages['standard']);
+                    $carouselMedia->setImageHighResolutionUrl($carouselImages['high']);
+                }
 
-				if ($carouselMedia->getType() === 'video') {
-					if (isset($mediaArray['video_views'])) {
-						$carouselMedia->setVideoViews($carouselArray['video_views']);
-					}
-					if (isset($carouselArray['videos'])) {
-						$carouselMedia->setVideoLowResolutionUrl($carouselArray['videos']['low_resolution']['url']);
-						$carouselMedia->setVideoStandardResolutionUrl($carouselArray['videos']['standard_resolution']['url']);
-						$carouselMedia->setVideoLowBandwidthUrl($carouselArray['videos']['low_bandwidth']['url']);
-					}
-				}
-				array_push($instance->carouselMedia, $carouselMedia);
-			}
-		}
+                if ($carouselMedia->getType() === 'video') {
+                    if (isset($mediaArray['video_views'])) {
+                        $carouselMedia->setVideoViews($carouselArray['video_views']);
+                    }
+                    if (isset($carouselArray['videos'])) {
+                        $carouselMedia->setVideoLowResolutionUrl($carouselArray['videos']['low_resolution']['url']);
+                        $carouselMedia->setVideoStandardResolutionUrl($carouselArray['videos']['standard_resolution']['url']);
+                        $carouselMedia->setVideoLowBandwidthUrl($carouselArray['videos']['low_bandwidth']['url']);
+                    }
+                }
+                array_push($instance->carouselMedia, $carouselMedia);
+            }
+        }
         if (isset($mediaArray['caption_is_edited'])) {
-            $instance->captionIsEdited = $mediaArray['caption_is_edited'];
+            $instance->isCaptionEdited = $mediaArray['caption_is_edited'];
         }
         if (isset($mediaArray['is_ad'])) {
             $instance->isAd = $mediaArray['is_ad'];
@@ -278,6 +452,11 @@ class Media
         return $instance;
     }
 
+    /**
+     * @param array $mediaArray
+     *
+     * @return Media
+     */
     public static function fromTagPage($mediaArray)
     {
         $instance = new self();
@@ -300,38 +479,43 @@ class Media
             $instance->type = 'video';
             $instance->videoViews = $mediaArray['video_views'];
         }
-		if(isset($mediaArray["carousel_media"])){
-			$instance->type = 'carousel';
-			$instance->carouselMedia = array();
-			foreach($mediaArray["carousel_media"] as $carouselArray){
-				$carouselMedia = new CarouselMedia();
-				$carouselMedia->setType($carouselArray['type']);
+        if (isset($mediaArray["carousel_media"])) {
+            $instance->type = 'carousel';
+            $instance->carouselMedia = [];
+            foreach ($mediaArray["carousel_media"] as $carouselArray) {
+                $carouselMedia = new CarouselMedia();
+                $carouselMedia->setType($carouselArray['type']);
 
-				if (isset($carouselArray['images'])) {
-					$carouselImages = self::getImageUrls($carouselArray['images']['standard_resolution']['url']);
-					$carouselMedia->setImageLowResolutionUrl($carouselImages['low']);
-					$carouselMedia->setImageThumbnailUrl($carouselImages['thumbnail']);
-					$carouselMedia->setImageStandardResolutionUrl($carouselImages['standard']);
-					$carouselMedia->setImageHighResolutionUrl($carouselImages['high']);
-				}
+                if (isset($carouselArray['images'])) {
+                    $carouselImages = self::getImageUrls($carouselArray['images']['standard_resolution']['url']);
+                    $carouselMedia->setImageLowResolutionUrl($carouselImages['low']);
+                    $carouselMedia->setImageThumbnailUrl($carouselImages['thumbnail']);
+                    $carouselMedia->setImageStandardResolutionUrl($carouselImages['standard']);
+                    $carouselMedia->setImageHighResolutionUrl($carouselImages['high']);
+                }
 
-				if ($carouselMedia->getType() === 'video') {
-					if (isset($mediaArray['video_views'])) {
-						$carouselMedia->setVideoViews($carouselArray['video_views']);
-					}
-					if (isset($carouselArray['videos'])) {
-						$carouselMedia->setVideoLowResolutionUrl($carouselArray['videos']['low_resolution']['url']);
-						$carouselMedia->setVideoStandardResolutionUrl($carouselArray['videos']['standard_resolution']['url']);
-						$carouselMedia->setVideoLowBandwidthUrl($carouselArray['videos']['low_bandwidth']['url']);
-					}
-				}
-				array_push($instance->carouselMedia, $carouselMedia);
-			}
-		}
+                if ($carouselMedia->getType() === 'video') {
+                    if (isset($mediaArray['video_views'])) {
+                        $carouselMedia->setVideoViews($carouselArray['video_views']);
+                    }
+                    if (isset($carouselArray['videos'])) {
+                        $carouselMedia->setVideoLowResolutionUrl($carouselArray['videos']['low_resolution']['url']);
+                        $carouselMedia->setVideoStandardResolutionUrl($carouselArray['videos']['standard_resolution']['url']);
+                        $carouselMedia->setVideoLowBandwidthUrl($carouselArray['videos']['low_bandwidth']['url']);
+                    }
+                }
+                array_push($instance->carouselMedia, $carouselMedia);
+            }
+        }
         $instance->id = $mediaArray['id'];
         return $instance;
     }
 
+    /**
+     * @param string $code
+     *
+     * @return int
+     */
     public static function getIdFromCode($code)
     {
         $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
@@ -343,11 +527,22 @@ class Media
         return $id;
     }
 
+    /**
+     * @param string $id
+     *
+     * @return mixed
+     */
     public static function getLinkFromId($id)
     {
         $code = Media::getCodeFromId($id);
         return Endpoints::getMediaPageLink($code);
     }
+
+    /**
+     * @param string $id
+     *
+     * @return string
+     */
     public static function getCodeFromId($id)
     {
         $parts = explode('_', $id);
@@ -360,5 +555,22 @@ class Media
             $code = $alphabet{$remainder} . $code;
         };
         return $code;
+    }
+    /**
+     * @param string $imageUrl
+     *
+     * @return array
+     */
+    private static function getImageUrls($imageUrl)
+    {
+        $parts = explode('/', parse_url($imageUrl)['path']);
+        $imageName = $parts[sizeof($parts) - 1];
+        $urls = [
+            'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName,
+            'low'       => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
+            'standard'  => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
+            'high'      => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
+        ];
+        return $urls;
     }
 }

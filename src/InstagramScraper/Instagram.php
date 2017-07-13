@@ -94,7 +94,8 @@ class Instagram
             if (!is_array($arr)) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
             }
-            if (count($arr['items']) === 0) {
+            // fix - count takes longer/has more overhead
+            if (empty($arr['items']) || !isset($arr['items'])) {
                 return [];
             }
             foreach ($arr['items'] as $mediaArray) {
@@ -104,7 +105,7 @@ class Instagram
                 $medias[] = Media::fromApi($mediaArray);
                 $index++;
             }
-            if (count($arr['items']) == 0) {
+            if (empty($arr['items']) || !isset($arr['items'])) {
                 return $medias;
             }
             $maxId = $arr['items'][count($arr['items']) - 1]['id'];
