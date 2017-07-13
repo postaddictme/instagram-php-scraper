@@ -308,6 +308,10 @@ class Instagram
         $url = Endpoints::getFollowUrl($id);
         $response = Request::get($url, $this->generateHeaders($this->userSession));
 
+        if($response->code === 400){
+            throw new InstagramException('Account with this id does not exist.');
+        }
+
         if ($response->code !== 200) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->raw_body . ' Something went wrong. Please report issue.');
         }
