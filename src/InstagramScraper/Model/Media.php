@@ -321,7 +321,7 @@ class Media
         $instance = new self();
         $instance->id = $mediaArray['id'];
         $instance->type = $mediaArray['type'];
-        $instance->createdTime = $mediaArray['created_time'];
+        $instance->createdTime = (int) $mediaArray['created_time'];
         $instance->shortCode = $mediaArray['code'];
         $instance->link = $mediaArray['link'];
         $instance->commentsCount = $mediaArray['comments']['count'];
@@ -429,7 +429,7 @@ class Media
         if (isset($mediaArray['is_ad'])) {
             $instance->isAd = $mediaArray['is_ad'];
         }
-        $instance->createdTime = $mediaArray['taken_at_timestamp'];
+        $instance->createdTime = (int) $mediaArray['taken_at_timestamp'];
         $instance->shortCode = $mediaArray['shortcode'];
         $instance->link = Endpoints::getMediaPageLink($instance->shortCode);
         $instance->commentsCount = $mediaArray['edge_media_to_comment']['count'];
@@ -468,7 +468,7 @@ class Media
         if (isset($mediaArray['caption'])) {
             $instance->caption = $mediaArray['caption'];
         }
-        $instance->createdTime = $mediaArray['date'];
+        $instance->createdTime = (int) $mediaArray['date'];
         $images = self::getImageUrls($mediaArray['display_src']);
         $instance->imageStandardResolutionUrl = $images['standard'];
         $instance->imageLowResolutionUrl = $images['low'];
