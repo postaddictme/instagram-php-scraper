@@ -8,7 +8,7 @@ class Account
      * User id
      * @var string
      */
-    private $id = '';
+    private $id = 0;
 
     /**
      * Username
@@ -79,11 +79,11 @@ class Account
     }
 
     /**
-     * @return string
+     * @return int
      */
     public function getId()
     {
-        return $this->id;
+        return (int) $this->id;
     }
 
     /**
@@ -166,7 +166,7 @@ class Account
     public static function fromComment($userArray)
     {
         $instance = new self();
-        $instance->id = $userArray['id'];
+        $instance->id = (int) $userArray['id'];
         $instance->profilePicUrl = $userArray['profile_pic_url'];
         $instance->username = $userArray['username'];
         return $instance;
@@ -184,7 +184,7 @@ class Account
         $instance->followsCount = $userArray['follows']['count'];
         $instance->followedByCount = $userArray['followed_by']['count'];
         $instance->profilePicUrl = $userArray['profile_pic_url'];
-        $instance->id = $userArray['id'];
+        $instance->id = (int) $userArray['id'];
         $instance->biography = $userArray['biography'];
         $instance->fullName = $userArray['full_name'];
         $instance->mediaCount = $userArray['media']['count'];
@@ -202,7 +202,7 @@ class Account
     public static function fromMediaPage($userArray)
     {
         $instance = new self();
-        $instance->id = $userArray['id'];
+        $instance->id = (int) $userArray['id'];
         if (isset($userArray['profile_pic_url'])) {
             $instance->profilePicUrl = $userArray['profile_pic_url'];
         }
@@ -226,7 +226,7 @@ class Account
         $instance = new self();
         $instance->username = $userArray['username'];
         $instance->profilePicUrl = $userArray['profile_pic_url'];
-        $instance->id = $userArray['pk'];
+        $instance->id = (int) $userArray['pk'];
         $instance->fullName = $userArray['full_name'];
         $instance->isPrivate = $userArray['is_private'];
         $instance->isVerified = $userArray['is_verified'];

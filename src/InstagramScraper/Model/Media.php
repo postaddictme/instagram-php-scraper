@@ -423,9 +423,9 @@ class Media
         $instance = new self();
         $instance->shortCode = $mediaArray['code'];
         $instance->link = Endpoints::getMediaPageLink($instance->shortCode);
-        $instance->commentsCount = $mediaArray['comments']['count'];
-        $instance->likesCount = $mediaArray['likes']['count'];
-        $instance->ownerId = $mediaArray['owner']['id'];
+        $instance->commentsCount = (int) $mediaArray['comments']['count'];
+        $instance->likesCount = (int) $mediaArray['likes']['count'];
+        $instance->ownerId = (int) $mediaArray['owner']['id'];
         if (isset($mediaArray['caption'])) {
             $instance->caption = $mediaArray['caption'];
         }
