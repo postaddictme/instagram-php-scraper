@@ -306,9 +306,17 @@ class Instagram
         }
 
         $url = Endpoints::getFollowUrl($id);
-        $response = Request::get($url, $this->generateHeaders($this->userSession));
 
-        if ($response->code !== 200) {
+        // Cut a request by disabling redirects.
+        Request::curlOpt(CURLOPT_FOLLOWLOCATION, FALSE);
+        $response = Request::get($url, $this->generateHeaders($this->userSession));
+        Request::curlOpt(CURLOPT_FOLLOWLOCATION, TRUE);
+
+        if($response->code === 400){
+            throw new InstagramException('Account with this id does not exist.');
+        }
+
+        if ($response->code !== 302){
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->raw_body . ' Something went wrong. Please report issue.');
         }
 
