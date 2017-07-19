@@ -8,5 +8,5 @@ require_once 'vendor/autoload.php';
 use InstagramScraper\Instagram;
 
 $username = 'kevin';
-$medias = Instagram::getAccount($username);
+$medias = Instagram::getMedias($username, 500);
 var_dump($medias);

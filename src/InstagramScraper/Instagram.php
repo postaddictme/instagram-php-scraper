@@ -102,7 +102,7 @@ class Instagram
                 if ($index === $count) {
                     return $medias;
                 }
-                $medias[] = Media::fromApi($mediaArray);
+                $medias[] = Media::create($mediaArray);
                 $index++;
             }
             if (empty($arr['items']) || !isset($arr['items'])) {
@@ -214,7 +214,7 @@ class Instagram
         if (!isset($mediaArray['graphql']['shortcode_media'])) {
             throw new InstagramException('Media with this code does not exist');
         }
-        return Media::fromMediaPage($mediaArray['graphql']['shortcode_media']);
+        return Media::create($mediaArray['graphql']['shortcode_media']);
     }
     /**
      * @param string $username
@@ -252,7 +252,7 @@ class Instagram
         }
 
         foreach ($arr['items'] as $mediaArray) {
-            $medias[] = Media::fromApi($mediaArray);
+            $medias[] = Media::create($mediaArray);
         }
 
         $maxId = $arr['items'][count($arr['items']) - 1]['id'];
@@ -399,7 +399,7 @@ class Instagram
                 if ($index === $count) {
                     return $medias;
                 }
-                $media = Media::fromTagPage($mediaArray);
+                $media = Media::create($mediaArray);
                 if (in_array($media->getId(), $mediaIds)) {
                     return $medias;
                 }
@@ -461,7 +461,7 @@ class Instagram
         }
 
         foreach ($nodes as $mediaArray) {
-            $medias[] = Media::fromTagPage($mediaArray);
+            $medias[] = Media::create($mediaArray);
         }
 
         $maxId = $arr['tag']['media']['page_info']['end_cursor'];
@@ -500,7 +500,7 @@ class Instagram
         $jsonResponse = json_decode($response->raw_body, true);
         $medias = [];
         foreach ($jsonResponse['tag']['top_posts']['nodes'] as $mediaArray) {
-            $medias[] = Media::fromTagPage($mediaArray);
+            $medias[] = Media::create($mediaArray);
         }
         return $medias;
     }
@@ -528,7 +528,7 @@ class Instagram
         $nodes = $jsonResponse['location']['top_posts']['nodes'];
         $medias = [];
         foreach ($nodes as $mediaArray) {
-            $medias[] = Media::fromTagPage($mediaArray);
+            $medias[] = Media::create($mediaArray);
         }
         return $medias;
     }
@@ -560,7 +560,7 @@ class Instagram
                 if ($index === $quantity) {
                     return $medias;
                 }
-                $medias[] = Media::fromTagPage($mediaArray);
+                $medias[] = Media::create($mediaArray);
                 $index++;
             }
             if (count($nodes) == 0) {

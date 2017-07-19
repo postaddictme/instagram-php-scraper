@@ -4,7 +4,7 @@ namespace InstagramScraper\Model;
 
 use InstagramScraper\Endpoints;
 
-class Media
+class Media extends AbstractModel
 {
     const TYPE_IMAGE = 'image';
     const TYPE_VIDEO = 'video';
@@ -14,117 +14,117 @@ class Media
     /**
      * @var string
      */
-    private $id = '';
+    protected $id = '';
 
     /**
      * @var string
      */
-    private $shortCode = '';
+    protected $shortCode = '';
 
     /**
      * @var int
      */
-    private $createdTime = 0;
+    protected $createdTime = 0;
 
     /**
      * @var string
      */
-    private $type = '';
+    protected $type = '';
 
     /**
      * @var string
      */
-    private $link = '';
+    protected $link = '';
 
     /**
      * @var string
      */
-    private $imageLowResolutionUrl = '';
+    protected $imageLowResolutionUrl = '';
 
     /**
      * @var string
      */
-    private $imageThumbnailUrl = '';
+    protected $imageThumbnailUrl = '';
 
     /**
      * @var string
      */
-    private $imageStandardResolutionUrl = '';
+    protected $imageStandardResolutionUrl = '';
 
     /**
      * @var string
      */
-    private $imageHighResolutionUrl = '';
+    protected $imageHighResolutionUrl = '';
 
     /**
      * @var array
      */
-    private $carouselMedia = [];
+    protected $carouselMedia = [];
 
     /**
      * @var string
      */
-    private $caption = '';
+    protected $caption = '';
 
     /**
      * @var bool
      */
-    private $isCaptionEdited = false;
+    protected $isCaptionEdited = false;
 
     /**
      * @var bool
      */
-    private $isAd = false;
+    protected $isAd = false;
 
     /**
      * @var string
      */
-    private $videoLowResolutionUrl = '';
+    protected $videoLowResolutionUrl = '';
 
     /**
      * @var string
      */
-    private $videoStandardResolutionUrl = '';
+    protected $videoStandardResolutionUrl = '';
 
     /**
      * @var string
      */
-    private $videoLowBandwidthUrl = '';
+    protected $videoLowBandwidthUrl = '';
 
     /**
      * @var int
      */
-    private $videoViews = 0;
+    protected $videoViews = 0;
 
     /**
      * @var Account
      */
-    private $owner;
+    protected $owner;
 
     /**
      * @var int
      */
-    private $ownerId = 0;
+    protected $ownerId = 0;
 
     /**
      * @var int
      */
-    private $likesCount = 0;
+    protected $likesCount = 0;
 
     /**
      * @var
      */
-    private $locationId;
+    protected $locationId;
 
     /**
      * @var string
      */
-    private $locationName = '';
+    protected $locationName = '';
 
     /**
      * @var string
      */
-    private $commentsCount = 0;
+    protected $commentsCount = 0;
 
     /**
      * @return mixed
@@ -311,144 +311,128 @@ class Media
         return $this->commentsCount;
     }
 
-    /**
-     * @param array $mediaArray
-     *
-     * @return Media
-     */
-    public static function fromApi($mediaArray)
-    {
-        $instance = new self();
-        $instance->id = $mediaArray['id'];
-        $instance->type = $mediaArray['type'];
-        $instance->createdTime = (int) $mediaArray['created_time'];
-        $instance->shortCode = $mediaArray['code'];
-        $instance->link = $mediaArray['link'];
-        $instance->commentsCount = $mediaArray['comments']['count'];
-        $instance->likesCount = $mediaArray['likes']['count'];
-        $images = self::getImageUrls($mediaArray['images']['standard_resolution']['url']);
-        $instance->imageLowResolutionUrl = $images['low'];
-        $instance->imageThumbnailUrl = $images['thumbnail'];
-        $instance->imageStandardResolutionUrl = $images['standard'];
-        $instance->imageHighResolutionUrl = $images['high'];
-        if (isset($mediaArray["carousel_media"])) {
-            $instance->carouselMedia = [];
-            foreach ($mediaArray["carousel_media"] as $carouselArray) {
-                self::setCarouselMedia($mediaArray, $carouselArray, $instance);
-            }
-        }
-
-        if (isset($mediaArray['caption'])) {
-            $instance->caption = $mediaArray['caption']['text'];
-        }
-        if ($instance->type === self::TYPE_VIDEO) {
-            if (isset($mediaArray['video_views'])) {
-                $instance->videoViews = $mediaArray['video_views'];
-            }
-            if (isset($mediaArray['videos'])) {
-                $instance->videoLowResolutionUrl = $mediaArray['videos']['low_resolution']['url'];
-                $instance->videoStandardResolutionUrl = $mediaArray['videos']['standard_resolution']['url'];
-                $instance->videoLowBandwidthUrl = $mediaArray['videos']['low_bandwidth']['url'];
-            }
-        }
-        if (isset($mediaArray['location']['id'])) {
-            $instance->locationId = $mediaArray['location']['id'];
-        }
-        if (isset($mediaArray['location']['name'])) {
-            $instance->locationName = $mediaArray['location']['name'];
-        }
-        $instance->owner = Account::create($mediaArray['user']);
-        $instance->ownerId = $instance->getOwner()->getId();
-        return $instance;
-    }
 
     /**
-     * @param array $mediaArray
-     *
-     * @return Media
+     * @param $value
+     * @param $prop
      */
-    public static function fromMediaPage($mediaArray)
+    protected function initPropertiesCustom($value, $prop, $arr)
     {
-        $instance = new self();
-        $instance->id = $mediaArray['id'];
-        $instance->type = self::TYPE_IMAGE;
-        if ($mediaArray['is_video']) {
-            $instance->type = self::TYPE_VIDEO;
-            $instance->videoStandardResolutionUrl = $mediaArray['video_url'];
-            $instance->videoViews = $mediaArray['video_view_count'];
+        switch ($prop) {
+            case 'id':
+                $this->id = $value;
+                break;
+            case 'type':
+                $this->type = $value;
+                break;
+            case 'created_time':
+                $this->createdTime = (int) $value;
+                break;
+            case 'code':
+                $this->shortCode = $value;
+                break;
+            case 'link':
+                $this->link = $value;
+                break;
+            case 'comments':
+                $this->commentsCount = $arr[$prop]['count'];
+                break;
+            case 'likes':
+                $this->likesCount = $arr[$prop]['count'];
+                break;
+            case 'images':
+                $images = self::getImageUrls($arr[$prop]['standard_resolution']['url']);
+                $this->imageLowResolutionUrl = $images['low'];
+                $this->imageThumbnailUrl = $images['thumbnail'];
+                $this->imageStandardResolutionUrl = $images['standard'];
+                $this->imageHighResolutionUrl = $images['high'];
+                break;
+            case 'carousel_media':
+                $this->type = self::TYPE_CAROUSEL;
+                $this->carouselMedia = [];
+                foreach ($arr["carousel_media"] as $carouselArray) {
+                    self::setCarouselMedia($arr, $carouselArray, $this);
+                }
+                break;
+            case 'caption':
+                $this->caption = $arr[$prop]['text'];
+                break;
+            case 'video_views':
+                $this->videoViews = $value;
+                break;
+            case 'videos':
+                $this->videoLowResolutionUrl = $arr[$prop]['low_resolution']['url'];
+                $this->videoStandardResolutionUrl = $arr[$prop]['standard_resolution']['url'];
+                $this->videoLowBandwidthUrl = $arr[$prop]['low_bandwidth']['url'];
+                break;
+            case 'location':
+                switch ($prop) {
+                    case 'id':
+                        $this->locationId = $value[$prop];
+                        break;
+                    case 'name':
+                        $this->locationId = $value[$prop];
+                        break;
+                }
+                $this->locationName = $arr[$prop]['name'];
+                break;
+            case 'user':
+                $this->owner = Account::create($arr[$prop]);
+                break;
+            case 'is_video':
+                $this->type = self::TYPE_VIDEO;
+                break;
+            case 'video_url':
+                $this->videoStandardResolutionUrl = $value;
+                break;
+            case 'video_view_count':
+                $this->videoViews = $value;
+                break;
+            case 'caption_is_edited':
+                $this->isCaptionEdited =$value;
+                break;
+            case 'is_ad':
+                $this->isAd = $value;
+                break;
+            case 'taken_at_timestamp':
+                $this->createdTime = $value;
+                break;
+            case 'shortcode':
+                $this->shortCode = $value;
+                $this->link = Endpoints::getMediaPageLink($this->shortCode);
+                break;
+            case 'edge_media_to_comment':
+                $this->commentsCount = $arr[$prop]['count'];
+                $this->likesCount = $arr[$prop]['count'];
+                break;
+            case 'display_url':
+                $images = self::getImageUrls($arr[$prop]);
+                $this->imageStandardResolutionUrl = $images['standard'];
+                $this->imageLowResolutionUrl = $images['low'];
+                $this->imageHighResolutionUrl = $images['high'];
+                $this->imageThumbnailUrl = $images['thumbnail'];
+                break;
+            case 'edge_media_to_caption':
+                $this->caption = $arr[$prop]['edges'][0]['node']['text'];
+                break;
+            case 'owner':
+                $this->owner = Account::create($arr[$prop]);
+                break;
+            case 'date':
+                $this->createdTime = (int) $value;
+                break;
+            case 'display_src':
+                $images = self::getImageUrls($value);
+                $this->imageStandardResolutionUrl = $images['standard'];
+                $this->imageLowResolutionUrl = $images['low'];
+                $this->imageHighResolutionUrl = $images['high'];
+                $this->imageThumbnailUrl = $images['thumbnail'];
+                $this->type = self::TYPE_IMAGE;
+                break;
         }
-        if (isset($mediaArray["carousel_media"])) {
-            $instance->type = self::TYPE_CAROUSEL;
-            $instance->carouselMedia = [];
-            foreach ($mediaArray["carousel_media"] as $carouselArray) {
-                $mediaArray = self::setCarouselMedia($mediaArray, $carouselArray, $instance);
-            }
+        if (!$this->ownerId && !is_null($this->owner)) {
+            $this->ownerId = $this->getOwner()->getId();
         }
-        if (isset($mediaArray['caption_is_edited'])) {
-            $instance->isCaptionEdited = $mediaArray['caption_is_edited'];
-        }
-        if (isset($mediaArray['is_ad'])) {
-            $instance->isAd = $mediaArray['is_ad'];
-        }
-        $instance->createdTime = (int) $mediaArray['taken_at_timestamp'];
-        $instance->shortCode = $mediaArray['shortcode'];
-        $instance->link = Endpoints::getMediaPageLink($instance->shortCode);
-        $instance->commentsCount = $mediaArray['edge_media_to_comment']['count'];
-        $instance->likesCount = $mediaArray['edge_media_preview_like']['count'];
-        $images = self::getImageUrls($mediaArray['display_url']);
-        $instance->imageStandardResolutionUrl = $images['standard'];
-        $instance->imageLowResolutionUrl = $images['low'];
-        $instance->imageHighResolutionUrl = $images['high'];
-        $instance->imageThumbnailUrl = $images['thumbnail'];
-        if (isset($mediaArray['edge_media_to_caption']['edges'][0]['node']['text'])) {
-            $instance->caption = $mediaArray['edge_media_to_caption']['edges'][0]['node']['text'];
-        }
-        if (isset($mediaArray['location']['id'])) {
-            $instance->locationId = $mediaArray['location']['id'];
-        }
-        if (isset($mediaArray['location']['name'])) {
-            $instance->locationName = $mediaArray['location']['name'];
-        }
-        $instance->owner = Account::create($mediaArray['owner']);
-        return $instance;
-    }
-
-    /**
-     * @param array $mediaArray
-     *
-     * @return Media
-     */
-    public static function fromTagPage($mediaArray)
-    {
-        $instance = new self();
-        $instance->shortCode = $mediaArray['code'];
-        $instance->link = Endpoints::getMediaPageLink($instance->shortCode);
-        $instance->commentsCount = (int) $mediaArray['comments']['count'];
-        $instance->likesCount = (int) $mediaArray['likes']['count'];
-        $instance->ownerId = (int) $mediaArray['owner']['id'];
-        if (isset($mediaArray['caption'])) {
-            $instance->caption = $mediaArray['caption'];
-        }
-        $instance->createdTime = (int) $mediaArray['date'];
-        $images = self::getImageUrls($mediaArray['display_src']);
-        $instance->imageStandardResolutionUrl = $images['standard'];
-        $instance->imageLowResolutionUrl = $images['low'];
-        $instance->imageHighResolutionUrl = $images['high'];
-        $instance->imageThumbnailUrl = $images['thumbnail'];
-        $instance->type = self::TYPE_IMAGE;
-        if ($mediaArray['is_video']) {
-            $instance->type = self::TYPE_VIDEO;
-            $instance->videoViews = $mediaArray['video_views'];
-        }
-        if (isset($mediaArray["carousel_media"])) {
-            $instance->type = self::TYPE_CAROUSEL;
-            $instance->carouselMedia = [];
-            foreach ($mediaArray["carousel_media"] as $carouselArray) {
-                $mediaArray = self::setCarouselMedia($mediaArray, $carouselArray, $instance);
-            }
-        }
-        $instance->id = $mediaArray['id'];
-        return $instance;
     }
 
     /**

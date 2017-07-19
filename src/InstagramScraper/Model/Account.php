@@ -80,6 +80,14 @@ class Account extends AbstractModel
     protected $isLoaded = false;
 
     /**
+     * @return bool
+     */
+    public function isLoaded()
+    {
+        return $this->isLoaded;
+    }
+
+    /**
      * @param $value
      * @param $prop
      * @param $array
