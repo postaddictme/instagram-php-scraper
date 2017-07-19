@@ -315,6 +315,51 @@ class Media extends AbstractModel
         return $this->commentsCount;
     }
 
+    /**
+     * @param string $code
+     *
+     * @return int
+     */
+    public static function getIdFromCode($code)
+    {
+        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+        $id = 0;
+        for ($i = 0; $i < strlen($code); $i++) {
+            $c = $code[$i];
+            $id = $id * 64 + strpos($alphabet, $c);
+        }
+        return $id;
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return mixed
+     */
+    public static function getLinkFromId($id)
+    {
+        $code = Media::getCodeFromId($id);
+        return Endpoints::getMediaPageLink($code);
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return string
+     */
+    public static function getCodeFromId($id)
+    {
+        $parts = explode('_', $id);
+        $id = $parts[0];
+        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+        $code = '';
+        while ($id > 0) {
+            $remainder = $id % 64;
+            $id = ($id - $remainder) / 64;
+            $code = $alphabet{$remainder} . $code;
+        };
+        return $code;
+    }
 
     /**
      * @param $value
@@ -439,51 +484,6 @@ class Media extends AbstractModel
         }
     }
 
-    /**
-     * @param string $code
-     *
-     * @return int
-     */
-    public static function getIdFromCode($code)
-    {
-        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-        $id = 0;
-        for ($i = 0; $i < strlen($code); $i++) {
-            $c = $code[$i];
-            $id = $id * 64 + strpos($alphabet, $c);
-        }
-        return $id;
-    }
-
-    /**
-     * @param string $id
-     *
-     * @return mixed
-     */
-    public static function getLinkFromId($id)
-    {
-        $code = Media::getCodeFromId($id);
-        return Endpoints::getMediaPageLink($code);
-    }
-
-    /**
-     * @param string $id
-     *
-     * @return string
-     */
-    public static function getCodeFromId($id)
-    {
-        $parts = explode('_', $id);
-        $id = $parts[0];
-        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-        $code = '';
-        while ($id > 0) {
-            $remainder = $id % 64;
-            $id = ($id - $remainder) / 64;
-            $code = $alphabet{$remainder} . $code;
-        };
-        return $code;
-    }
     /**
      * @param string $imageUrl
      *
