@@ -2,23 +2,57 @@
 
 namespace InstagramScraper\Model;
 
-
-class Tag
+/**
+ * Class Tag
+ * @package InstagramScraper\Model
+ */
+class Tag extends AbstractModel
 {
-    public $mediaCount;
-    public $name;
-    public $id;
+    /**
+     * @var int
+     */
+    protected $mediaCount = 0;
 
-    function __construct()
+    /**
+     * @var string
+     */
+    protected $name;
+
+    /**
+     * @var int
+     */
+    protected $id;
+
+    /**
+     * @var array
+     */
+    protected static $initPropertiesMap = [
+        'media_count' => 'mediaCount',
+        'name'        => 'name',
+        'id'          => 'id',
+    ];
+
+    /**
+     * @return int
+     */
+    public function getMediaCount()
     {
+        return $this->mediaCount;
     }
 
-    public static function fromSearchPage($tagArray)
+    /**
+     * @return string
+     */
+    public function getName()
     {
-        $instance = new self();
-        $instance->mediaCount = $tagArray['media_count'];
-        $instance->name = $tagArray['name'];
-        $instance->id = $tagArray['id'];
-        return $instance;
+        return $this->name;
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
     }
 }

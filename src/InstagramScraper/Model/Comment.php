@@ -3,26 +3,53 @@
 namespace InstagramScraper\Model;
 
 
-class Comment
+class Comment extends AbstractModel
 {
-    public $id;
-    public $text;
-    public $createdAt;
+    /**
+     * @var
+     */
+    protected $id;
 
-    public $owner;
+    /**
+     * @var
+     */
+    protected $text;
 
-    function __construct()
+    /**
+     * @var
+     */
+    protected $createdAt;
+
+    /**
+     * @var Account
+     */
+    protected $owner;
+
+    /**
+     * @var bool
+     */
+    protected $isLoaded = false;
+
+    /**
+     * @param $value
+     * @param $prop
+     */
+    protected function initPropertiesCustom($value, $prop)
     {
-    }
-
-    public static function fromApi($commentArray)
-    {
-        $instance = new self();
-        $instance->id = $commentArray['id'];
-        $instance->createdAt = $commentArray['created_at'];
-        $instance->text = $commentArray['text'];
-        $instance->owner = Account::fromComment($commentArray['owner']);
-        return $instance;
+        switch ($prop) {
+            case 'id':
+                $this->id = $value;
+                break;
+            case 'created_at':
+                $this->createdAt = $value;
+                break;
+            case 'text':
+                $this->text = $value;
+                break;
+            case 'owner':
+                $this->owner = Account::create($value);
+                break;
+        }
     }
 
 }
