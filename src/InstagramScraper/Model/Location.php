@@ -41,30 +41,14 @@ class Location extends AbstractModel
     protected $isLoaded = false;
 
     /**
-     * @param $value
-     * @param $prop
+     * @var array
      */
-    protected function initPropertiesCustom($value, $prop)
-    {
-        switch ($prop) {
-            case 'id':
-                $this->id = $value;
-                break;
-            case 'has_public_page':
-                $this->hasPublicPage = $value;
-                break;
-            case 'name':
-                $this->name = $value;
-                break;
-            case 'slug':
-                $this->slug = $value;
-                break;
-            case 'lat':
-                $this->lat = $value;
-                break;
-            case 'lng':
-                $this->lng = $value;
-                break;
-        }
-    }
+    protected static $initPropertiesMap = [
+        'id'              => 'id',
+        'has_public_page' => 'hasPublicPage',
+        'name'            => '',
+        'slug'            => 'slug',
+        'lat'             => 'lat',
+        'lng'             => 'lng',
+    ];
 }
