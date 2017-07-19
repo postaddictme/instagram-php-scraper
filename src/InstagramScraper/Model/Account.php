@@ -2,73 +2,126 @@
 
 namespace InstagramScraper\Model;
 
-class Account
+/**
+ * Class Account
+ * @package InstagramScraper\Model
+ */
+class Account extends AbstractModel
 {
     /**
      * User id
      * @var string
      */
-    private $id = 0;
+    protected $id = 0;
 
     /**
      * Username
      * @var string
      */
-    private $username = '';
+    protected $username = '';
 
     /**
      * Full name
      * @var string
      */
-    private $fullName = '';
+    protected $fullName = '';
 
     /**
      * Profile picture url
      * @var string
      */
-    private $profilePicUrl = '';
+    protected $profilePicUrl = '';
 
     /**
      * Information filled by user
      * @var string
      */
-    private $biography = '';
+    protected $biography = '';
 
     /**
      * Url provided by user in profile
      * @var string
      */
-    private $externalUrl = '';
+    protected $externalUrl = '';
 
     /**
      * Number of subscriptions
      * @var integer
      */
-    private $followsCount = 0;
+    protected $followsCount = 0;
 
     /**
      * Number of followers
      * @var integer
      */
-    private $followedByCount = 0;
+    protected $followedByCount = 0;
 
     /**
      * Number of medias published by user
      * @var integer
      */
-    private $mediaCount = 0;
+    protected $mediaCount = 0;
 
     /**
      * true if account is private
      * @var boolean
      */
-    private $isPrivate = false;
+    protected $isPrivate = false;
 
     /**
      * true if verified by Instagram as celebrity
      * @var boolean
      */
-    private $isVerified = false;
+    protected $isVerified = false;
+
+    /**
+     * @var bool
+     */
+    protected $isLoaded = false;
+
+    /**
+     * @param $value
+     * @param $prop
+     * @param $array
+     */
+    protected function initPropertiesCustom($value, $prop, $array)
+    {
+        switch ($prop) {
+            case 'id':
+                $this->id = (int) $value;
+                break;
+            case 'username':
+                $this->username = $value;
+                break;
+            case 'full_name':
+                $this->fullName = $value;
+                break;
+            case 'profile_pic_url':
+                $this->profilePicUrl = $value;
+                break;
+            case 'biography':
+                $this->biography = $value;
+                break;
+            case 'external_url':
+                $this->externalUrl = $value;
+                break;
+            case 'follows':
+                $this->followsCount = !empty($array[$prop]['count']) ? (int) $array[$prop]['count'] : 0;
+                break;
+            case 'followed_by':
+                $this->followedByCount = !empty($array[$prop]['count']) ? (int) $array[$prop]['count'] : 0;
+                break;
+            case 'media':
+                $this->mediaCount = !empty($array[$prop]['count']) ? $array[$prop]['count'] : 0;
+                break;
+            case 'is_private':
+                $this->isPrivate = (bool) $value;
+                break;
+            case 'is_verified':
+                $this->isVerified = (bool) $value;
+                break;
+        }
+    }
 
     /**
      * @return string
@@ -156,81 +209,5 @@ class Account
     public function isVerified()
     {
         return $this->isVerified;
-    }
-
-    /**
-     * @param array $userArray
-     *
-     * @return Account
-     */
-    public static function fromComment($userArray)
-    {
-        $instance = new self();
-        $instance->id = (int) $userArray['id'];
-        $instance->profilePicUrl = $userArray['profile_pic_url'];
-        $instance->username = $userArray['username'];
-        return $instance;
-    }
-
-    /**
-     * @param array $userArray
-     *
-     * @return Account
-     */
-    public static function fromAccountPage($userArray)
-    {
-        $instance = new self();
-        $instance->username = $userArray['username'];
-        $instance->followsCount = $userArray['follows']['count'];
-        $instance->followedByCount = $userArray['followed_by']['count'];
-        $instance->profilePicUrl = $userArray['profile_pic_url'];
-        $instance->id = (int) $userArray['id'];
-        $instance->biography = $userArray['biography'];
-        $instance->fullName = $userArray['full_name'];
-        $instance->mediaCount = $userArray['media']['count'];
-        $instance->isPrivate = $userArray['is_private'];
-        $instance->externalUrl = $userArray['external_url'];
-        $instance->isVerified = $userArray['is_verified'];
-        return $instance;
-    }
-
-    /**
-     * @param array $userArray
-     *
-     * @return Account
-     */
-    public static function fromMediaPage($userArray)
-    {
-        $instance = new self();
-        $instance->id = (int) $userArray['id'];
-        if (isset($userArray['profile_pic_url'])) {
-            $instance->profilePicUrl = $userArray['profile_pic_url'];
-        }
-        if (isset($userArray['profile_picture'])) {
-            $instance->profilePicUrl = $userArray['profile_picture'];
-        }
-        $instance->username = $userArray['username'];
-        $instance->fullName = $userArray['full_name'];
-        if (isset($userArray['is_private'])) {
-            $instance->isPrivate = $userArray['is_private'];
-        }
-        return $instance;
-    }
-    /**
-     * @param array $userArray
-     *
-     * @return Account
-     */
-    public static function fromSearchPage($userArray)
-    {
-        $instance = new self();
-        $instance->username = $userArray['username'];
-        $instance->profilePicUrl = $userArray['profile_pic_url'];
-        $instance->id = (int) $userArray['pk'];
-        $instance->fullName = $userArray['full_name'];
-        $instance->isPrivate = $userArray['is_private'];
-        $instance->isVerified = $userArray['is_verified'];
-        $instance->followedByCount = $userArray['follower_count'];
-        return $instance;
     }
 }

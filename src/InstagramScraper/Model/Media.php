@@ -357,7 +357,7 @@ class Media
         if (isset($mediaArray['location']['name'])) {
             $instance->locationName = $mediaArray['location']['name'];
         }
-        $instance->owner = Account::fromMediaPage($mediaArray['user']);
+        $instance->owner = Account::create($mediaArray['user']);
         $instance->ownerId = $instance->getOwner()->getId();
         return $instance;
     }
@@ -409,7 +409,7 @@ class Media
         if (isset($mediaArray['location']['name'])) {
             $instance->locationName = $mediaArray['location']['name'];
         }
-        $instance->owner = Account::fromMediaPage($mediaArray['owner']);
+        $instance->owner = Account::create($mediaArray['owner']);
         return $instance;
     }
 

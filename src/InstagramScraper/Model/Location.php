@@ -3,60 +3,68 @@
 namespace InstagramScraper\Model;
 
 
-class Location
+class Location extends AbstractModel
 {
     /**
      * @var
      */
-    private $id;
+    protected $id;
 
     /**
      * @var
      */
-    private $hasPublicPage;
+    protected $hasPublicPage;
 
     /**
      * @var
      */
-    private $name;
+    protected $name;
 
     /**
      * @var
      */
-    private $slug;
+    protected $slug;
 
     /**
      * @var
      */
-    private $lng;
+    protected $lng;
 
     /**
      * @var
      */
-    private $lat;
+    protected $lat;
 
     /**
-     * @param array $locationArray
-     *
-     * @return Location
+     * @var bool
      */
-    public static function makeLocation($locationArray)
+    protected $isLoaded = false;
+
+    /**
+     * @param $value
+     * @param $prop
+     */
+    protected function initPropertiesCustom($value, $prop)
     {
-        $instance = new self();
-        $instance->id = $locationArray['id'];
-        $instance->hasPublicPage = $locationArray['has_public_page'];
-        if (isset($locationArray['name'])) {
-            $instance->name = $locationArray['name'];
+        switch ($prop) {
+            case 'id':
+                $this->id = $value;
+                break;
+            case 'has_public_page':
+                $this->hasPublicPage = $value;
+                break;
+            case 'name':
+                $this->name = $value;
+                break;
+            case 'slug':
+                $this->slug = $value;
+                break;
+            case 'lat':
+                $this->lat = $value;
+                break;
+            case 'lng':
+                $this->lng = $value;
+                break;
         }
-        if (isset($locationArray['slug'])) {
-            $instance->slug = $locationArray['slug'];
-        }
-        if (isset($locationArray['lat'])) {
-            $instance->lat = $locationArray['lat'];
-        }
-        if (isset($locationArray['lng'])) {
-            $instance->lng = $locationArray['lng'];
-        }
-        return $instance;
     }
 }

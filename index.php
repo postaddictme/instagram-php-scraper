@@ -8,23 +8,5 @@ require_once 'vendor/autoload.php';
 use InstagramScraper\Instagram;
 
 $username = 'kevin';
-//
-//$account = Instagram::getAccount($username);
-//var_dump($account);
-//
-$medias = Instagram::getMedias($username);
-if (!empty($medias)) {
-    /**
-     * @var \InstagramScraper\Model\Media $media
-     */
-    foreach ($medias as $media) {
-        var_dump($media);
-    }
-} else {
-    print 'medias array is empty';
-}
-
-//$account = Instagram::searchAccountsByUsername($username);
-//var_dump($account);
-
-//s
+$medias = Instagram::getAccount($username);
+var_dump($medias);

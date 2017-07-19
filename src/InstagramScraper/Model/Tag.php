@@ -3,22 +3,22 @@
 namespace InstagramScraper\Model;
 
 
-class Tag
+class Tag extends AbstractModel
 {
     /**
      * @var int
      */
-    private $mediaCount;
+    protected $mediaCount = 0;
 
     /**
      * @var string
      */
-    private $name;
+    protected $name;
 
     /**
      * @var int
      */
-    private $id;
+    protected $id;
 
     /**
      * @return int
@@ -45,16 +45,21 @@ class Tag
     }
 
     /**
-     * @param $tagArray
-     *
-     * @return Tag
+     * @param $value
+     * @param $prop
      */
-    public static function fromSearchPage($tagArray)
+    protected function initPropertiesCustom($value, $prop)
     {
-        $instance = new self();
-        $instance->mediaCount = $tagArray['media_count'];
-        $instance->name = $tagArray['name'];
-        $instance->id = $tagArray['id'];
-        return $instance;
+        switch ($prop) {
+            case 'media_count':
+                $this->mediaCount = $value;
+                break;
+            case 'name':
+                $this->name = $value;
+                break;
+            case 'id':
+                $this->id = $value;
+                break;
+        }
     }
 }

@@ -68,7 +68,7 @@ class Instagram
         if (!isset($userArray['user'])) {
             throw new InstagramException('Account with this username does not exist');
         }
-        return Account::fromAccountPage($userArray['user']);
+        return Account::create($userArray['user']);
     }
 
     /**
@@ -142,7 +142,7 @@ class Instagram
 
         $accounts = [];
         foreach ($jsonResponse['users'] as $jsonAccount) {
-            $accounts[] = Account::fromSearchPage($jsonAccount['user']);
+            $accounts[] = Account::create($jsonAccount['user']);
         }
         return $accounts;
     }
@@ -175,7 +175,7 @@ class Instagram
         }
         $hashtags = [];
         foreach ($jsonResponse['hashtags'] as $jsonHashtag) {
-            $hashtags[] = Tag::fromSearchPage($jsonHashtag['hashtag']);
+            $hashtags[] = Tag::create($jsonHashtag['hashtag']);
         }
         return $hashtags;
     }
@@ -318,7 +318,7 @@ class Instagram
             $jsonResponse = json_decode($response->raw_body, true);
             $nodes = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['edges'];
             foreach ($nodes as $commentArray) {
-                $comments[] = Comment::fromApi($commentArray['node']);
+                $comments[] = Comment::create($commentArray['node']);
             }
             $hasPrevious = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['has_next_page'];
             $numberOfComments = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['count'];
@@ -592,7 +592,7 @@ class Instagram
         $cookies = self::parseCookies($response->headers['Set-Cookie']);
         $this->userSession['csrftoken'] = $cookies['csrftoken'];
         $jsonResponse = json_decode($response->raw_body, true);
-        return Location::makeLocation($jsonResponse['location']);
+        return Location::create($jsonResponse['location']);
     }
 
     /**
