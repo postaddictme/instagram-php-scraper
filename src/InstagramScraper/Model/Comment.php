@@ -31,6 +31,30 @@ class Comment extends AbstractModel
     protected $isLoaded = false;
 
     /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getText()
+    {
+        return $this->text;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
      * @param $value
      * @param $prop
      */
