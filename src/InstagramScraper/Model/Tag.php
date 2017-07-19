@@ -2,7 +2,10 @@
 
 namespace InstagramScraper\Model;
 
-
+/**
+ * Class Tag
+ * @package InstagramScraper\Model
+ */
 class Tag extends AbstractModel
 {
     /**
@@ -19,6 +22,15 @@ class Tag extends AbstractModel
      * @var int
      */
     protected $id;
+
+    /**
+     * @var array
+     */
+    protected static $initPropertiesMap = [
+        'media_count' => 'mediaCount',
+        'name'        => 'name',
+        'id'          => 'id',
+    ];
 
     /**
      * @return int
@@ -42,24 +54,5 @@ class Tag extends AbstractModel
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * @param $value
-     * @param $prop
-     */
-    protected function initPropertiesCustom($value, $prop)
-    {
-        switch ($prop) {
-            case 'media_count':
-                $this->mediaCount = $value;
-                break;
-            case 'name':
-                $this->name = $value;
-                break;
-            case 'id':
-                $this->id = $value;
-                break;
-        }
     }
 }

@@ -2,6 +2,10 @@
 
 namespace InstagramScraper\Model;
 
+/**
+ * Class CarouselMedia
+ * @package InstagramScraper\Model
+ */
 class CarouselMedia
 {
     /**

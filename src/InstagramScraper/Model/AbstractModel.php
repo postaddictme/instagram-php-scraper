@@ -5,6 +5,10 @@ namespace InstagramScraper\Model;
 use InstagramScraper\Traits\ArrayLikeTrait;
 use InstagramScraper\Traits\InitializerTrait;
 
+/**
+ * Class AbstractModel
+ * @package InstagramScraper\Model
+ */
 abstract class AbstractModel implements \ArrayAccess
 {
     use InitializerTrait, ArrayLikeTrait;

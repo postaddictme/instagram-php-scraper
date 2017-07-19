@@ -4,6 +4,10 @@ namespace InstagramScraper\Model;
 
 use InstagramScraper\Endpoints;
 
+/**
+ * Class Media
+ * @package InstagramScraper\Model
+ */
 class Media extends AbstractModel
 {
     const TYPE_IMAGE = 'image';
