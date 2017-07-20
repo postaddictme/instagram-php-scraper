@@ -65,7 +65,7 @@ trait InitializerTrait
      */
     public static function fake()
     {
-        return static::create()->_setFake(true);
+        return static::create()->setFake(true);
     }
 
     /**
@@ -73,16 +73,16 @@ trait InitializerTrait
      */
     protected function __construct(array $props = null)
     {
-        $this->_beforeInit();
+        $this->beforeInit();
         $this->modified = \time();
         if ($this->isAutoConstruct) {
-            $this->_initAuto();
+            $this->initAuto();
         } elseif (empty($props)) {
-            $this->_initDefaults();
+            $this->initDefaults();
         } else {
-            $this->_init($props);
+            $this->init($props);
         }
-        $this->_afterInit();
+        $this->afterInit();
     }
 
     /**
@@ -128,7 +128,7 @@ trait InitializerTrait
      *
      * @return $this
      */
-    protected function _setFake($value = true)
+    protected function setFake($value = true)
     {
         $this->isFake = (bool) $value;
 
@@ -140,7 +140,7 @@ trait InitializerTrait
      *
      * @return $this
      */
-    final protected function _init(array $props)
+    final protected function init(array $props)
     {
         //?reflection?
         foreach ($props as $prop => $value) {
@@ -175,7 +175,7 @@ trait InitializerTrait
     /**
      * @return $this
      */
-    final protected function _initAuto()
+    final protected function initAuto()
     {
         foreach ($this as $prop => $value) {
             if (isset(static::$initPropertiesMap[$prop]) and $methodOrProp = static::$initPropertiesMap[$prop] and \method_exists($this,
@@ -195,7 +195,7 @@ trait InitializerTrait
     /**
      * @return $this
      */
-    protected function _initDefaults()
+    protected function initDefaults()
     {
         return $this;
     }
@@ -203,23 +203,15 @@ trait InitializerTrait
     /**
      * @return $this
      */
-    protected function _beforeInit()
+    protected function beforeInit()
     {
-        //TODO а зачем это надо? Как-то неочевидно
-//        if (!empty(static::$initPropertiesMap)) {
-//            static::$initPropertiesMap += [
-//                'modified' => 'initModified',
-//                'flags'    => 'initInt',
-//            ];
-//        }
-
         return $this;
     }
 
     /**
      * @return $this
      */
-    protected function _afterInit()
+    protected function afterInit()
     {
         return $this;
     }
@@ -244,7 +236,7 @@ trait InitializerTrait
      */
     protected function initDatetime($date, $key)
     {
-        return $this->_initProperty(\strtotime($date), $key);
+        return $this->initProperty(\strtotime($date), $key);
     }
 
     /**
@@ -255,7 +247,7 @@ trait InitializerTrait
      */
     protected function initBool($value, $key)
     {
-        return $this->_initProperty(!empty($value), "is{$key}", $key);
+        return $this->initProperty(!empty($value), "is{$key}", $key);
     }
 
     /**
@@ -266,7 +258,7 @@ trait InitializerTrait
      */
     protected function initInt($value, $key)
     {
-        return $this->_initProperty((int) $value, $key);
+        return $this->initProperty((int) $value, $key);
     }
 
     /**
@@ -277,7 +269,7 @@ trait InitializerTrait
      */
     protected function initFloat($value, $key)
     {
-        return $this->_initProperty((float) $value, $key);
+        return $this->initProperty((float) $value, $key);
     }
 
     /**
@@ -300,7 +292,7 @@ trait InitializerTrait
             $value = (array) $value;
         }
 
-        return $this->_initProperty($value, $key);
+        return $this->initProperty($value, $key);
     }
 
     /**
@@ -309,9 +301,9 @@ trait InitializerTrait
      *
      * @return $this
      */
-    protected function _initExplode($value, $key)
+    protected function initExplode($value, $key)
     {
-        return $this->_initProperty(\explode(',', $value), "is{$key}", $key);
+        return $this->initProperty(\explode(',', $value), "is{$key}", $key);
     }
 
     /**
@@ -320,7 +312,7 @@ trait InitializerTrait
      *
      * @return $this
      */
-    protected function _initProperty($value, $key)
+    protected function initProperty($value, $key)
     {
         $keys = \func_get_args();
         unset($keys[0]); //remove value

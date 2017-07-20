@@ -23,7 +23,7 @@ trait ArrayLikeTrait
      */
     public function offsetExists($offset)
     {
-        return $this->_isMethod($offset, 'get') || \property_exists($this, $offset);
+        return $this->isMethod($offset, 'get') || \property_exists($this, $offset);
     }
 
     /**
@@ -33,8 +33,8 @@ trait ArrayLikeTrait
      */
     public function offsetGet($offset)
     {
-        if ($run = $this->_isMethod($offset, 'get')) {
-            return $this->_run($run);
+        if ($run = $this->isMethod($offset, 'get')) {
+            return $this->run($run);
         } elseif (\property_exists($this, $offset)) {
             return $this->{$offset};
         } else {
@@ -50,8 +50,8 @@ trait ArrayLikeTrait
      */
     public function offsetSet($offset, $value)
     {
-        if ($run = $this->_isMethod($offset, 'set')) {
-            $this->_run($run);
+        if ($run = $this->isMethod($offset, 'set')) {
+            $this->run($run);
         } else {
             $this->{$offset} = $value;
         }
@@ -64,8 +64,8 @@ trait ArrayLikeTrait
      */
     public function offsetUnset($offset)
     {
-        if ($run = $this->_isMethod($offset, 'unset')) {
-            $this->_run($run);
+        if ($run = $this->isMethod($offset, 'unset')) {
+            $this->run($run);
         } else {
             $this->{$offset} = null;
         }
@@ -77,7 +77,7 @@ trait ArrayLikeTrait
      *
      * @return bool|string
      */
-    protected function _isMethod($method, $case)
+    protected function isMethod($method, $case)
     {
         $uMethod = $case . \ucfirst($method);
         if (\method_exists($this, $uMethod)) {
@@ -94,7 +94,7 @@ trait ArrayLikeTrait
      *
      * @return mixed
      */
-    protected function _run($method)
+    protected function run($method)
     {
         if (\is_array($method)) {
             $params = $method;

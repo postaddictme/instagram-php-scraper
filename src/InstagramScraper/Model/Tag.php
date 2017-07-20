@@ -29,7 +29,7 @@ class Tag extends AbstractModel
     protected static $initPropertiesMap = [
         'media_count' => 'mediaCount',
         'name'        => 'name',
-        'id'          => 'id',
+        'id'          => 'initInt',
     ];
 
     /**

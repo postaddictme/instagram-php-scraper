@@ -88,50 +88,6 @@ class Account extends AbstractModel
     }
 
     /**
-     * @param $value
-     * @param $prop
-     * @param $array
-     */
-    protected function initPropertiesCustom($value, $prop, $array)
-    {
-        switch ($prop) {
-            case 'id':
-                $this->id = (int) $value;
-                break;
-            case 'username':
-                $this->username = $value;
-                break;
-            case 'full_name':
-                $this->fullName = $value;
-                break;
-            case 'profile_pic_url':
-                $this->profilePicUrl = $value;
-                break;
-            case 'biography':
-                $this->biography = $value;
-                break;
-            case 'external_url':
-                $this->externalUrl = $value;
-                break;
-            case 'follows':
-                $this->followsCount = !empty($array[$prop]['count']) ? (int) $array[$prop]['count'] : 0;
-                break;
-            case 'followed_by':
-                $this->followedByCount = !empty($array[$prop]['count']) ? (int) $array[$prop]['count'] : 0;
-                break;
-            case 'media':
-                $this->mediaCount = !empty($array[$prop]['count']) ? $array[$prop]['count'] : 0;
-                break;
-            case 'is_private':
-                $this->isPrivate = (bool) $value;
-                break;
-            case 'is_verified':
-                $this->isVerified = (bool) $value;
-                break;
-        }
-    }
-
-    /**
      * @return string
      */
     public function getUsername()
@@ -217,5 +173,49 @@ class Account extends AbstractModel
     public function isVerified()
     {
         return $this->isVerified;
+    }
+
+    /**
+     * @param $value
+     * @param $prop
+     * @param $array
+     */
+    protected function initPropertiesCustom($value, $prop, $array)
+    {
+        switch ($prop) {
+            case 'id':
+                $this->id = (int) $value;
+                break;
+            case 'username':
+                $this->username = $value;
+                break;
+            case 'full_name':
+                $this->fullName = $value;
+                break;
+            case 'profile_pic_url':
+                $this->profilePicUrl = $value;
+                break;
+            case 'biography':
+                $this->biography = $value;
+                break;
+            case 'external_url':
+                $this->externalUrl = $value;
+                break;
+            case 'follows':
+                $this->followsCount = !empty($array[$prop]['count']) ? (int) $array[$prop]['count'] : 0;
+                break;
+            case 'followed_by':
+                $this->followedByCount = !empty($array[$prop]['count']) ? (int) $array[$prop]['count'] : 0;
+                break;
+            case 'media':
+                $this->mediaCount = !empty($array[$prop]['count']) ? $array[$prop]['count'] : 0;
+                break;
+            case 'is_private':
+                $this->isPrivate = (bool) $value;
+                break;
+            case 'is_verified':
+                $this->isVerified = (bool) $value;
+                break;
+        }
     }
 }
