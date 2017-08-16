@@ -79,13 +79,13 @@ class Instagram
      * @return array
      * @throws InstagramException
      */
-    public static function getMedias($username, $count = 20, $maxId = '')
+    public static function getMedias($username, $count = 20, $maxId = '', $login = [])
     {
         $index = 0;
         $medias = [];
         $isMoreAvailable = true;
         while ($index < $count && $isMoreAvailable) {
-            $response = Request::get(Endpoints::getAccountMediasJsonLink($username, $maxId));
+            $response = Request::get(Endpoints::getAccountMediasJsonLink($username, $maxId), $login);
             if ($response->code !== 200) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
             }
@@ -608,6 +608,8 @@ class Instagram
      *
      * @throws InstagramAuthException
      * @throws InstagramException
+     *
+     * @return headers
      */
     public function login($force = false)
     {
@@ -648,6 +650,8 @@ class Instagram
         } else {
             $this->userSession = $session;
         }
+        
+        return $this->generateHeaders($this->userSession);
     }
 
     /**
