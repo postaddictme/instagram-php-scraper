@@ -642,6 +642,12 @@ class Instagram
                 }
             }
 
+            if (is_object($response->body)) {
+                if (!$response->body->authenticated) {
+                    throw new InstagramAuthException('User credentials are wrong.');
+                }
+            }
+
             $cookies = self::parseCookies($response->headers['Set-Cookie']);
             $cookies['mid'] = $mid;
             $cachedString->set($cookies);
@@ -650,7 +656,7 @@ class Instagram
         } else {
             $this->userSession = $session;
         }
-        
+
         return $this->generateHeaders($this->userSession);
     }
 
