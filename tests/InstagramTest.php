@@ -39,6 +39,13 @@ class InstagramTest extends TestCase
         $this->assertEquals('3', $account->id);
     }
 
+    public function testGetAccountByIdWithInvalidNumericId()
+    {
+        // PHP_INT_MAX is far larger than the greatest id so far and thus does not represent a valid account.
+        $this->expectException(\InstagramScraper\Exception\InstagramException::class);
+        self::$instagram->getAccountById(PHP_INT_MAX);
+    }
+
     public function testGetMedias()
     {
         $medias = Instagram::getMedias('kevin', 80);
