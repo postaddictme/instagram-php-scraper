@@ -15,11 +15,15 @@ use Unirest\Request;
 
 class Instagram
 {
+    const HTTP_NOT_FOUND = 404;
+    const HTTP_OK = 200;
     const MAX_COMMENTS_PER_REQUEST = 300;
+
+    // public properties is not a good idea, please use a public getters and setters!
     private static $instanceCache;
-    public $sessionUsername;
-    public $sessionPassword;
-    public $userSession;
+    private $sessionUsername;
+    private $sessionPassword;
+    private $userSession;
 
     /**
      * @param string $username
@@ -57,10 +61,10 @@ class Instagram
     public static function getAccount($username)
     {
         $response = Request::get(Endpoints::getAccountJsonLink($username));
-        if ($response->code === 404) {
+        if (self::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
-        if ($response->code !== 200) {
+        if (self::HTTP_OK !== $response->code) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . Instagram::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
         }
 
@@ -75,6 +79,7 @@ class Instagram
      * @param string $username
      * @param int    $count
      * @param string $maxId
+     * @param array  $login
      *
      * @return array
      * @throws InstagramException
@@ -86,7 +91,7 @@ class Instagram
         $isMoreAvailable = true;
         while ($index < $count && $isMoreAvailable) {
             $response = Request::get(Endpoints::getAccountMediasJsonLink($username, $maxId), $login);
-            if ($response->code !== 200) {
+            if (self::HTTP_OK !== $response->code) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . Instagram::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
             }
 
@@ -125,10 +130,12 @@ class Instagram
     {
         // TODO: Add tests and auth
         $response = Request::get(Endpoints::getGeneralSearchJsonLink($username));
-        if ($response->code === 404) {
+        // use a raw constant in the code is not a good idea!!
+        //if ($response->code === 404) {
+        if (self::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
-        if ($response->code !== 200) {
+        if (self::HTTP_OK !== $response->code) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . Instagram::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
         }
 
@@ -136,7 +143,7 @@ class Instagram
         if (!isset($jsonResponse['status']) || $jsonResponse['status'] != 'ok') {
             throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
         }
-        if (!isset($jsonResponse['users']) || count($jsonResponse['users']) == 0) {
+        if (!isset($jsonResponse['users']) || empty($jsonResponse['users'])) {
             return [];
         }
 
@@ -158,10 +165,14 @@ class Instagram
     {
         // TODO: Add tests and auth
         $response = Request::get(Endpoints::getGeneralSearchJsonLink($tag));
-        if ($response->code === 404) {
+        // use a raw constant in the code is not a good idea!!
+        //if ($response->code === 404) {
+        if (self::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
-        if ($response->code !== 200) {
+        // use a raw constant in the code is not a good idea!!
+        //if ($response->code !== 200) {
+        if (self::HTTP_OK !== $response->code) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . Instagram::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
         }
 
@@ -170,7 +181,7 @@ class Instagram
             throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
         }
 
-        if (!isset($jsonResponse['hashtags']) || count($jsonResponse['hashtags']) == 0) {
+        if (!isset($jsonResponse['hashtags']) || empty($jsonResponse['hashtags'])) {
             return [];
         }
         $hashtags = [];
@@ -204,10 +215,14 @@ class Instagram
             throw new \InvalidArgumentException('Malformed media url');
         }
         $response = Request::get(rtrim($mediaUrl, '/') . '/?__a=1', $this->generateHeaders($this->userSession));
-        if ($response->code === 404) {
+        // use a raw constant in the code is not a good idea!!
+        //if ($response->code === 404) {
+        if (self::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Media with given code does not exist or account is private.');
         }
-        if ($response->code !== 200) {
+        // use a raw constant in the code is not a good idea!!
+        //if ($response->code !== 200) {
+        if (self::HTTP_OK !== $response->code) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . Instagram::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
         }
         $mediaArray = json_decode($response->raw_body, true);
@@ -237,7 +252,9 @@ class Instagram
         $response = Request::get(Endpoints::getAccountMediasJsonLink($username, $maxId),
             $this->generateHeaders($this->userSession));
 
-        if ($response->code !== 200) {
+        // use a raw constant in the code is not a good idea!!
+        //if ($response->code !== 200) {
+        if (self::HTTP_OK !== $response->code) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . Instagram::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
         }
 
@@ -247,7 +264,10 @@ class Instagram
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . Instagram::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
         }
 
-        if (count($arr['items']) === 0) {
+        //if (count($arr['items']) === 0) {
+        // I generally use empty. Im not sure why people would use count really - If the array is large then count takes longer/has more overhead.
+        // If you simply need to know whether or not the array is empty then use empty.
+        if (empty($arr['items'])) {
             return $toReturn;
         }
 
@@ -310,7 +330,9 @@ class Instagram
             }
             $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($code, $numberOfCommentsToRetreive, $maxId);
             $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession));
-            if ($response->code !== 200) {
+            // use a raw constant in the code is not a good idea!!
+            //if ($response->code !== 200) {
+            if (self::HTTP_OK !== $response->code) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . Instagram::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
             }
             $cookies = self::parseCookies($response->headers['Set-Cookie']);
@@ -399,7 +421,7 @@ class Instagram
             if (!is_array($arr)) {
                 throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
             }
-            if (count($arr['tag']['media']['count']) === 0) {
+            if (empty($arr['tag']['media']['count'])) {
                 return [];
             }
             $nodes = $arr['tag']['media']['nodes'];
@@ -415,7 +437,7 @@ class Instagram
                 $medias[] = $media;
                 $index++;
             }
-            if (count($nodes) == 0) {
+            if (empty($nodes)) {
                 return $medias;
             }
             $maxId = $arr['tag']['media']['page_info']['end_cursor'];
@@ -458,13 +480,13 @@ class Instagram
             throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
         }
 
-        if (count($arr['tag']['media']['count']) === 0) {
+        if (empty($arr['tag']['media']['count'])) {
             return $toReturn;
         }
 
         $nodes = $arr['tag']['media']['nodes'];
 
-        if (count($nodes) == 0) {
+        if (empty($nodes)) {
             return $toReturn;
         }
 
@@ -571,7 +593,7 @@ class Instagram
                 $medias[] = Media::create($mediaArray);
                 $index++;
             }
-            if (count($nodes) == 0) {
+            if (empty($nodes)) {
                 return $medias;
             }
             $hasNext = $arr['location']['media']['page_info']['has_next_page'];
