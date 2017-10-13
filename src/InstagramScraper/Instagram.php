@@ -403,7 +403,7 @@ class Instagram
      * @return array
      * @throws InstagramException
      */
-    public function getMediasByTag($tag, $count = 12, $maxId = '')
+    public function getMediasByTag($tag, $count = 12, $maxId = '', $minTimestamp = null)
     {
         $index = 0;
         $medias = [];
@@ -431,6 +431,9 @@ class Instagram
                 }
                 $media = Media::create($mediaArray);
                 if (in_array($media->getId(), $mediaIds)) {
+                    return $medias;
+                }
+                if (isset($minTimestamp) && $media->createdTime < $minTimestamp) {
                     return $medias;
                 }
                 $mediaIds[] = $media->getId();
