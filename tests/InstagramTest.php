@@ -58,6 +58,12 @@ class InstagramTest extends TestCase
         $this->assertEquals(100, sizeof($medias));
     }
 
+    public function testGetMediasByTag()
+    {
+        $medias = self::$instagram->getMediasByTag('youneverknow', 20);
+        $this->assertEquals(20, sizeof($medias));
+    }
+
     public function testGetMediaByCode()
     {
         $media = self::$instagram->getMediaByCode('BHaRdodBouH');
