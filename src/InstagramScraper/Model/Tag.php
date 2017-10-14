@@ -9,28 +9,25 @@ namespace InstagramScraper\Model;
 class Tag extends AbstractModel
 {
     /**
-     * @var int
-     */
-    protected $mediaCount = 0;
-
-    /**
-     * @var string
-     */
-    protected $name;
-
-    /**
-     * @var int
-     */
-    protected $id;
-
-    /**
      * @var array
      */
     protected static $initPropertiesMap = [
         'media_count' => 'mediaCount',
-        'name'        => 'name',
-        'id'          => 'initInt',
+        'name' => 'name',
+        'id' => 'initInt',
     ];
+    /**
+     * @var int
+     */
+    protected $mediaCount = 0;
+    /**
+     * @var string
+     */
+    protected $name;
+    /**
+     * @var int
+     */
+    protected $id;
 
     /**
      * @return int

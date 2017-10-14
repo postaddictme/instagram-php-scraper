@@ -100,7 +100,7 @@ class Account extends AbstractModel
      */
     public function getId()
     {
-        return (int) $this->id;
+        return (int)$this->id;
     }
 
     /**
@@ -184,7 +184,7 @@ class Account extends AbstractModel
     {
         switch ($prop) {
             case 'id':
-                $this->id = (int) $value;
+                $this->id = (int)$value;
                 break;
             case 'username':
                 $this->username = $value;
@@ -202,19 +202,19 @@ class Account extends AbstractModel
                 $this->externalUrl = $value;
                 break;
             case 'follows':
-                $this->followsCount = !empty($array[$prop]['count']) ? (int) $array[$prop]['count'] : 0;
+                $this->followsCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
                 break;
             case 'followed_by':
-                $this->followedByCount = !empty($array[$prop]['count']) ? (int) $array[$prop]['count'] : 0;
+                $this->followedByCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
                 break;
             case 'media':
                 $this->mediaCount = !empty($array[$prop]['count']) ? $array[$prop]['count'] : 0;
                 break;
             case 'is_private':
-                $this->isPrivate = (bool) $value;
+                $this->isPrivate = (bool)$value;
                 break;
             case 'is_verified':
-                $this->isVerified = (bool) $value;
+                $this->isVerified = (bool)$value;
                 break;
         }
     }

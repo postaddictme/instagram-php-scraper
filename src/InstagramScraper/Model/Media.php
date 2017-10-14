@@ -131,6 +131,52 @@ class Media extends AbstractModel
     protected $commentsCount = 0;
 
     /**
+     * @param string $code
+     *
+     * @return int
+     */
+    public static function getIdFromCode($code)
+    {
+        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+        $id = 0;
+        for ($i = 0; $i < strlen($code); $i++) {
+            $c = $code[$i];
+            $id = $id * 64 + strpos($alphabet, $c);
+        }
+        return $id;
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return mixed
+     */
+    public static function getLinkFromId($id)
+    {
+        $code = Media::getCodeFromId($id);
+        return Endpoints::getMediaPageLink($code);
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return string
+     */
+    public static function getCodeFromId($id)
+    {
+        $parts = explode('_', $id);
+        $id = $parts[0];
+        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+        $code = '';
+        while ($id > 0) {
+            $remainder = $id % 64;
+            $id = ($id - $remainder) / 64;
+            $code = $alphabet{$remainder} . $code;
+        };
+        return $code;
+    }
+
+    /**
      * @return mixed
      */
     public function getId()
@@ -153,7 +199,6 @@ class Media extends AbstractModel
     {
         return $this->createdTime;
     }
-
 
     /**
      * @return string
@@ -268,14 +313,6 @@ class Media extends AbstractModel
     }
 
     /**
-     * @return Account
-     */
-    public function getOwner()
-    {
-        return $this->owner;
-    }
-
-    /**
      * @return int
      */
     public function getOwnerId()
@@ -316,52 +353,6 @@ class Media extends AbstractModel
     }
 
     /**
-     * @param string $code
-     *
-     * @return int
-     */
-    public static function getIdFromCode($code)
-    {
-        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-        $id = 0;
-        for ($i = 0; $i < strlen($code); $i++) {
-            $c = $code[$i];
-            $id = $id * 64 + strpos($alphabet, $c);
-        }
-        return $id;
-    }
-
-    /**
-     * @param string $id
-     *
-     * @return mixed
-     */
-    public static function getLinkFromId($id)
-    {
-        $code = Media::getCodeFromId($id);
-        return Endpoints::getMediaPageLink($code);
-    }
-
-    /**
-     * @param string $id
-     *
-     * @return string
-     */
-    public static function getCodeFromId($id)
-    {
-        $parts = explode('_', $id);
-        $id = $parts[0];
-        $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-        $code = '';
-        while ($id > 0) {
-            $remainder = $id % 64;
-            $id = ($id - $remainder) / 64;
-            $code = $alphabet{$remainder} . $code;
-        };
-        return $code;
-    }
-
-    /**
      * @param $value
      * @param $prop
      */
@@ -375,7 +366,7 @@ class Media extends AbstractModel
                 $this->type = $value;
                 break;
             case 'created_time':
-                $this->createdTime = (int) $value;
+                $this->createdTime = (int)$value;
                 break;
             case 'code':
                 $this->shortCode = $value;
@@ -404,7 +395,7 @@ class Media extends AbstractModel
                 }
                 break;
             case 'caption':
-                $this->caption = $arr[$prop]['text'];
+                $this->caption = $arr[$prop];
                 break;
             case 'video_views':
                 $this->videoViews = $value;
@@ -438,7 +429,7 @@ class Media extends AbstractModel
                 $this->videoViews = $value;
                 break;
             case 'caption_is_edited':
-                $this->isCaptionEdited =$value;
+                $this->isCaptionEdited = $value;
                 break;
             case 'is_ad':
                 $this->isAd = $value;
@@ -468,7 +459,7 @@ class Media extends AbstractModel
                 $this->owner = Account::create($arr[$prop]);
                 break;
             case 'date':
-                $this->createdTime = (int) $value;
+                $this->createdTime = (int)$value;
                 break;
             case 'display_src':
                 $images = self::getImageUrls($value);
@@ -495,9 +486,9 @@ class Media extends AbstractModel
         $imageName = $parts[sizeof($parts) - 1];
         $urls = [
             'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName,
-            'low'       => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
-            'standard'  => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
-            'high'      => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
+            'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
+            'standard' => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
+            'high' => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
         ];
         return $urls;
     }
@@ -534,5 +525,13 @@ class Media extends AbstractModel
         }
         array_push($instance->carouselMedia, $carouselMedia);
         return $mediaArray;
+    }
+
+    /**
+     * @return Account
+     */
+    public function getOwner()
+    {
+        return $this->owner;
     }
 }

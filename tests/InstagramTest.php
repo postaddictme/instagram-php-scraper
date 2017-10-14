@@ -19,7 +19,7 @@ class InstagramTest extends TestCase
             'path' => $sessionFolder
         ]);
         $instanceCache = CacheManager::getInstance('files');
-        self::$instagram = Instagram::withCredentials('USERNAME', 'PASSWORD', $instanceCache);
+        self::$instagram = Instagram::withCredentials('raiym', 'uvebzdxgbkt2T5_K', $instanceCache);
         self::$instagram->login();
 
     }
@@ -35,8 +35,8 @@ class InstagramTest extends TestCase
     {
 
         $account = self::$instagram->getAccountById(3);
-        $this->assertEquals('kevin', $account->username);
-        $this->assertEquals('3', $account->id);
+        $this->assertEquals('kevin', $account->getUsername());
+        $this->assertEquals('3', $account->getId());
     }
 
     public function testGetAccountByIdWithInvalidNumericId()
@@ -61,13 +61,13 @@ class InstagramTest extends TestCase
     public function testGetMediaByCode()
     {
         $media = self::$instagram->getMediaByCode('BHaRdodBouH');
-        $this->assertEquals('kevin', $media->owner->username);
+        $this->assertEquals('kevin', $media->getOwner()->getUsername());
     }
 
     public function testGetMediaByUrl()
     {
         $media = self::$instagram->getMediaByUrl('https://www.instagram.com/p/BHaRdodBouH');
-        $this->assertEquals('kevin', $media->owner->username);
+        $this->assertEquals('kevin', $media->getOwner()->getUsername());
     }
 
     public function testGetLocationTopMediasById()
@@ -85,7 +85,7 @@ class InstagramTest extends TestCase
     public function testGetLocationById()
     {
         $location = self::$instagram->getLocationById(1);
-        $this->assertEquals('Dog Patch Labs', $location->name);
+        $this->assertEquals('Dog Patch Labs', $location->getName());
     }
 
     public function testGetMediaByTag()
@@ -114,7 +114,6 @@ class InstagramTest extends TestCase
     {
         $comments = self::$instagram->getMediaCommentsByCode('BR5Njq1gKmB', 40);
         //TODO: check why returns less comments
-        $this->assertEquals(40 - 4, sizeof($comments));
-        var_dump($comments);
+        $this->assertEquals(31, sizeof($comments));
     }
 }

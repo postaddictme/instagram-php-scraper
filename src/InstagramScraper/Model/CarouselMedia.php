@@ -81,6 +81,14 @@ class CarouselMedia
     }
 
     /**
+     * @return mixed
+     */
+    public function getImageLowResolutionUrl()
+    {
+        return $this->imageLowResolutionUrl;
+    }
+
+    /**
      * @param mixed $imageLowResolutionUrl
      *
      * @return CarouselMedia
@@ -94,9 +102,9 @@ class CarouselMedia
     /**
      * @return mixed
      */
-    public function getImageLowResolutionUrl()
+    public function getImageThumbnailUrl()
     {
-        return $this->imageLowResolutionUrl;
+        return $this->imageThumbnailUrl;
     }
 
     /**
@@ -113,9 +121,9 @@ class CarouselMedia
     /**
      * @return mixed
      */
-    public function getImageThumbnailUrl()
+    public function getImageStandardResolutionUrl()
     {
-        return $this->imageThumbnailUrl;
+        return $this->imageStandardResolutionUrl;
     }
 
     /**
@@ -132,9 +140,9 @@ class CarouselMedia
     /**
      * @return mixed
      */
-    public function getImageStandardResolutionUrl()
+    public function getImageHighResolutionUrl()
     {
-        return $this->imageStandardResolutionUrl;
+        return $this->imageHighResolutionUrl;
     }
 
     /**
@@ -151,9 +159,9 @@ class CarouselMedia
     /**
      * @return mixed
      */
-    public function getImageHighResolutionUrl()
+    public function getVideoLowResolutionUrl()
     {
-        return $this->imageHighResolutionUrl;
+        return $this->videoLowResolutionUrl;
     }
 
     /**
@@ -170,9 +178,9 @@ class CarouselMedia
     /**
      * @return mixed
      */
-    public function getVideoLowResolutionUrl()
+    public function getVideoStandardResolutionUrl()
     {
-        return $this->videoLowResolutionUrl;
+        return $this->videoStandardResolutionUrl;
     }
 
     /**
@@ -189,9 +197,9 @@ class CarouselMedia
     /**
      * @return mixed
      */
-    public function getVideoStandardResolutionUrl()
+    public function getVideoLowBandwidthUrl()
     {
-        return $this->videoStandardResolutionUrl;
+        return $this->videoLowBandwidthUrl;
     }
 
     /**
@@ -208,9 +216,9 @@ class CarouselMedia
     /**
      * @return mixed
      */
-    public function getVideoLowBandwidthUrl()
+    public function getVideoViews()
     {
-        return $this->videoLowBandwidthUrl;
+        return $this->videoViews;
     }
 
     /**
@@ -222,14 +230,6 @@ class CarouselMedia
     {
         $this->videoViews = $videoViews;
         return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getVideoViews()
-    {
-        return $this->videoViews;
     }
 
 }
