@@ -734,7 +734,7 @@ class Instagram
             throw new InstagramException('Count must be greater than or equal to page size.');
         }
         
-        while ($index < $count) {
+        while (true) {
             $response = Request::get(Endpoints::getFollowersJsonLink($accountId, $pageSize, $endCursor),
                 $this->generateHeaders($this->userSession));
             if ($response->code !== 200) {
@@ -754,7 +754,10 @@ class Instagram
             
             foreach ($edgesArray as $edge) {
                 $accounts[] = $edge['node'];
-                $index++;
+                $index++;               
+                if ($index >= $count) {
+                    break 2;
+                }
             }
             
             $pageInfo = $jsonResponse['data']['user']['edge_followed_by']['page_info'];
