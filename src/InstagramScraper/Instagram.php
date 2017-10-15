@@ -710,6 +710,72 @@ class Instagram
         $jsonResponse = json_decode($response->raw_body, true);
         return Location::create($jsonResponse['location']);
     }
+    
+    /**
+     * @param string $accountId  Account id of the profile to query
+     * @param int    $count      Total followers to retrieve
+     * @param array  $pageSize   Internal page size for pagination
+     * @param bool   $delayed    Use random delay between requests to mimic browser behaviour
+     *
+     * @return array
+     * @throws InstagramException
+     */
+    public function getFollowers($accountId, $count = 20, $pageSize = 20, $delayed = true)
+    {
+        if ($delayed) {
+            set_time_limit(1800); // 30 mins
+        }
+        
+        $index = 0;
+        $accounts = [];
+        $endCursor = '';
+        
+        if ($count < $pageSize) {
+            throw new InstagramException('Count must be greater than or equal to page size.');
+        }
+        
+        while (true) {
+            $response = Request::get(Endpoints::getFollowersJsonLink($accountId, $pageSize, $endCursor),
+                $this->generateHeaders($this->userSession));
+            if ($response->code !== 200) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . Instagram::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+            }
+            
+            $jsonResponse = json_decode($response->raw_body, true);
+            
+            if ($jsonResponse['data']['user']['edge_followed_by']['count'] === 0) {
+                return $accounts;
+            }
+            
+            $edgesArray = $jsonResponse['data']['user']['edge_followed_by']['edges'];
+            if (count($edgesArray) === 0) {
+                throw new InstagramException('Failed to get followers of account id ' . $accountId . '. The account is private.');
+            }            
+            
+            foreach ($edgesArray as $edge) {
+                $accounts[] = $edge['node'];
+                $index++;               
+                if ($index >= $count) {
+                    break 2;
+                }
+            }
+            
+            $pageInfo = $jsonResponse['data']['user']['edge_followed_by']['page_info'];
+            if ($pageInfo['has_next_page']) {
+                $endCursor = $pageInfo['end_cursor'];
+            }
+            else {
+                break;
+            }            
+            
+            if ($delayed) {
+                // Random wait between 1 and 3 sec to mimic browser
+                $microsec = rand(1000000, 3000000);
+                usleep($microsec);
+            }
+        }
+        return $accounts;
+    }
 
     /**
      * @param bool $force
