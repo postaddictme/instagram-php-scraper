@@ -714,7 +714,7 @@ class Instagram
     /**
      * @param string $accountId  Account id of the profile to query
      * @param int    $count      Total followers to retrieve
-     * @param array  $pageSize   Internal page size for pagination
+     * @param int    $pageSize   Internal page size for pagination
      * @param bool   $delayed    Use random delay between requests to mimic browser behaviour
      *
      * @return array
