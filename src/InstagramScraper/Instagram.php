@@ -758,7 +758,7 @@ class Instagram
     }
 
     /**
-     * @param stdClass $rawError
+     * @param \stdClass|string $rawError
      *
      * @return string
      */

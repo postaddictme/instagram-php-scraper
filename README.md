@@ -175,12 +175,12 @@ echo 'Media id: ' . Media::getIdFromCode('BGiDkHAgBF_');
 
 ### Get media comments by shortcode
 ```php
-$comments = Instagram::getMediaCommentsByCode('BG3Iz-No1IZ', 8000);
+$comments = (new Instagram)->getMediaCommentsByCode('BG3Iz-No1IZ', 8000);
 ```
 
 ### Get media comments by id
 ```php
-$comments = Instagram::getMediaCommentsById('1130748710921700586', 10000)
+$comments = (new Instagram)->getMediaCommentsById('1130748710921700586', 10000)
 ```
 
 ### Get location id
