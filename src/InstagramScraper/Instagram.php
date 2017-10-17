@@ -292,7 +292,7 @@ class Instagram
      * @param int  $count
      * @param null $maxId
      *
-     * @return array
+     * @return Comment
      */
     public function getMediaCommentsById($mediaId, $count = 10, $maxId = null)
     {
@@ -305,7 +305,7 @@ class Instagram
      * @param int  $count
      * @param null $maxId
      *
-     * @return array
+     * @return Comment
      * @throws InstagramException
      */
     public function getMediaCommentsByCode($code, $count = 10, $maxId = null)
