@@ -328,7 +328,7 @@ class Instagram
      * @param int $count
      * @param null $maxId
      *
-     * @return array
+     * @return Comment[]
      */
     public function getMediaCommentsById($mediaId, $count = 10, $maxId = null)
     {
@@ -341,7 +341,7 @@ class Instagram
      * @param int $count
      * @param null $maxId
      *
-     * @return array
+     * @return Comment[]
      * @throws InstagramException
      */
     public function getMediaCommentsByCode($code, $count = 10, $maxId = null)
@@ -868,5 +868,72 @@ class Instagram
     {
         $cachedString = self::$instanceCache->getItem($this->sessionUsername);
         $cachedString->set($this->userSession);
+    }
+
+    /**
+     * @param string $rawCookies
+     *
+     * @return array
+     */
+    private static function parseCookies($rawCookies)
+    {
+        if (!is_array($rawCookies)) {
+            $rawCookies = [$rawCookies];
+        }
+
+        $cookies = [];
+        foreach ($rawCookies as $c) {
+            $c = explode(';', $c)[0];
+            $parts = explode('=', $c);
+            if (sizeof($parts) >= 2 && !is_null($parts[1])) {
+                $cookies[$parts[0]] = $parts[1];
+            }
+        }
+        return $cookies;
+    }
+
+
+    /**
+     * @param $session
+     *
+     * @return array
+     */
+    private function generateHeaders($session)
+    {
+        $headers = [];
+        if ($session) {
+            $cookies = '';
+            foreach ($session as $key => $value) {
+                $cookies .= "$key=$value; ";
+            }
+            $headers = [
+                'cookie'      => $cookies,
+                'referer'     => Endpoints::BASE_URL . '/',
+                'x-csrftoken' => $session['csrftoken'],
+            ];
+        }
+        return $headers;
+    }
+
+    /**
+     * @param \stdClass|string $rawError
+     *
+     * @return string
+     */
+    private static function getErrorBody($rawError)
+    {
+        if (is_string($rawError)) {
+            return  $rawError;
+        }
+        if (is_object($rawError)) {
+            $str = "";
+            foreach ($rawError as $key => $value) {
+                $str .= " " .  $key . " => " . $value . ";";
+            }
+            return $str;
+        } else {
+            return "Unknown body format";
+        }
+
     }
 }

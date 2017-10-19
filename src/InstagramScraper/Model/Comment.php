@@ -55,6 +55,14 @@ class Comment extends AbstractModel
     }
 
     /**
+     * @return Account
+     */
+    public function getOwner()
+    {
+        return $this->owner;
+    }
+
+    /**
      * @param $value
      * @param $prop
      */
