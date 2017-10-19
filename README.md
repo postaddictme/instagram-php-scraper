@@ -198,5 +198,18 @@ $medias = Instagram::getLocationTopMediasById(1);
 $medias = Instagram::getLocationMediasById(1);
 ```
 
+### Get followers of an account
+```php
+$username = 'kevin';
+$followers = [];
+$instagram = Instagram::withCredentials('your_username', 'hunter2');
+$instagram->login();
+sleep(2); // Delay to mimic browser
+$account = Instagram::getAccount($username);
+sleep(1);
+$followers = $instagram->getFollowers($account->getId(), 1000, 100, true); // Get 1000 followers of 'kevin', 100 a time with random delay between requests
+echo '<pre>' . json_encode($followers, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . '</pre>';
+```
+
 ### Other
 Java library: https://github.com/postaddictme/instagram-java-scraper

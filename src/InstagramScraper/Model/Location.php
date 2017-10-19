@@ -6,51 +6,44 @@ namespace InstagramScraper\Model;
 class Location extends AbstractModel
 {
     /**
+     * @var array
+     */
+    protected static $initPropertiesMap = [
+        'id' => 'id',
+        'has_public_page' => 'hasPublicPage',
+        'name' => 'name',
+        'slug' => 'slug',
+        'lat' => 'lat',
+        'lng' => 'lng',
+    ];
+    /**
      * @var
      */
     protected $id;
-
     /**
      * @var
      */
     protected $hasPublicPage;
-
     /**
      * @var
      */
     protected $name;
-
     /**
      * @var
      */
     protected $slug;
-
     /**
      * @var
      */
     protected $lng;
-
     /**
      * @var
      */
     protected $lat;
-
     /**
      * @var bool
      */
     protected $isLoaded = false;
-
-    /**
-     * @var array
-     */
-    protected static $initPropertiesMap = [
-        'id'              => 'id',
-        'has_public_page' => 'hasPublicPage',
-        'name'            => 'name',
-        'slug'            => 'slug',
-        'lat'             => 'lat',
-        'lng'             => 'lng',
-    ];
 
     /**
      * @return mixed
