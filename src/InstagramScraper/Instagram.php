@@ -96,7 +96,7 @@ class Instagram
     }
 
     /**
-     * @param stdClass $rawError
+     * @param \stdClass|string $rawError
      *
      * @return string
      */
@@ -710,12 +710,12 @@ class Instagram
         $jsonResponse = json_decode($response->raw_body, true);
         return Location::create($jsonResponse['location']);
     }
-    
+
     /**
-     * @param string $accountId  Account id of the profile to query
-     * @param int    $count      Total followers to retrieve
-     * @param int    $pageSize   Internal page size for pagination
-     * @param bool   $delayed    Use random delay between requests to mimic browser behaviour
+     * @param string $accountId Account id of the profile to query
+     * @param int $count Total followers to retrieve
+     * @param int $pageSize Internal page size for pagination
+     * @param bool $delayed Use random delay between requests to mimic browser behaviour
      *
      * @return array
      * @throws InstagramException
@@ -725,49 +725,48 @@ class Instagram
         if ($delayed) {
             set_time_limit(1800); // 30 mins
         }
-        
+
         $index = 0;
         $accounts = [];
         $endCursor = '';
-        
+
         if ($count < $pageSize) {
             throw new InstagramException('Count must be greater than or equal to page size.');
         }
-        
+
         while (true) {
             $response = Request::get(Endpoints::getFollowersJsonLink($accountId, $pageSize, $endCursor),
                 $this->generateHeaders($this->userSession));
             if ($response->code !== 200) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . Instagram::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
             }
-            
+
             $jsonResponse = json_decode($response->raw_body, true);
-            
+
             if ($jsonResponse['data']['user']['edge_followed_by']['count'] === 0) {
                 return $accounts;
             }
-            
+
             $edgesArray = $jsonResponse['data']['user']['edge_followed_by']['edges'];
             if (count($edgesArray) === 0) {
                 throw new InstagramException('Failed to get followers of account id ' . $accountId . '. The account is private.');
-            }            
-            
+            }
+
             foreach ($edgesArray as $edge) {
                 $accounts[] = $edge['node'];
-                $index++;               
+                $index++;
                 if ($index >= $count) {
                     break 2;
                 }
             }
-            
+
             $pageInfo = $jsonResponse['data']['user']['edge_followed_by']['page_info'];
             if ($pageInfo['has_next_page']) {
                 $endCursor = $pageInfo['end_cursor'];
-            }
-            else {
+            } else {
                 break;
-            }            
-            
+            }
+
             if ($delayed) {
                 // Random wait between 1 and 3 sec to mimic browser
                 $microsec = rand(1000000, 3000000);
@@ -870,70 +869,4 @@ class Instagram
         $cachedString->set($this->userSession);
     }
 
-    /**
-     * @param string $rawCookies
-     *
-     * @return array
-     */
-    private static function parseCookies($rawCookies)
-    {
-        if (!is_array($rawCookies)) {
-            $rawCookies = [$rawCookies];
-        }
-
-        $cookies = [];
-        foreach ($rawCookies as $c) {
-            $c = explode(';', $c)[0];
-            $parts = explode('=', $c);
-            if (sizeof($parts) >= 2 && !is_null($parts[1])) {
-                $cookies[$parts[0]] = $parts[1];
-            }
-        }
-        return $cookies;
-    }
-
-
-    /**
-     * @param $session
-     *
-     * @return array
-     */
-    private function generateHeaders($session)
-    {
-        $headers = [];
-        if ($session) {
-            $cookies = '';
-            foreach ($session as $key => $value) {
-                $cookies .= "$key=$value; ";
-            }
-            $headers = [
-                'cookie'      => $cookies,
-                'referer'     => Endpoints::BASE_URL . '/',
-                'x-csrftoken' => $session['csrftoken'],
-            ];
-        }
-        return $headers;
-    }
-
-    /**
-     * @param \stdClass|string $rawError
-     *
-     * @return string
-     */
-    private static function getErrorBody($rawError)
-    {
-        if (is_string($rawError)) {
-            return  $rawError;
-        }
-        if (is_object($rawError)) {
-            $str = "";
-            foreach ($rawError as $key => $value) {
-                $str .= " " .  $key . " => " . $value . ";";
-            }
-            return $str;
-        } else {
-            return "Unknown body format";
-        }
-
-    }
 }
