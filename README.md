@@ -37,11 +37,8 @@ You can download it [here](https://getcomposer.org/download/).
 See examples [here](https://github.com/postaddictme/instagram-php-scraper/tree/master/examples).
 
 
-#v0.5.0
-Important update: 
 
-First of all thank you guys for your suggestions and support. 
-This is *not final* fix for getting medias by tags and locations. 
+### Some of following examples outdated (fixing it)
 
 if you need to get medias by tags or locations:
 ```php
