@@ -1,5 +1,41 @@
-# instagram-php-scraper
-# Usage
+# Instagram PHP Scrapper
+This library based on Instagram web version. We develop it because nowadays it is hard to get approved Instagram application. 
+The purpose support every feature that web desktop and mobile version support. 
+## Code Example
+```php
+$instagram = Instagram::withCredentials('username', 'password');
+$instagram->login();
+$account = $instagram->getAccountById(3);
+echo $account->getUsername();
+```
+Some methods does not require auth: 
+```php
+$nonPrivateAccountMedias = Instagram::getMedias('kevin'); // All static methods will become non-static in next updates
+echo $nonPrivateAccountMedias[0]->getLink();
+```
+If you use auth it is recommended to cash user session, in this case you don't need run `$instagram->login()` method every time your program runs:
+
+```php
+$instagram = Instagram::withCredentials('username', 'password', '/path/to/cache/folder/');
+$instagram->login(); // will use cached session if you can force login $instagram->login(true)
+$account = $instagram->getAccountById(3);
+echo $account->getUsername();
+```
+
+## Installation
+
+### Using composer
+
+```sh
+composer require raiym/instagram-php-scraper
+```
+
+### I don't have composer
+You can download it [here](https://getcomposer.org/download/).
+
+## Examples
+See examples [here](https://github.com/postaddict.me/instagram-php-scrapper/tree/master/examples).
+
 
 #v0.5.0
 Important update: 
@@ -20,40 +56,6 @@ $location $instagram->getLocationById(1);
 $medias = $instagram->getTopMediasByTagName('hello');
 ```
 
-Be carefull with login method. I am planning to implement session caching soon
- 
-
-`composer require raiym/instagram-php-scraper`
-
-
-```php
-use InstagramScraper\Instagram;
-
-```
-
-### Get account info
-```php
-$account = Instagram::getAccount('kevin');
-/*
-Available properties: 
-    $username;
-    $followsCount;
-    $followedByCount;
-    $profilePicUrl;
-    $id;
-    $biography;
-    $fullName;
-    $mediaCount;
-    $isPrivate;
-    $externalUrl;
-*/
-echo $account->followedByCount;
-```
-### Get account info by userId
-```php
-$account = Instagram::getAccountById(193886659);
-echo $account->username;
-```
 
 ### Search users by username
 ```php
@@ -198,18 +200,5 @@ $medias = Instagram::getLocationTopMediasById(1);
 $medias = Instagram::getLocationMediasById(1);
 ```
 
-### Get followers of an account
-```php
-$username = 'kevin';
-$followers = [];
-$instagram = Instagram::withCredentials('your_username', 'hunter2');
-$instagram->login();
-sleep(2); // Delay to mimic browser
-$account = Instagram::getAccount($username);
-sleep(1);
-$followers = $instagram->getFollowers($account->getId(), 1000, 100, true); // Get 1000 followers of 'kevin', 100 a time with random delay between requests
-echo '<pre>' . json_encode($followers, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . '</pre>';
-```
-
-### Other
+## Other
 Java library: https://github.com/postaddictme/instagram-java-scraper

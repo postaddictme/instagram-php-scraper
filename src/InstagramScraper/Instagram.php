@@ -19,7 +19,6 @@ class Instagram
     const HTTP_OK = 200;
     const MAX_COMMENTS_PER_REQUEST = 300;
 
-    // public properties is not a good idea, please use a public getters and setters!
     private static $instanceCache;
     private $sessionUsername;
     private $sessionPassword;

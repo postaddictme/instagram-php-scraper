@@ -4,5 +4,4 @@ composer.phar
 composer.lock
 .DS_Store
 phpunit.phar
-index.php
 tests/sessions
