@@ -61,8 +61,6 @@ class Instagram
     {
         // TODO: Add tests and auth
         $response = Request::get(Endpoints::getGeneralSearchJsonLink($username));
-        // use a raw constant in the code is not a good idea!!
-        //if ($response->code === 404) {
         if (self::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
@@ -780,7 +778,7 @@ class Instagram
      * @throws InstagramAuthException
      * @throws InstagramException
      *
-     * @return headers
+     * @return array
      */
     public function login($force = false)
     {
