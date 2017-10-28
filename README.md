@@ -53,16 +53,6 @@ $medias = $instagram->getLocationMediasById(1);
 $location $instagram->getLocationById(1);
 $medias = $instagram->getTopMediasByTagName('hello');
 ```
-
-
-### Search users by username
-```php
-$users = Instagram::searchAccountsByUsername('durov');
-echo '<pre>';
-echo json_encode($users);
-echo '</pre><br/>';
-```
-
 ### Paginate medias
 ```php
 $result = Instagram::getPaginateMedias('kevin');
