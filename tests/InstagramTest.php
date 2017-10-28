@@ -48,13 +48,13 @@ class InstagramTest extends TestCase
 
     public function testGetMedias()
     {
-        $medias = Instagram::getMedias('kevin', 80);
+        $medias = self::$instagram->getMedias('kevin', 80);
         $this->assertEquals(80, sizeof($medias));
     }
 
     public function testGet100Medias()
     {
-        $medias = Instagram::getMedias('kevin', 100);
+        $medias = self::$instagram->getMedias('kevin', 100);
         $this->assertEquals(100, sizeof($medias));
     }
 
