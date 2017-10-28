@@ -449,7 +449,7 @@ class Instagram
         $urlParts = explode('/', rtrim($responseUrl, '/'));
         $username = end($urlParts);
 
-        return self::getAccount($username);
+        return $this->getAccount($username);
     }
 
     /**
@@ -459,9 +459,9 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public static function getAccount($username)
+    public function getAccount($username)
     {
-        $response = Request::get(Endpoints::getAccountJsonLink($username));
+        $response = Request::get(Endpoints::getAccountJsonLink($username), $this->generateHeaders($this->userSession));
         if (self::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
