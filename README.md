@@ -62,41 +62,6 @@ echo json_encode($users);
 echo '</pre><br/>';
 ```
 
-### Get account medias
-```php
-$medias = Instagram::getMedias('kevin', 150);
-
-/*
-Available properties: 
-    $id;
-    $createdTime;
-    $type;
-    $link;
-    $imageLowResolutionUrl;
-    $imageThumbnailUrl;
-    $imageStandardResolutionUrl;
-    $imageHighResolutionUrl;
-    $caption;
-    $captionIsEdited;
-    $isAd;
-    $videoLowResolutionUrl;
-    $videoStandardResolutionUrl;
-    $videoLowBandwidthUrl;
-    $videoViews;
-    $code;
-    $owner;
-    $ownerId;
-    $likesCount;
-    $locationId;
-    $locationName;
-    $commentsCount;
-    
-*/
-echo $medias[0]->imageHighResolutionUrl;
-echo $medias[0]->caption;
-
-```
-
 ### Paginate medias
 ```php
 $result = Instagram::getPaginateMedias('kevin');
