@@ -214,7 +214,7 @@ class Instagram
     public function getMediaById($mediaId)
     {
         $mediaLink = Media::getLinkFromId($mediaId);
-        return self::getMediaByUrl($mediaLink);
+        return $this->getMediaByUrl($mediaLink);
     }
 
     /**
@@ -258,7 +258,7 @@ class Instagram
     public function getMediaByCode($mediaCode)
     {
         $url = Endpoints::getMediaPageLink($mediaCode);
-        return self::getMediaByUrl($url);
+        return $this->getMediaByUrl($url);
 
     }
 

@@ -66,22 +66,6 @@ if($result['hasNextPage'] === true) {
 echo json_encode($medias);
 ```
 
-### Get media by code
-```php
-$media = Instagram::getMediaByCode('BDs9iwfL7XA');
-```
-
-### Get media by url
-```php
-$media = Instagram::getMediaByUrl('https://www.instagram.com/p/BDs9iwfL7XA/');
-echo $media->owner->username;
-```
-
-### Get media by id
-```php
-$media = Instagram::getMediaById(1042815830884781756);
-```
-
 ### Search medias by tag name
 ```php
 $medias = Instagram::getMediasByTag('zara', 30);

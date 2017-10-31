@@ -120,6 +120,6 @@ class InstagramTest extends TestCase
     {
         $comments = self::$instagram->getMediaCommentsByCode('BR5Njq1gKmB', 40);
         //TODO: check why returns less comments
-        $this->assertEquals(31, sizeof($comments));
+        $this->assertEquals(32, sizeof($comments));
     }
 }
