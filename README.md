@@ -52,18 +52,6 @@ $medias $instagram->getLocationTopMediasById(1)
 $medias = $instagram->getLocationMediasById(1);
 $medias = $instagram->getTopMediasByTagName('hello');
 ```
-### Paginate medias
-```php
-$result = Instagram::getPaginateMedias('kevin');
-$medias = $result['medias']
-
-if($result['hasNextPage'] === true) {
-    $result = Instagram::getPaginateMedias('kevin', $result['maxId']);
-    $medias = array_merge($medias, $result['medias']);
-}
-
-echo json_encode($medias);
-```
 
 ### Search medias by tag name
 ```php
