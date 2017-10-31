@@ -50,7 +50,6 @@ $instagram->login();
 
 $medias $instagram->getLocationTopMediasById(1)
 $medias = $instagram->getLocationMediasById(1);
-$location $instagram->getLocationById(1);
 $medias = $instagram->getTopMediasByTagName('hello');
 ```
 ### Paginate medias
@@ -110,11 +109,6 @@ echo 'CODE: ' . Media::getCodeFromId(1270593720437182847);
 ```php
 echo 'Media id: ' . Media::getIdFromCode('BGiDkHAgBF_');
 // Media id: 1270593720437182847
-```
-
-### Get location id
-```php
-$medias = Instagram::getLocationById(1);
 ```
 
 ### Get location top medias by location id

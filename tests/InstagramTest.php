@@ -122,4 +122,7 @@ class InstagramTest extends TestCase
         //TODO: check why returns less comments
         $this->assertEquals(32, sizeof($comments));
     }
+
+    // TODO: Add test getMediaById
+    // TODO: Add test getLocationById
 }
