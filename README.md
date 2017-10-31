@@ -76,12 +76,6 @@ echo json_encode($medias);
 ```php
 $medias = Instagram::getTopMediasByTagName('durov');
 ```
-
-### Get media by id
-```php
-$media = Instagram::getMediaById(1270593720437182847)
-```
-
 ### Convert media id to shortcode
 ```php
 echo 'CODE: ' . Media::getCodeFromId('1270593720437182847_3');
