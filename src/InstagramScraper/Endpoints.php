@@ -36,68 +36,68 @@ class Endpoints
 
     public static function getAccountPageLink($username)
     {
-        return str_replace('{username}', urlencode($username), Endpoints::ACCOUNT_PAGE);
+        return str_replace('{username}', urlencode($username), static::ACCOUNT_PAGE);
     }
 
     public static function getAccountJsonLink($username)
     {
-        return str_replace('{username}', urlencode($username), Endpoints::ACCOUNT_JSON_INFO);
+        return str_replace('{username}', urlencode($username), static::ACCOUNT_JSON_INFO);
     }
 
     public static function getAccountJsonInfoLinkByAccountId($id)
     {
-        return str_replace('{userId}', urlencode($id), Endpoints::ACCOUNT_JSON_INFO_BY_ID);
+        return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_INFO_BY_ID);
     }
 
     public static function getAccountMediasJsonLink($username, $maxId = '')
     {
-        $url = str_replace('{username}', urlencode($username), Endpoints::ACCOUNT_MEDIAS);
+        $url = str_replace('{username}', urlencode($username), static::ACCOUNT_MEDIAS);
         return str_replace('{max_id}', urlencode($maxId), $url);
     }
 
     public static function getMediaPageLink($code)
     {
-        return str_replace('{code}', urlencode($code), Endpoints::MEDIA_LINK);
+        return str_replace('{code}', urlencode($code), static::MEDIA_LINK);
     }
 
     public static function getMediaJsonLink($code)
     {
-        return str_replace('{code}', urlencode($code), Endpoints::MEDIA_JSON_INFO);
+        return str_replace('{code}', urlencode($code), static::MEDIA_JSON_INFO);
     }
 
     public static function getMediasJsonByLocationIdLink($facebookLocationId, $maxId = '')
     {
-        $url = str_replace('{{facebookLocationId}}', urlencode($facebookLocationId), Endpoints::MEDIA_JSON_BY_LOCATION_ID);
+        $url = str_replace('{{facebookLocationId}}', urlencode($facebookLocationId), static::MEDIA_JSON_BY_LOCATION_ID);
         return str_replace('{{maxId}}', urlencode($maxId), $url);
     }
 
     public static function getMediasJsonByTagLink($tag, $maxId = '')
     {
-        $url = str_replace('{tag}', urlencode($tag), Endpoints::MEDIA_JSON_BY_TAG);
+        $url = str_replace('{tag}', urlencode($tag), static::MEDIA_JSON_BY_TAG);
         return str_replace('{max_id}', urlencode($maxId), $url);
     }
 
     public static function getGeneralSearchJsonLink($query)
     {
-        return str_replace('{query}', urlencode($query), Endpoints::GENERAL_SEARCH);
+        return str_replace('{query}', urlencode($query), static::GENERAL_SEARCH);
     }
 
     public static function getCommentsBeforeCommentIdByCode($code, $count, $commentId)
     {
-        $url = str_replace('{{shortcode}}', urlencode($code), Endpoints::COMMENTS_BEFORE_COMMENT_ID_BY_CODE);
+        $url = str_replace('{{shortcode}}', urlencode($code), static::COMMENTS_BEFORE_COMMENT_ID_BY_CODE);
         $url = str_replace('{{count}}', urlencode($count), $url);
         return str_replace('{{commentId}}', urlencode($commentId), $url);
     }
 
     public static function getLastLikesByCodeLink($code)
     {
-        $url = str_replace('{{code}}', urlencode($code), Endpoints::LAST_LIKES_BY_CODE);
+        $url = str_replace('{{code}}', urlencode($code), static::LAST_LIKES_BY_CODE);
         return $url;
     }
 
     public static function getGraphQlUrl($queryId, $parameters)
     {
-        $url = str_replace('{{queryId}}', urlencode($queryId), Endpoints::GRAPH_QL_QUERY_URL);
+        $url = str_replace('{{queryId}}', urlencode($queryId), static::GRAPH_QL_QUERY_URL);
         foreach ($parameters as $key => $value) {
             $url .= "&$key=$value";
         }
@@ -106,13 +106,13 @@ class Endpoints
 
     public static function getFollowUrl($accountId)
     {
-        $url = str_replace('{{accountId}}', urlencode($accountId), Endpoints::FOLLOW_URL);
+        $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOW_URL);
         return $url;
     }
     
     public static function getFollowersJsonLink($accountId, $count, $after = '')
     {
-        $url = str_replace('{{accountId}}', urlencode($accountId), Endpoints::FOLLOWERS_URL);
+        $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOWERS_URL);
         $url = str_replace('{{count}}', urlencode($count), $url);
         
         if ($after === '') {            
