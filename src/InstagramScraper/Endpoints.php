@@ -5,33 +5,33 @@ namespace InstagramScraper;
 class Endpoints
 {
     const BASE_URL = 'https://www.instagram.com';
-    const LOGIN_URL = self:: BASE_URL . '/accounts/login/ajax/';
-    const ACCOUNT_PAGE = self:: BASE_URL . '/{username}';
-    const MEDIA_LINK = self:: BASE_URL . '/p/{code}';
-    const ACCOUNT_MEDIAS = self:: BASE_URL . '/{username}/media/?max_id={max_id}';
-    const ACCOUNT_JSON_INFO = self:: BASE_URL . '/{username}/?__a=1';
-    const MEDIA_JSON_INFO = self:: BASE_URL . '/p/{code}/?__a=1';
-    const MEDIA_JSON_BY_LOCATION_ID = self:: BASE_URL . '/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
-    const MEDIA_JSON_BY_TAG = self:: BASE_URL . '/explore/tags/{tag}/?__a=1&max_id={max_id}';
-    const GENERAL_SEARCH = self:: BASE_URL . '/web/search/topsearch/?query={query}';
+    const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
+    const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
+    const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
+    const ACCOUNT_MEDIAS = 'https://www.instagram.com/{username}/media/?max_id={max_id}';
+    const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
+    const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
+    const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
+    const MEDIA_JSON_BY_TAG = 'https://www.instagram.com/explore/tags/{tag}/?__a=1&max_id={max_id}';
+    const GENERAL_SEARCH = 'https://www.instagram.com/web/search/topsearch/?query={query}';
     const ACCOUNT_JSON_INFO_BY_ID = 'ig_user({userId}){id,username,external_url,full_name,profile_pic_url,biography,followed_by{count},follows{count},media{count},is_private,is_verified}';
-    const COMMENTS_BEFORE_COMMENT_ID_BY_CODE = self:: BASE_URL . '/graphql/query/?query_id=17852405266163336&shortcode={{shortcode}}&first={{count}}&after={{commentId}}';
+    const COMMENTS_BEFORE_COMMENT_ID_BY_CODE = 'https://www.instagram.com/graphql/query/?query_id=17852405266163336&shortcode={{shortcode}}&first={{count}}&after={{commentId}}';
     const LAST_LIKES_BY_CODE = 'ig_shortcode({{code}}){likes{nodes{id,user{id,profile_pic_url,username,follows{count},followed_by{count},biography,full_name,media{count},is_private,external_url,is_verified}},page_info}}';
-    const FOLLOWING_URL = self:: BASE_URL . '/graphql/query/?query_id=17874545323001329&id={{accountId}}&first={{count}}';
-    const FOLLOWERS_URL = self:: BASE_URL . '/graphql/query/?query_id=17851374694183129&id={{accountId}}&first={{count}}&after={{after}}';
-    const FOLLOW_URL = self:: BASE_URL . '/web/friendships/{{accountId}}/follow/';
-    const UNFOLLOW_URL = self:: BASE_URL . '/web/friendships/{{accountId}}/unfollow/';
-    const USER_FEED = self:: BASE_URL . '/graphql/query/?query_id=17861995474116400&fetch_media_item_count=12&fetch_media_item_cursor=&fetch_comment_count=4&fetch_like=10';
-    const USER_FEED2 = self:: BASE_URL . '/?__a=1';
-    const INSTAGRAM_QUERY_URL = self:: BASE_URL . '/query/';
+    const FOLLOWING_URL = 'https://www.instagram.com/graphql/query/?query_id=17874545323001329&id={{accountId}}&first={{count}}';
+    const FOLLOWERS_URL = 'https://www.instagram.com/graphql/query/?query_id=17851374694183129&id={{accountId}}&first={{count}}&after={{after}}';
+    const FOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/follow/';
+    const UNFOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/unfollow/';
+    const USER_FEED = 'https://www.instagram.com/graphql/query/?query_id=17861995474116400&fetch_media_item_count=12&fetch_media_item_cursor=&fetch_comment_count=4&fetch_like=10';
+    const USER_FEED2 = 'https://www.instagram.com/?__a=1';
+    const INSTAGRAM_QUERY_URL = 'https://www.instagram.com/query/';
     const INSTAGRAM_CDN_URL = 'https://scontent.cdninstagram.com/';
 
-    const ACCOUNT_MEDIAS2 = self:: BASE_URL . '/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
+    const ACCOUNT_MEDIAS2 = 'https://www.instagram.com/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
 
     // Look alike??
-    const URL_SIMILAR = self:: BASE_URL . '/graphql/query/?query_id=17845312237175864&id=4663052';
+    const URL_SIMILAR = 'https://www.instagram.com/graphql/query/?query_id=17845312237175864&id=4663052';
 
-    const GRAPH_QL_QUERY_URL = self:: BASE_URL . '/graphql/query/?query_id={{queryId}}';
+    const GRAPH_QL_QUERY_URL = 'https://www.instagram.com/graphql/query/?query_id={{queryId}}';
 
 
     public static function getAccountPageLink($username)
