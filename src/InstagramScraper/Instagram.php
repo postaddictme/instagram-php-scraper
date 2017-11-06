@@ -477,8 +477,9 @@ class Instagram
      * @param string $tag
      * @param int $count
      * @param string $maxId
+     * @param string $minTimestamp
      *
-     * @return array
+     * @return Media[]
      * @throws InstagramException
      */
     public function getMediasByTag($tag, $count = 12, $maxId = '', $minTimestamp = null)
@@ -592,11 +593,11 @@ class Instagram
     /**
      * @param $tagName
      *
-     * @return array
+     * @return Media[]
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getTopMediasByTagName($tagName)
+    public function getCurrentTopMediasByTagName($tagName)
     {
         $response = Request::get(Endpoints::getMediasJsonByTagLink($tagName, ''),
             $this->generateHeaders($this->userSession));
@@ -619,11 +620,11 @@ class Instagram
     /**
      * @param $facebookLocationId
      *
-     * @return array
+     * @return Media[]
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getLocationTopMediasById($facebookLocationId)
+    public function getCurrentTopMediasByLocationId($facebookLocationId)
     {
         $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId),
             $this->generateHeaders($this->userSession));
@@ -649,10 +650,10 @@ class Instagram
      * @param int $quantity
      * @param string $offset
      *
-     * @return array
+     * @return Media[]
      * @throws InstagramException
      */
-    public function getLocationMediasById($facebookLocationId, $quantity = 12, $offset = '')
+    public function getMediasByLocationId($facebookLocationId, $quantity = 12, $offset = '')
     {
         $index = 0;
         $medias = [];
