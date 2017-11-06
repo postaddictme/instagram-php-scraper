@@ -29,6 +29,10 @@ echo $account->getUsername();
 ### Using composer
 
 ```sh
+composer.phar require raiym/instagram-php-scraper
+```
+or 
+```sh
 composer require raiym/instagram-php-scraper
 ```
 
