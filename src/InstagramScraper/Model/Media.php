@@ -469,6 +469,15 @@ class Media extends AbstractModel
                 $this->imageThumbnailUrl = $images['thumbnail'];
                 $this->type = self::TYPE_IMAGE;
                 break;
+            case '__typename':
+                if ($value === 'GraphImage') {
+                    $this->type = static::TYPE_IMAGE;
+                } else if ($value === 'GraphVideo') {
+                    $this->type = static::TYPE_VIDEO;
+                } else if ($value === 'GraphSidecar') {
+                    $this->type = static::TYPE_SIDECAR;
+                }
+                break;
         }
         if (!$this->ownerId && !is_null($this->owner)) {
             $this->ownerId = $this->getOwner()->getId();
