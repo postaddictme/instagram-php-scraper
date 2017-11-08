@@ -370,6 +370,7 @@ class Media extends AbstractModel
                 break;
             case 'code':
                 $this->shortCode = $value;
+                $this->link = Endpoints::getMediaPageLink($this->shortCode);
                 break;
             case 'link':
                 $this->link = $value;
