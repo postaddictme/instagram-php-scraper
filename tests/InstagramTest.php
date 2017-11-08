@@ -4,65 +4,100 @@ require '../vendor/autoload.php';
 
 use InstagramScraper\Instagram;
 use InstagramScraper\Model\Media;
+use phpFastCache\CacheManager;
 use PHPUnit\Framework\TestCase;
 
 
 class InstagramTest extends TestCase
 {
+    private static $instagram;
+
+    public static function setUpBeforeClass()
+    {
+        $sessionFolder = __DIR__ . DIRECTORY_SEPARATOR . 'sessions' . DIRECTORY_SEPARATOR;
+        CacheManager::setDefaultConfig([
+            'path' => $sessionFolder
+        ]);
+        $instanceCache = CacheManager::getInstance('files');
+        self::$instagram = Instagram::withCredentials('raiym', 'uvebzdxgbkt2T5_K', $instanceCache);
+        self::$instagram->login();
+
+    }
+
     public function testGetAccountByUsername()
     {
-        $account = Instagram::getAccount('kevin');
-        $this->assertEquals('kevin', $account->username);
-        $this->assertEquals('3', $account->id);
+        $account = self::$instagram->getAccount('kevin');
+        $this->assertEquals('kevin', $account->getUsername());
+        $this->assertEquals('3', $account->getId());
     }
 
     public function testGetAccountById()
     {
-        $account = Instagram::getAccountById(3);
-        $this->assertEquals('kevin', $account->username);
-        $this->assertEquals('3', $account->id);
+
+        $account = self::$instagram->getAccountById(3);
+        $this->assertEquals('kevin', $account->getUsername());
+        $this->assertEquals('3', $account->getId());
+    }
+
+    public function testGetAccountByIdWithInvalidNumericId()
+    {
+        // PHP_INT_MAX is far larger than the greatest id so far and thus does not represent a valid account.
+        $this->expectException(\InstagramScraper\Exception\InstagramException::class);
+        self::$instagram->getAccountById(PHP_INT_MAX);
     }
 
     public function testGetMedias()
     {
-        $medias = Instagram::getMedias('kevin', 80);
+        $medias = self::$instagram->getMedias('kevin', 80);
         $this->assertEquals(80, sizeof($medias));
     }
 
-    public function testGet1000Medias()
+    public function testGet100Medias()
     {
-        $medias = Instagram::getMedias('kevin', 1000);
-        $this->assertEquals(1000, sizeof($medias));
+        $medias = self::$instagram->getMedias('kevin', 100);
+        $this->assertEquals(100, sizeof($medias));
+    }
+
+    public function testGetMediasByTag()
+    {
+        $medias = self::$instagram->getMediasByTag('youneverknow', 20);
+        $this->assertEquals(20, sizeof($medias));
     }
 
     public function testGetMediaByCode()
     {
-        $media = Instagram::getMediaByCode('BHaRdodBouH');
-        $this->assertEquals('kevin', $media->owner->username);
+        $media = self::$instagram->getMediaByCode('BHaRdodBouH');
+        $this->assertEquals('kevin', $media->getOwner()->getUsername());
     }
 
     public function testGetMediaByUrl()
     {
-        $media = Instagram::getMediaByUrl('https://www.instagram.com/p/BHaRdodBouH');
-        $this->assertEquals('kevin', $media->owner->username);
+        $media = self::$instagram->getMediaByUrl('https://www.instagram.com/p/BHaRdodBouH');
+        $this->assertEquals('kevin', $media->getOwner()->getUsername());
     }
 
     public function testGetLocationTopMediasById()
     {
-        $medias = Instagram::getLocationTopMediasById(1);
+        $medias = self::$instagram->getLocationTopMediasById(1);
         $this->assertEquals(9, count($medias));
     }
 
     public function testGetLocationMediasById()
     {
-        $medias = Instagram::getLocationMediasById(1);
+        $medias = self::$instagram->getLocationMediasById(1);
         $this->assertEquals(12, count($medias));
     }
 
     public function testGetLocationById()
     {
-        $location = Instagram::getLocationById(1);
-        $this->assertEquals('Dog Patch Labs', $location->name);
+        $location = self::$instagram->getLocationById(1);
+        $this->assertEquals('Dog Patch Labs', $location->getName());
+    }
+
+    public function testGetMediaByTag()
+    {
+        $medias = self::$instagram->getTopMediasByTagName('hello');
+        echo json_encode($medias);
     }
 
     public function testGetIdFromCode()
@@ -80,4 +115,14 @@ class InstagramTest extends TestCase
         $id = Media::getIdFromCode('BGiDkHAgBF_');
         $this->assertEquals(1270593720437182847, $id);
     }
+
+    public function testGeMediaCommentsByCode()
+    {
+        $comments = self::$instagram->getMediaCommentsByCode('BR5Njq1gKmB', 40);
+        //TODO: check why returns less comments
+        $this->assertEquals(32, sizeof($comments));
+    }
+
+    // TODO: Add test getMediaById
+    // TODO: Add test getLocationById
 }

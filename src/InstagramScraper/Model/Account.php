@@ -2,116 +2,220 @@
 
 namespace InstagramScraper\Model;
 
-class Account
+/**
+ * Class Account
+ * @package InstagramScraper\Model
+ */
+class Account extends AbstractModel
 {
     /**
      * User id
      * @var string
      */
-    public $id;
+    protected $id = 0;
 
     /**
      * Username
      * @var string
      */
-    public $username;
+    protected $username = '';
 
     /**
      * Full name
      * @var string
      */
-    public $fullName;
+    protected $fullName = '';
 
     /**
      * Profile picture url
      * @var string
      */
-    public $profilePicUrl;
+    protected $profilePicUrl = '';
 
     /**
      * Information filled by user
      * @var string
      */
-    public $biography;
+    protected $biography = '';
 
     /**
      * Url provided by user in profile
      * @var string
      */
-    public $externalUrl;
+    protected $externalUrl = '';
 
     /**
      * Number of subscriptions
      * @var integer
      */
-    public $followsCount;
+    protected $followsCount = 0;
 
     /**
      * Number of followers
      * @var integer
      */
-    public $followedByCount;
+    protected $followedByCount = 0;
 
     /**
      * Number of medias published by user
      * @var integer
      */
-    public $mediaCount;
+    protected $mediaCount = 0;
 
     /**
      * true if account is private
      * @var boolean
      */
-    public $isPrivate;
+    protected $isPrivate = false;
 
     /**
      * true if verified by Instagram as celebrity
      * @var boolean
      */
-    public $isVerified;
+    protected $isVerified = false;
 
-    function __construct()
+    /**
+     * @var bool
+     */
+    protected $isLoaded = false;
+
+    /**
+     * @return bool
+     */
+    public function isLoaded()
     {
+        return $this->isLoaded;
     }
 
-    public static function fromAccountPage($userArray)
+    /**
+     * @return string
+     */
+    public function getUsername()
     {
-        $instance = new self();
-        $instance->username = $userArray['username'];
-        $instance->followsCount = $userArray['follows']['count'];
-        $instance->followedByCount = $userArray['followed_by']['count'];
-        $instance->profilePicUrl = $userArray['profile_pic_url'];
-        $instance->id = $userArray['id'];
-        $instance->biography = $userArray['biography'];
-        $instance->fullName = $userArray['full_name'];
-        $instance->mediaCount = $userArray['media']['count'];
-        $instance->isPrivate = $userArray['is_private'];
-        $instance->externalUrl = $userArray['external_url'];
-        $instance->isVerified = $userArray['is_verified'];
-        return $instance;
+        return $this->username;
     }
 
-    public static function fromMediaPage($userArray)
+    /**
+     * @return int
+     */
+    public function getId()
     {
-        $instance = new self();
-        $instance->username = $userArray['username'];
-        $instance->profilePicUrl = $userArray['profile_pic_url'];
-        $instance->id = $userArray['id'];
-        $instance->fullName = $userArray['full_name'];
-        $instance->isPrivate = $userArray['is_private'];
-        return $instance;
+        return (int)$this->id;
     }
 
-    public static function fromSearchPage($userArray)
+    /**
+     * @return string
+     */
+    public function getFullName()
     {
-        $instance = new self();
-        $instance->username = $userArray['username'];
-        $instance->profilePicUrl = $userArray['profile_pic_url'];
-        $instance->id = $userArray['pk'];
-        $instance->fullName = $userArray['full_name'];
-        $instance->isPrivate = $userArray['is_private'];
-        $instance->isVerified = $userArray['is_verified'];
-        $instance->followedByCount = $userArray['follower_count'];
-        return $instance;
+        return $this->fullName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProfilePicUrl()
+    {
+        return $this->profilePicUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBiography()
+    {
+        return $this->biography;
+    }
+
+    /**
+     * @return string
+     */
+    public function getExternalUrl()
+    {
+        return $this->externalUrl;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFollowsCount()
+    {
+        return $this->followsCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFollowedByCount()
+    {
+        return $this->followedByCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMediaCount()
+    {
+        return $this->mediaCount;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrivate()
+    {
+        return $this->isPrivate;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVerified()
+    {
+        return $this->isVerified;
+    }
+
+    /**
+     * @param $value
+     * @param $prop
+     * @param $array
+     */
+    protected function initPropertiesCustom($value, $prop, $array)
+    {
+        switch ($prop) {
+            case 'id':
+                $this->id = (int)$value;
+                break;
+            case 'username':
+                $this->username = $value;
+                break;
+            case 'full_name':
+                $this->fullName = $value;
+                break;
+            case 'profile_pic_url':
+                $this->profilePicUrl = $value;
+                break;
+            case 'biography':
+                $this->biography = $value;
+                break;
+            case 'external_url':
+                $this->externalUrl = $value;
+                break;
+            case 'follows':
+                $this->followsCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
+                break;
+            case 'followed_by':
+                $this->followedByCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
+                break;
+            case 'media':
+                $this->mediaCount = !empty($array[$prop]['count']) ? $array[$prop]['count'] : 0;
+                break;
+            case 'is_private':
+                $this->isPrivate = (bool)$value;
+                break;
+            case 'is_verified':
+                $this->isVerified = (bool)$value;
+                break;
+        }
     }
 }

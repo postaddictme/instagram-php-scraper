@@ -3,24 +3,93 @@
 namespace InstagramScraper\Model;
 
 
-class Location
+class Location extends AbstractModel
 {
-    public $id;
-    public $name;
-    public $lat;
-    public $lng;
+    /**
+     * @var array
+     */
+    protected static $initPropertiesMap = [
+        'id' => 'id',
+        'has_public_page' => 'hasPublicPage',
+        'name' => 'name',
+        'slug' => 'slug',
+        'lat' => 'lat',
+        'lng' => 'lng',
+    ];
+    /**
+     * @var
+     */
+    protected $id;
+    /**
+     * @var
+     */
+    protected $hasPublicPage;
+    /**
+     * @var
+     */
+    protected $name;
+    /**
+     * @var
+     */
+    protected $slug;
+    /**
+     * @var
+     */
+    protected $lng;
+    /**
+     * @var
+     */
+    protected $lat;
+    /**
+     * @var bool
+     */
+    protected $isLoaded = false;
 
-    function __construct()
+    /**
+     * @return mixed
+     */
+    public function getId()
     {
+        return $this->id;
     }
 
-    public static function makeLocation($locationArray)
+    /**
+     * @return mixed
+     */
+    public function getHasPublicPage()
     {
-        $location = new Location();
-        $location->id = $locationArray['id'];
-        $location->name = $locationArray['name'];
-        $location->lat = $locationArray['lat'];
-        $location->lng = $locationArray['lng'];
-        return $location;
+        return $this->hasPublicPage;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLng()
+    {
+        return $this->lng;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLat()
+    {
+        return $this->lat;
     }
 }

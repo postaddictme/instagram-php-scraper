@@ -1,180 +1,46 @@
-# instagram-php-scraper
-# Usage
+# Instagram PHP Scrapper
+This library based on Instagram web version. We develop it because nowadays it is hard to get approved Instagram application. 
+The purpose support every feature that web desktop and mobile version support. 
 
-`composer require raiym/instagram-php-scraper`
-
+## Code Example
+```php
+$instagram = Instagram::withCredentials('username', 'password');
+$instagram->login();
+$account = $instagram->getAccountById(3);
+echo $account->getUsername();
+```
+Some methods does not require auth: 
+```php
+$instagram = new Instagram();
+$nonPrivateAccountMedias = $instagram->getMedias('kevin');
+echo $nonPrivateAccountMedias[0]->getLink();
+```
+If you use auth it is recommended to cash user session, in this case you don't need run `$instagram->login()` method every time your program runs:
 
 ```php
-use InstagramScraper\Instagram;
-
+$instagram = Instagram::withCredentials('username', 'password', '/path/to/cache/folder/');
+$instagram->login(); // will use cached session if you can force login $instagram->login(true)
+$account = $instagram->getAccountById(3);
+echo $account->getUsername();
 ```
 
-### Get account info
-```php
-$account = Instagram::getAccount('kevin');
-/*
-Available properties: 
-    $username;
-    $followsCount;
-    $followedByCount;
-    $profilePicUrl;
-    $id;
-    $biography;
-    $fullName;
-    $mediaCount;
-    $isPrivate;
-    $externalUrl;
-*/
-echo $account->followedByCount;
+## Installation
+
+### Using composer
+
+```sh
+composer.phar require raiym/instagram-php-scraper
 ```
-### Get account info by userId
-```php
-$account = Instagram::getAccountById(193886659);
-echo $account->username;
+or 
+```sh
+composer require raiym/instagram-php-scraper
 ```
 
-### Search users by username
-```php
-$users = Instagram::searchAccountsByUsername('durov');
-echo '<pre>';
-echo json_encode($users);
-echo '</pre><br/>';
-```
+### If you don't have composer
+You can download it [here](https://getcomposer.org/download/).
 
-### Get account medias
-```php
-$medias = Instagram::getMedias('kevin', 150);
+## Examples
+See examples [here](https://github.com/postaddictme/instagram-php-scraper/tree/master/examples).
 
-/*
-Available properties: 
-    $id;
-    $createdTime;
-    $type;
-    $link;
-    $imageLowResolutionUrl;
-    $imageThumbnailUrl;
-    $imageStandardResolutionUrl;
-    $imageHighResolutionUrl;
-    $caption;
-    $captionIsEdited;
-    $isAd;
-    $videoLowResolutionUrl;
-    $videoStandardResolutionUrl;
-    $videoLowBandwidthUrl;
-    $videoViews;
-    $code;
-    $owner;
-    $ownerId;
-    $likesCount;
-    $locationId;
-    $locationName;
-    $commentsCount;
-    
-*/
-echo $medias[0]->imageHighResolutionUrl;
-echo $medias[0]->caption;
-
-```
-
-### Paginate medias
-```php
-$result = Instagram::getPaginateMedias('kevin');
-$medias = $result['medias']
-
-if($result['hasNextPage'] === true) {
-    $result = Instagram::getPaginateMedias('kevin', $result['maxId']);
-    $medias = array_merge($medias, $result['medias']);
-}
-
-echo json_encode($medias);
-```
-
-### Get media by code
-```php
-$media = Instagram::getMediaByCode('BDs9iwfL7XA');
-```
-
-### Get media by url
-```php
-$media = Instagram::getMediaByUrl('https://www.instagram.com/p/BDs9iwfL7XA/');
-echo $media->owner->username;
-```
-
-### Get media by id
-```php
-$media = Instagram::getMediaById(1042815830884781756);
-```
-
-### Search medias by tag name
-```php
-$medias = Instagram::getMediasByTag('zara', 30);
-echo json_encode($medias);
-```
-
-### Paginate medias by tag name
-```php
-$result = Instagram::getPaginateMediasByTag('zara');
-$medias = $result['medias']
-
-if($result['hasNextPage'] === true) {
-    $result = Instagram::getPaginateMediasByTag('zara', $result['maxId']);
-    $medias = array_merge($medias, $result['medias']);
-}
-
-echo json_encode($medias);
-```
-
-### Get top medias by tag name
-```php
-$medias = Instagram::getTopMediasByTagName('durov');
-```
-
-### Get media by id
-```php
-$media = Instagram::getMediaById(1270593720437182847)
-```
-
-### Convert media id to shortcode
-```php
-echo 'CODE: ' . Media::getCodeFromId('1270593720437182847_3');
-// OR
-echo 'CODE: ' . Media::getCodeFromId('1270593720437182847');
-// OR
-echo 'CODE: ' . Media::getCodeFromId(1270593720437182847);
-// CODE: BGiDkHAgBF_
-// So you can do like this: instagram.com/p/BGiDkHAgBF_
-```
-
-### Convert shortcode to media id
-```php
-echo 'Media id: ' . Media::getIdFromCode('BGiDkHAgBF_');
-// Media id: 1270593720437182847
-```
-
-### Get media comments by shortcode
-```php
-$comments = Instagram::getMediaCommentsByCode('BG3Iz-No1IZ', 8000);
-```
-
-### Get media comments by id
-```php
-$comments = Instagram::getMediaCommentsById('1130748710921700586', 10000)
-```
-
-### Get location id
-```php
-$medias = Instagram::getLocationById(1);
-```
-
-### Get location top medias by location id
-```php
-$medias = Instagram::getLocationTopMediasById(1);
-```
-
-### Get location medias by location id
-```php
-$medias = Instagram::getLocationMediasById(1);
-```
-
-### Other
+## Other
 Java library: https://github.com/postaddictme/instagram-java-scraper
