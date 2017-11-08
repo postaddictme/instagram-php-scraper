@@ -8,7 +8,7 @@ class Endpoints
     const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
     const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
     const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
-    const ACCOUNT_MEDIAS = 'https://www.instagram.com/{username}/media/?max_id={max_id}';
+    const ACCOUNT_MEDIAS = 'https://www.instagram.com/{username}/?__a=1&max_id={max_id}';
     const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
     const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
     const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
@@ -109,19 +109,18 @@ class Endpoints
         $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOW_URL);
         return $url;
     }
-    
+
     public static function getFollowersJsonLink($accountId, $count, $after = '')
     {
         $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOWERS_URL);
         $url = str_replace('{{count}}', urlencode($count), $url);
-        
-        if ($after === '') {            
+
+        if ($after === '') {
             $url = str_replace('&after={{after}}', '', $url);
-        }
-        else {
+        } else {
             $url = str_replace('{{after}}', urlencode($after), $url);
         }
-        
+
         return $url;
     }
 }

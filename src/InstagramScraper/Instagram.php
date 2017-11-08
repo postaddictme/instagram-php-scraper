@@ -186,22 +186,23 @@ class Instagram
             if (!is_array($arr)) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
             }
+            $nodes = $arr['user']['media']['nodes'];
             // fix - count takes longer/has more overhead
-            if (empty($arr['items']) || !isset($arr['items'])) {
+            if (!isset($nodes) || empty($nodes)) {
                 return [];
             }
-            foreach ($arr['items'] as $mediaArray) {
+            foreach ($nodes as $mediaArray) {
                 if ($index === $count) {
                     return $medias;
                 }
                 $medias[] = Media::create($mediaArray);
                 $index++;
             }
-            if (empty($arr['items']) || !isset($arr['items'])) {
+            if (empty($nodes) || !isset($nodes)) {
                 return $medias;
             }
-            $maxId = $arr['items'][count($arr['items']) - 1]['id'];
-            $isMoreAvailable = $arr['more_available'];
+            $maxId = $nodes[count($nodes) - 1]['id'];
+            $isMoreAvailable = $arr['user']['media']['page_info']['has_next_page'];
         }
         return $medias;
     }
