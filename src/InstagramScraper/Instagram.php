@@ -295,20 +295,21 @@ class Instagram
         if (!is_array($arr)) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
         }
+        $nodes = $arr['user']['media']['nodes'];
 
         //if (count($arr['items']) === 0) {
         // I generally use empty. Im not sure why people would use count really - If the array is large then count takes longer/has more overhead.
         // If you simply need to know whether or not the array is empty then use empty.
-        if (empty($arr['items'])) {
+        if (empty($nodes)) {
             return $toReturn;
         }
 
-        foreach ($arr['items'] as $mediaArray) {
+        foreach ($nodes as $mediaArray) {
             $medias[] = Media::create($mediaArray);
         }
 
-        $maxId = $arr['items'][count($arr['items']) - 1]['id'];
-        $hasNextPage = $arr['more_available'];
+        $maxId = $arr['user']['media']['page_info']['end_cursor'];
+        $hasNextPage = $arr['user']['media']['page_info']['has_next_page'];
 
         $toReturn = [
             'medias' => $medias,
