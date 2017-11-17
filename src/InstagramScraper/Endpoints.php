@@ -17,6 +17,7 @@ class Endpoints
     const ACCOUNT_JSON_INFO_BY_ID = 'ig_user({userId}){id,username,external_url,full_name,profile_pic_url,biography,followed_by{count},follows{count},media{count},is_private,is_verified}';
     const COMMENTS_BEFORE_COMMENT_ID_BY_CODE = 'https://www.instagram.com/graphql/query/?query_id=17852405266163336&shortcode={{shortcode}}&first={{count}}&after={{commentId}}';
     const LAST_LIKES_BY_CODE = 'ig_shortcode({{code}}){likes{nodes{id,user{id,profile_pic_url,username,follows{count},followed_by{count},biography,full_name,media{count},is_private,external_url,is_verified}},page_info}}';
+	const LIKES_BY_SHORTCODE =  'https://www.instagram.com/graphql/query/?query_id=17864450716183058&variables={"shortcode":"{{shortcode}}","first":{{count}},"after":"{{likeId}}"}';
     const FOLLOWING_URL = 'https://www.instagram.com/graphql/query/?query_id=17874545323001329&id={{accountId}}&first={{count}}';
     const FOLLOWERS_URL = 'https://www.instagram.com/graphql/query/?query_id=17851374694183129&id={{accountId}}&first={{count}}&after={{after}}';
     const FOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/follow/';
@@ -94,6 +95,14 @@ class Endpoints
         $url = str_replace('{{code}}', urlencode($code), static::LAST_LIKES_BY_CODE);
         return $url;
     }
+	
+	public static function getLastLikesByCode($code, $count, $lastLikeID) {
+		$url = str_replace('{{shortcode}}', urlencode($code), static::LIKES_BY_SHORTCODE);
+		$url = str_replace('{{count}}', urlencode($count), $url);
+		$url = str_replace('{{likeId}}', urlencode($lastLikeID), $url);
+
+        return $url;
+	}
 
     public static function getGraphQlUrl($queryId, $parameters)
     {

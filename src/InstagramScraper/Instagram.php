@@ -7,6 +7,7 @@ use InstagramScraper\Exception\InstagramException;
 use InstagramScraper\Exception\InstagramNotFoundException;
 use InstagramScraper\Model\Account;
 use InstagramScraper\Model\Comment;
+use InstagramScraper\Model\Like;
 use InstagramScraper\Model\Location;
 use InstagramScraper\Model\Media;
 use InstagramScraper\Model\Tag;
@@ -18,6 +19,7 @@ class Instagram
     const HTTP_NOT_FOUND = 404;
     const HTTP_OK = 200;
     const MAX_COMMENTS_PER_REQUEST = 300;
+	const MAX_LIKES_PER_REQUEST = 300;
 
     private static $instanceCache;
     private $sessionUsername;
@@ -386,6 +388,63 @@ class Instagram
             $maxId = $nodes[sizeof($nodes) - 1]['node']['id'];
         }
         return $comments;
+    }
+	
+	/**
+     * @param      $code
+     * @param int  $count
+     * @param null $maxId
+     *
+     * @return array
+     * @throws InstagramException
+     */
+    public function getMediaLikesByCode($code, $count = 10, $maxId = null)
+    {
+        $remain = $count;
+        $likes = [];
+        $index = 0;
+        $hasPrevious = true;
+        while ($hasPrevious && $index < $count) {
+            if ($remain > self::MAX_LIKES_PER_REQUEST) {
+                $numberOfLikesToRetreive = self::MAX_LIKES_PER_REQUEST;
+                $remain -= self::MAX_LIKES_PER_REQUEST;
+                $index += self::MAX_LIKES_PER_REQUEST;
+            } else {
+                $numberOfLikesToRetreive = $remain;
+                $index += $remain;
+                $remain = 0;
+            }
+            if (!isset($maxId)) {
+                $maxId = '';
+
+            }
+            $commentsUrl = Endpoints::getLastLikesByCode($code, $numberOfLikesToRetreive, $maxId);
+            $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession));
+            if ($response->code !== 200) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.');
+            }
+            $cookies = self::parseCookies($response->headers['Set-Cookie']);
+            $this->userSession['csrftoken'] = $cookies['csrftoken'];
+            $jsonResponse = json_decode($response->raw_body, true);
+            
+			$nodes = $jsonResponse['data']['shortcode_media']['edge_liked_by']['edges'];
+			
+            foreach ($nodes as $likesArray) {
+                $likes[] = Like::create($likesArray['node']);
+            }
+			
+            $hasPrevious = $jsonResponse['data']['shortcode_media']['edge_liked_by']['page_info']['has_next_page'];
+            $numberOfLikes = $jsonResponse['data']['shortcode_media']['edge_liked_by']['count'];
+            if ($count > $numberOfLikes) {
+                $count = $numberOfLikes;
+            }
+            if (sizeof($nodes) == 0) {
+                return $likes;
+            }
+            $maxId = $nodes[sizeof($nodes) - 1]['node']['id'];
+        }
+        
+		return $likes;
     }
 
     /**
