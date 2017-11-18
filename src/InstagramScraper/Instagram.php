@@ -441,7 +441,7 @@ class Instagram
             if (sizeof($nodes) == 0) {
                 return $likes;
             }
-            $maxId = $nodes[sizeof($nodes) - 1]['node']['id'];
+            $maxId = $jsonResponse['data']['shortcode_media']['edge_liked_by']['page_info']['end_cursor'];
         }
         
 		return $likes;
