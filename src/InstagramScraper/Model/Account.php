@@ -31,6 +31,66 @@ class Account extends AbstractModel
      * @var string
      */
     protected $profilePicUrl = '';
+    
+    /**
+     * Profile picture id
+     * @var string
+     */
+    protected $profilePicId = '';
+
+    /**
+     * true if account has anonymous profile picture
+     * @var boolean
+     */
+    protected $hasAnonymousProfilePicture = false;
+
+    /**
+     * Mutual followers or number of followers
+     * @var string
+     */
+    protected $byline = '';
+
+    /**
+     * Following or followed by
+     * @var string
+     */
+    protected $socialContext = '';
+
+    /**
+     * Following or followed by
+     * @var string
+     */
+    protected $searchSocialContext = '';
+
+    /**
+     * Number of mutual followers
+     * @var integer
+     */
+    protected $mutualFollowersCount = 0;
+
+    /**
+     * Latest reel media timestamp
+     * @var epoch
+     */
+    protected $latestReelMedia = '';
+
+    /**
+     * true if following user
+     * @var boolean
+     */
+    protected $following = false;
+
+    /**
+     * true if follow requested
+     * @var boolean
+     */
+    protected $outgoingRequest = false;
+
+    /**
+     * Number of unseen medias
+     * @var int
+     */
+    protected $unseenMedias = 0;
 
     /**
      * Information filled by user
@@ -122,6 +182,87 @@ class Account extends AbstractModel
     /**
      * @return string
      */
+    public function getProfilePicId()
+    {
+        return $this->profilePicId;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasAnonymousProfilePicture()
+    {
+        return $this->hasAnonymousProfilePicture;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getByline()
+    {
+        return $this->byline;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSocialContext()
+    {
+        return $this->socialContext;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSearchSocialContext()
+    {
+        return $this->searchSocialContext;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMutualFollowersCount()
+    {
+        return $this->mutualFollowersCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLatestReelMedia()
+    {
+        return $this->latestReelMedia;
+    }
+
+    /**
+     * @return bool
+     */
+    public function following()
+    {
+        return $this->following;
+    }
+
+    /**
+     * @return bool
+     */
+    public function outgoingRequest()
+    {
+        return $this->outgoingRequest;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUnseenMedias()
+    {
+        return $this->unseenMedias;
+    }
+
+    /**
+     * @return string
+     */
     public function getBiography()
     {
         return $this->biography;
@@ -183,7 +324,7 @@ class Account extends AbstractModel
     protected function initPropertiesCustom($value, $prop, $array)
     {
         switch ($prop) {
-            case 'id':
+            case 'pk':
                 $this->id = (int)$value;
                 break;
             case 'username':
@@ -195,6 +336,36 @@ class Account extends AbstractModel
             case 'profile_pic_url':
                 $this->profilePicUrl = $value;
                 break;
+            case 'profile_pic_id':
+                $this->profilePicId = $value;
+                break;
+            case 'has_anonymous_profile_picture':
+                $this->hasAnonymousProfilePicture = (bool)$value;
+                break;
+            case 'byline':
+                $this->byline = $value;
+                break;
+            case 'social_context':
+                $this->socialContext = $value;
+                break;
+            case 'search_social_context':
+                $this->searchSocialContext = $value;
+                break;
+            case 'mutual_followers_count':
+                $this->mutualFollowersCount = $value;
+                break;
+            case 'latest_reel_media':
+                $this->latestReelMedia = $value;
+                break;
+            case 'following':
+                $this->following = $value;
+                break;
+            case 'outgoing_request':
+                $this->outgoingRequest = $value;
+                break;
+            case 'unseen_count':
+                $this->unseenMedias = $value;
+                break;
             case 'biography':
                 $this->biography = $value;
                 break;
@@ -204,8 +375,8 @@ class Account extends AbstractModel
             case 'follows':
                 $this->followsCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
                 break;
-            case 'followed_by':
-                $this->followedByCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
+            case 'follower_count':
+                $this->followedByCount = $value;
                 break;
             case 'media':
                 $this->mediaCount = !empty($array[$prop]['count']) ? $array[$prop]['count'] : 0;
