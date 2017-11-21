@@ -36,10 +36,14 @@ trait ArrayLikeTrait
         if ($run = $this->isMethod($offset, 'get')) {
             return $this->run($run);
         } elseif (\property_exists($this, $offset)) {
-            return $this->{$offset};
-        } else {
-            return null;
+            if (isset($this->{$offset})) {
+                return $this->{$offset};
+            } elseif (isset($this::$offset)) {
+                return $this::$offset;
+            }
         }
+        
+        return null;
     }
 
     /**
