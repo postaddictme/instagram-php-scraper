@@ -22,8 +22,8 @@ class Like extends AbstractModel
     {
         return $this->id;
     }
-	
-	/**
+
+    /**
      * @return mixed
      */
     public function getUserName()

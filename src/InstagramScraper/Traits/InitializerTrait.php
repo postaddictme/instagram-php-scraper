@@ -51,24 +51,6 @@ trait InitializerTrait
     protected $data = [];
 
     /**
-     * @param array $params
-     *
-     * @return static
-     */
-    public static function create(array $params = null)
-    {
-        return new static($params);
-    }
-
-    /**
-     * @return $this
-     */
-    public static function fake()
-    {
-        return static::create()->setFake(true);
-    }
-
-    /**
      * @param array $props
      */
     protected function __construct(array $props = null)
@@ -86,52 +68,38 @@ trait InitializerTrait
     }
 
     /**
-     * @return bool
-     */
-    public function isNotEmpty()
-    {
-        return !$this->isLoadEmpty;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isFake()
-    {
-        return $this->isFake;
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray()
-    {
-        $ret = [];
-        $map = static::$initPropertiesMap;
-        foreach ($map as $key => $init) {
-            if (\property_exists($this, $key)) {
-                //if there is property then it just assign value
-                $ret[$key] = $this->{$key};
-            } elseif (isset($this[$key])) {
-                //probably array access
-                $ret[$key] = $this[$key];
-            } else {
-                $ret[$key] = null;
-            }
-        }
-
-        return $ret;
-    }
-
-    /**
-     * @param bool $value
-     *
      * @return $this
      */
-    protected function setFake($value = true)
+    protected function beforeInit()
     {
-        $this->isFake = (bool) $value;
+        return $this;
+    }
 
+    /**
+     * @return $this
+     */
+    final protected function initAuto()
+    {
+        foreach ($this as $prop => $value) {
+            if (isset(static::$initPropertiesMap[$prop]) and $methodOrProp = static::$initPropertiesMap[$prop] and \method_exists($this,
+                    $methodOrProp)
+            ) {
+                //if there is method then use it firstly
+                \call_user_func([$this, $methodOrProp], $value, $prop);
+            }
+        }
+        $this->isNew = false;
+        $this->isLoaded = true;
+        $this->isLoadEmpty = false;
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function initDefaults()
+    {
         return $this;
     }
 
@@ -175,45 +143,77 @@ trait InitializerTrait
     /**
      * @return $this
      */
-    final protected function initAuto()
-    {
-        foreach ($this as $prop => $value) {
-            if (isset(static::$initPropertiesMap[$prop]) and $methodOrProp = static::$initPropertiesMap[$prop] and \method_exists($this,
-                    $methodOrProp)
-            ) {
-                //if there is method then use it firstly
-                \call_user_func([$this, $methodOrProp], $value, $prop);
-            }
-        }
-        $this->isNew = false;
-        $this->isLoaded = true;
-        $this->isLoadEmpty = false;
-
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    protected function initDefaults()
-    {
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    protected function beforeInit()
-    {
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
     protected function afterInit()
     {
         return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public static function fake()
+    {
+        return static::create()->setFake(true);
+    }
+
+    /**
+     * @param bool $value
+     *
+     * @return $this
+     */
+    protected function setFake($value = true)
+    {
+        $this->isFake = (bool)$value;
+
+        return $this;
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return static
+     */
+    public static function create(array $params = null)
+    {
+        return new static($params);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNotEmpty()
+    {
+        return !$this->isLoadEmpty;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFake()
+    {
+        return $this->isFake;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        $ret = [];
+        $map = static::$initPropertiesMap;
+        foreach ($map as $key => $init) {
+            if (\property_exists($this, $key)) {
+                //if there is property then it just assign value
+                $ret[$key] = $this->{$key};
+            } elseif (isset($this[$key])) {
+                //probably array access
+                $ret[$key] = $this[$key];
+            } else {
+                $ret[$key] = null;
+            }
+        }
+
+        return $ret;
     }
 
     /**
@@ -240,73 +240,6 @@ trait InitializerTrait
     }
 
     /**
-     * @param mixed  $value
-     * @param string $key
-     *
-     * @return $this
-     */
-    protected function initBool($value, $key)
-    {
-        return $this->initProperty(!empty($value), "is{$key}", $key);
-    }
-
-    /**
-     * @param mixed  $value
-     * @param string $key
-     *
-     * @return $this
-     */
-    protected function initInt($value, $key)
-    {
-        return $this->initProperty((int) $value, $key);
-    }
-
-    /**
-     * @param mixed  $value
-     * @param string $key
-     *
-     * @return $this
-     */
-    protected function initFloat($value, $key)
-    {
-        return $this->initProperty((float) $value, $key);
-    }
-
-    /**
-     * @param string $rawData
-     * @param string $key
-     *
-     * @return $this
-     */
-    protected function initJsonArray($rawData, $key)
-    {
-        $value = \json_decode($rawData, true);
-        if (empty($value)) {
-            //could not resolve -
-            if ('null' === $rawData or '' === $rawData) {
-                $value = [];
-            } else {
-                $value = (array) $rawData;
-            }
-        } else {
-            $value = (array) $value;
-        }
-
-        return $this->initProperty($value, $key);
-    }
-
-    /**
-     * @param mixed  $value
-     * @param string $key
-     *
-     * @return $this
-     */
-    protected function initExplode($value, $key)
-    {
-        return $this->initProperty(\explode(',', $value), "is{$key}", $key);
-    }
-
-    /**
      * @param $value
      * @param $key
      *
@@ -329,6 +262,73 @@ trait InitializerTrait
         }
 
         return $this;
+    }
+
+    /**
+     * @param mixed $value
+     * @param string $key
+     *
+     * @return $this
+     */
+    protected function initBool($value, $key)
+    {
+        return $this->initProperty(!empty($value), "is{$key}", $key);
+    }
+
+    /**
+     * @param mixed $value
+     * @param string $key
+     *
+     * @return $this
+     */
+    protected function initInt($value, $key)
+    {
+        return $this->initProperty((int)$value, $key);
+    }
+
+    /**
+     * @param mixed $value
+     * @param string $key
+     *
+     * @return $this
+     */
+    protected function initFloat($value, $key)
+    {
+        return $this->initProperty((float)$value, $key);
+    }
+
+    /**
+     * @param string $rawData
+     * @param string $key
+     *
+     * @return $this
+     */
+    protected function initJsonArray($rawData, $key)
+    {
+        $value = \json_decode($rawData, true, 512, JSON_BIGINT_AS_STRING);
+        if (empty($value)) {
+            //could not resolve -
+            if ('null' === $rawData or '' === $rawData) {
+                $value = [];
+            } else {
+                $value = (array)$rawData;
+            }
+        } else {
+            $value = (array)$value;
+        }
+
+        return $this->initProperty($value, $key);
+    }
+
+    /**
+     * @param mixed $value
+     * @param string $key
+     *
+     * @return $this
+     */
+    protected function initExplode($value, $key)
+    {
+        return $this->initProperty(\explode(',', $value), "is{$key}", $key);
     }
 
 }
