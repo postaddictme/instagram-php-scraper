@@ -100,7 +100,11 @@ class Account extends AbstractModel
      */
     public function getId()
     {
-        return (int)$this->id;
+        if (PHP_INT_SIZE > 4) {
+            $this->id = (int)$this->id;
+        }
+
+        return $this->id;
     }
 
     /**
@@ -184,7 +188,7 @@ class Account extends AbstractModel
     {
         switch ($prop) {
             case 'id':
-                $this->id = (int)$value;
+                $this->id = $value;
                 break;
             case 'username':
                 $this->username = $value;
