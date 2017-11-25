@@ -858,7 +858,7 @@ class Instagram
         }
 
         while (true) {
-            $response = Request::get(Endpoints::getFollowersJsonLink($accountId, $pageSize, $endCursor),
+            $response = Request::get(Endpoints::getFollowingJsonLink($accountId, $pageSize, $endCursor),
                 $this->generateHeaders($this->userSession));
             if ($response->code !== 200) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
