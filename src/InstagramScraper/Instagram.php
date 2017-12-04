@@ -10,6 +10,7 @@ use InstagramScraper\Model\Comment;
 use InstagramScraper\Model\Like;
 use InstagramScraper\Model\Location;
 use InstagramScraper\Model\Media;
+use InstagramScraper\Model\Story;
 use InstagramScraper\Model\Tag;
 use phpFastCache\CacheManager;
 use Unirest\Request;
@@ -897,6 +898,50 @@ class Instagram
             }
         }
         return $accounts;
+    }
+
+    public function getStories()
+    {
+        $response = Request::get(Endpoints::getUserStoriesLink(),
+            $this->generateHeaders($this->userSession));
+
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+        }
+
+        $jsonResponse = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
+        if (empty($jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'])) {
+            return [];
+        }
+
+        $variables = ['precomposed_overlay' => false, 'reel_ids' => []];
+        foreach ($jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'] as $edge) {
+            $variables['reel_ids'][] = $edge['node']['id'];
+        }
+
+        $response = Request::get(Endpoints::getStoriesLink($variables),
+            $this->generateHeaders($this->userSession));
+
+        if ($response->code !== 200) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+        }
+
+        $jsonResponse = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
+
+        if (empty($jsonResponse['data']['reels_media'])) {
+            return [];
+        }
+
+        $stories = [];
+        foreach ($jsonResponse['data']['reels_media'] as $user) {
+            $Story = Story::create();
+            $Story->setOwner(Account::create($user['user']));
+            foreach ($user['items'] as $item) {
+                $Story->addStory(Media::create($item));
+            }
+            $stories[] = $Story;
+        }
+        return $stories;
     }
 
     /**

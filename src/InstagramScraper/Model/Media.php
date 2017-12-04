@@ -407,6 +407,16 @@ class Media extends AbstractModel
                 $this->videoStandardResolutionUrl = $arr[$prop]['standard_resolution']['url'];
                 $this->videoLowBandwidthUrl = $arr[$prop]['low_bandwidth']['url'];
                 break;
+            case 'video_resources':
+                foreach ($value as $video) {
+                    if ($video['profile'] == 'MAIN') {
+                        $this->videoStandardResolutionUrl = $video['src'];
+                    } elseif ($video['profile'] == 'BASELINE') {
+                        $this->videoLowResolutionUrl = $video['src'];
+                        $this->videoLowBandwidthUrl = $video['src'];
+                    }
+                }
+                break;
             case 'location':
                 switch ($prop) {
                     case 'id':
