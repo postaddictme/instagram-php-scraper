@@ -34,6 +34,10 @@ class Endpoints
 
     const GRAPH_QL_QUERY_URL = 'https://www.instagram.com/graphql/query/?query_id={{queryId}}';
 
+    //stories use GRAPH_QL_QUERY_URL
+    const USER_STORIES_QUERY_ID = '17890626976041463';
+    const STORIES_QUERY_ID = '17873473675158481';
+
 
     public static function getAccountPageLink($username)
     {
@@ -108,8 +112,9 @@ class Endpoints
     public static function getGraphQlUrl($queryId, $parameters)
     {
         $url = str_replace('{{queryId}}', urlencode($queryId), static::GRAPH_QL_QUERY_URL);
-        foreach ($parameters as $key => $value) {
-            $url .= "&$key=$value";
+        if (!empty($parameters)) {
+            $query_string = http_build_query($parameters);
+            $url .= '&' . $query_string;
         }
         return $url;
     }
@@ -145,6 +150,18 @@ class Endpoints
             $url = str_replace('{{after}}', urlencode($after), $url);
         }
 
+        return $url;
+    }
+
+    public static function getUserStoriesLink()
+    {
+        $url = self::getGraphQlUrl(static::USER_STORIES_QUERY_ID, ['variables' => json_encode([])]);
+        return $url;
+    }
+
+    public static function getStoriesLink($variables)
+    {
+        $url = self::getGraphQlUrl(static::STORIES_QUERY_ID, ['variables' => json_encode($variables)]);
         return $url;
     }
 }
