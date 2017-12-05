@@ -20,11 +20,18 @@ class Instagram
     const HTTP_OK = 200;
     const MAX_COMMENTS_PER_REQUEST = 300;
     const MAX_LIKES_PER_REQUEST = 300;
+    const PAGING_TIME_LIMIT_SEC = 1800; // 30 mins time limit on operations that require multiple requests
+    const PAGING_DELAY_MINIMUM_MICROSEC = 1000000; // 1 sec min delay to simulate browser
+    const PAGING_DELAY_MAXIMUM_MICROSEC = 3000000; // 3 sec max delay to simulate browser
 
     private static $instanceCache;
     private $sessionUsername;
     private $sessionPassword;
     private $userSession;
+
+    public $pagingTimeLimitSec = self::PAGING_TIME_LIMIT_SEC;
+    public $pagingDelayMinimumMicrosec = self::PAGING_DELAY_MINIMUM_MICROSEC;
+    public $pagingDelayMaximumMicrosec = self::PAGING_DELAY_MAXIMUM_MICROSEC;
 
     /**
      * @param string $username
@@ -781,7 +788,7 @@ class Instagram
     public function getFollowers($accountId, $count = 20, $pageSize = 20, $delayed = true)
     {
         if ($delayed) {
-            set_time_limit(1800); // 30 mins
+            set_time_limit($this->pagingTimeLimitSec);
         }
 
         $index = 0;
@@ -827,7 +834,7 @@ class Instagram
 
             if ($delayed) {
                 // Random wait between 1 and 3 sec to mimic browser
-                $microsec = rand(1000000, 3000000);
+                $microsec = rand($this->pagingDelayMinimumMicrosec, $this->pagingDelayMaximumMicrosec);
                 usleep($microsec);
             }
         }
@@ -846,7 +853,7 @@ class Instagram
     public function getFollowing($accountId, $count = 20, $pageSize = 20, $delayed = true)
     {
         if ($delayed) {
-            set_time_limit(1800); // 30 mins
+            set_time_limit($this->pagingTimeLimitSec);
         }
 
         $index = 0;
@@ -892,7 +899,7 @@ class Instagram
 
             if ($delayed) {
                 // Random wait between 1 and 3 sec to mimic browser
-                $microsec = rand(1000000, 3000000);
+                $microsec = rand($this->pagingDelayMinimumMicrosec, $this->pagingDelayMaximumMicrosec);
                 usleep($microsec);
             }
         }
