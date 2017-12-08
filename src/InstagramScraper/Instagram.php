@@ -1044,4 +1044,42 @@ class Instagram
         $cachedString->set($this->userSession);
     }
 
+    /**
+     * @param array $config
+     */
+    public static function setProxy(array $config)
+    {
+        $defaultConfig = [
+            'port'    => false,
+            'tunnel'  => false,
+            'address' => false,
+            'type'    => CURLPROXY_HTTP,
+            'timeout' => false,
+            'auth' => [
+                'user' => '',
+                'pass' => '',
+                'method' => CURLAUTH_BASIC
+            ],
+        ];
+
+        $config = array_replace($defaultConfig, $config);
+
+        Request::proxy($config['address'], $config['port'], $config['type'], $config['tunnel']);
+
+        if (isset($config['auth'])) {
+            Request::proxyAuth($config['auth']['user'], $config['auth']['pass'], $config['auth']['method']);
+        }
+
+        if (isset($config['timeout'])) {
+            Request::timeout((int)$config['timeout']);
+        }
+    }
+
+    /**
+     * Disable proxy for all requests
+     */
+    public static function disableProxy()
+    {
+        Request::proxy('');
+    }
 }

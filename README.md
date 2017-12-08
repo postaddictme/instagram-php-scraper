@@ -23,6 +23,22 @@ $instagram->login(); // will use cached session if you can force login $instagra
 $account = $instagram->getAccountById(3);
 echo $account->getUsername();
 ```
+Using proxy for requests:
+
+```php
+$instagram = new Instagram();
+Instagram::setProxy([
+    'address' => '111.112.113.114',
+    'port'    => '8080',
+    'tunnel'  => true,
+    'timeout' => 30,
+]);
+// Request with proxy
+$account = $instagram->getAccount('kevin');
+Instagram::disableProxy();
+// Request without proxy
+$account = $instagram->getAccount('kevin');
+```
 
 ## Installation
 
