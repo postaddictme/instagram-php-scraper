@@ -907,6 +907,7 @@ class Instagram
      */
     public function getStories($reel_ids = null)
     {
+        $variables = ['precomposed_overlay' => false, 'reel_ids' => []];
         if (empty($reel_ids)) {
             $response = Request::get(Endpoints::getUserStoriesLink(),
                 $this->generateHeaders($this->userSession));
@@ -920,12 +921,11 @@ class Instagram
                 return [];
             }
 
-            $variables = ['precomposed_overlay' => false, 'reel_ids' => []];
             foreach ($jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'] as $edge) {
                 $variables['reel_ids'][] = $edge['node']['id'];
             }
         } else {
-            $variables['reel_ids'][] = $reel_ids;
+            $variables['reel_ids'] = $reel_ids;
         }
 
         $response = Request::get(Endpoints::getStoriesLink($variables),
