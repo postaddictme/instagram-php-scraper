@@ -900,23 +900,32 @@ class Instagram
         return $accounts;
     }
 
-    public function getStories()
+    /**
+     * @param array $reel_ids
+     * @return array
+     * @throws InstagramException
+     */
+    public function getStories($reel_ids = null)
     {
-        $response = Request::get(Endpoints::getUserStoriesLink(),
-            $this->generateHeaders($this->userSession));
+        if (empty($reel_ids)) {
+            $response = Request::get(Endpoints::getUserStoriesLink(),
+                $this->generateHeaders($this->userSession));
 
-        if ($response->code !== 200) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
-        }
+            if ($response->code !== 200) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+            }
 
-        $jsonResponse = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
-        if (empty($jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'])) {
-            return [];
-        }
+            $jsonResponse = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
+            if (empty($jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'])) {
+                return [];
+            }
 
-        $variables = ['precomposed_overlay' => false, 'reel_ids' => []];
-        foreach ($jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'] as $edge) {
-            $variables['reel_ids'][] = $edge['node']['id'];
+            $variables = ['precomposed_overlay' => false, 'reel_ids' => []];
+            foreach ($jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'] as $edge) {
+                $variables['reel_ids'][] = $edge['node']['id'];
+            }
+        } else {
+            $variables['reel_ids'][] = $reel_ids;
         }
 
         $response = Request::get(Endpoints::getStoriesLink($variables),
