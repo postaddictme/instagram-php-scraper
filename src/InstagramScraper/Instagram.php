@@ -901,7 +901,7 @@ class Instagram
     }
 
     /**
-     * @param array $reel_ids
+     * @param array $reel_ids - array of instagram user ids
      * @return array
      * @throws InstagramException
      */
