@@ -398,7 +398,7 @@ class Instagram
      *
      * @return array
      */
-    public static function parseCookies($rawCookies)
+    private static function parseCookies($rawCookies)
     {
         if (!is_array($rawCookies)) {
             $rawCookies = [$rawCookies];
