@@ -12,6 +12,7 @@ use InstagramScraper\Model\Location;
 use InstagramScraper\Model\Media;
 use InstagramScraper\Model\Story;
 use InstagramScraper\Model\Tag;
+use InstagramScraper\Model\UserStories;
 use phpFastCache\CacheManager;
 use Unirest\Request;
 
@@ -934,12 +935,12 @@ class Instagram
 
         $stories = [];
         foreach ($jsonResponse['data']['reels_media'] as $user) {
-            $Story = Story::create();
-            $Story->setOwner(Account::create($user['user']));
+            $UserStories = UserStories::create();
+            $UserStories->setOwner(Account::create($user['user']));
             foreach ($user['items'] as $item) {
-                $Story->addStory(Media::create($item));
+                $UserStories->addStory(Story::create($item));
             }
-            $stories[] = $Story;
+            $stories[] = $UserStories;
         }
         return $stories;
     }
