@@ -1040,7 +1040,17 @@ class Instagram
             $data = json_decode($matches[1], true, 512, JSON_BIGINT_AS_STRING);
             if (!empty($data['entry_data']['Challenge'][0]['extraData']['content'][3]['fields'][0]['values'])) {
                 $choices = $data['entry_data']['Challenge'][0]['extraData']['content'][3]['fields'][0]['values'];
+            } elseif (!empty($data['entry_data']['Challenge'][0]['fields'])) {
+                $fields = $data['entry_data']['Challenge'][0]['fields'];
+                if (!empty($fields['email'])) {
+                    $choices[] = ['label' => 'Email: ' . $fields['email'], 'value' => 1];
+                }
+                if (!empty($fields['phone_number'])) {
+                    $choices[] = ['label' => 'Phone: ' . $fields['phone_number'], 'value' => 0];
+                }
+            }
 
+            if (!empty($choices)) {
                 if (count($choices) > 1) {
                     $possible_values = [];
                     print "Select where to send security code\n";
