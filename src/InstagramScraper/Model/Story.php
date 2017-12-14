@@ -6,36 +6,25 @@ namespace InstagramScraper\Model;
  * Class Story
  * @package InstagramScraper\Model
  */
-class Story extends AbstractModel
+class Story extends Media
 {
-    /** @var  Account */
-    protected $owner;
+    private $skip_prop = [
+        'owner' => true,
+    ];
 
-    /** @var  Media[] */
-    protected $stories;
-
-    public function setOwner($owner)
+    /***
+     * We do not need some values - do not parse it for Story,
+     * for example - we do not need owner object inside story
+     *
+     * @param $value
+     * @param $prop
+     * @param $arr
+     */
+    protected function initPropertiesCustom($value, $prop, $arr)
     {
-        $this->owner = $owner;
-    }
-
-    public function getOwner()
-    {
-        return $this->owner;
-    }
-
-    public function addStory($story)
-    {
-        $this->stories[] = $story;
-    }
-
-    public function setStories($stories)
-    {
-        $this->stories = $stories;
-    }
-
-    public function getStories()
-    {
-        return $this->stories;
+        if (!empty($this->skip_prop[$prop])) {
+            return;
+        }
+        parent::initPropertiesCustom($value, $prop, $arr);
     }
 }
