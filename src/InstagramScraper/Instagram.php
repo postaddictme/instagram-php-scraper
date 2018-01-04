@@ -579,21 +579,22 @@ class Instagram
             if ($response->code !== 200) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
             }
+
             $cookies = static::parseCookies($response->headers['Set-Cookie']);
             $this->userSession['csrftoken'] = $cookies['csrftoken'];
             $arr = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
             if (!is_array($arr)) {
                 throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
             }
-            if (empty($arr['tag']['media']['count'])) {
+            if (empty($arr['graphql']['hashtag']['edge_hashtag_to_media']['count'])) {
                 return [];
             }
-            $nodes = $arr['tag']['media']['nodes'];
+            $nodes = $arr['graphql']['hashtag']['edge_hashtag_to_media']['edges'];
             foreach ($nodes as $mediaArray) {
                 if ($index === $count) {
                     return $medias;
                 }
-                $media = Media::create($mediaArray);
+                $media = Media::create($mediaArray['node']);
                 if (in_array($media->getId(), $mediaIds)) {
                     return $medias;
                 }
@@ -607,8 +608,8 @@ class Instagram
             if (empty($nodes)) {
                 return $medias;
             }
-            $maxId = $arr['tag']['media']['page_info']['end_cursor'];
-            $hasNextPage = $arr['tag']['media']['page_info']['has_next_page'];
+            $maxId = $arr['graphql']['hashtag']['edge_hashtag_to_media']['page_info']['end_cursor'];
+            $hasNextPage = $arr['graphql']['hashtag']['edge_hashtag_to_media']['page_info']['has_next_page'];
         }
         return $medias;
     }
