@@ -63,6 +63,11 @@ class Media extends AbstractModel
     /**
      * @var array
      */
+    protected $squareThumbnailsUrl = [];
+
+    /**
+     * @var array
+     */
     protected $carouselMedia = [];
 
     /**
@@ -248,6 +253,15 @@ class Media extends AbstractModel
         return $this->imageHighResolutionUrl;
     }
 
+
+    /**
+     * @return array
+     */
+    public function getSquareThumbnailsUrl() {
+        return $this->squareThumbnailsUrl;
+    }
+
+
     /**
      * @return array
      */
@@ -387,6 +401,13 @@ class Media extends AbstractModel
                 $this->imageThumbnailUrl = $images['thumbnail'];
                 $this->imageStandardResolutionUrl = $images['standard'];
                 $this->imageHighResolutionUrl = $images['high'];
+                break;
+            case 'thumbnail_resources':
+                $thumbnailsUrl = [];
+                foreach( $value as $thumbnail ) {
+                    $thumbnailsUrl[] = $thumbnail['src'];
+                }
+                $this->squareThumbnailsUrl = $thumbnailsUrl;
                 break;
             case 'carousel_media':
                 $this->type = self::TYPE_CAROUSEL;
