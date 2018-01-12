@@ -475,6 +475,9 @@ class Media extends AbstractModel
             case 'edge_media_preview_like':
                 $this->likesCount = $arr[$prop]['count'];
                 break;
+            case 'edge_liked_by':
+            	$this->likesCount = $arr[$prop]['count'];
+                break;
             case 'display_url':
                 $images = self::getImageUrls($arr[$prop]);
                 $this->imageStandardResolutionUrl = $images['standard'];
