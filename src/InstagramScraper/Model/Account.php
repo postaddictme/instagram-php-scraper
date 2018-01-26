@@ -33,6 +33,12 @@ class Account extends AbstractModel
     protected $profilePicUrl = '';
 
     /**
+     * Profile picture url HD
+     * @var string
+     */
+    protected $profilePicUrlHd = '';
+
+    /**
      * Information filled by user
      * @var string
      */
@@ -126,6 +132,20 @@ class Account extends AbstractModel
     /**
      * @return string
      */
+    public function getProfilePicUrlHd()
+    {
+        $toReturn = $this->profilePicUrl;
+
+        if ($this->profilePicUrlHd !== '') {
+            $toReturn = $this->profilePicUrlHd;
+        }
+
+        return $toReturn;
+    }
+
+    /**
+     * @return string
+     */
     public function getBiography()
     {
         return $this->biography;
@@ -198,6 +218,9 @@ class Account extends AbstractModel
                 break;
             case 'profile_pic_url':
                 $this->profilePicUrl = $value;
+                break;
+            case 'profile_pic_url_hd':
+                $this->profilePicUrlHd = $value;
                 break;
             case 'biography':
                 $this->biography = $value;
