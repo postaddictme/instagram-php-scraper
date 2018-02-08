@@ -30,6 +30,7 @@ class Instagram
     private $sessionUsername;
     private $sessionPassword;
     private $userSession;
+    private $userAgent = null;
 
     public $pagingTimeLimitSec = self::PAGING_TIME_LIMIT_SEC;
     public $pagingDelayMinimumMicrosec = self::PAGING_DELAY_MINIMUM_MICROSEC;
@@ -153,6 +154,35 @@ class Instagram
     }
 
     /**
+     * @param $userAgent
+     *
+     * @return string
+     */
+    public function setUserAgent($userAgent)
+    {
+        return $this->userAgent = $userAgent;
+    }
+
+    /**
+     * @param $userAgent
+     *
+     * @return null
+     */
+    public function resetUserAgent($userAgent)
+    {
+        return $this->userAgent = null;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getUserAgent()
+    {
+        return $this->userAgent;
+    }
+
+    /**
      * @param $session
      *
      * @return array
@@ -166,11 +196,17 @@ class Instagram
                 $cookies .= "$key=$value; ";
             }
             $headers = [
-                'cookie' => $cookies,
-                'referer' => Endpoints::BASE_URL . '/',
+                'cookie'      => $cookies,
+                'referer'     => Endpoints::BASE_URL . '/',
                 'x-csrftoken' => $session['csrftoken'],
             ];
         }
+
+        if($this->getUserAgent())
+        {
+            $headers['user-agent'] = $this->getUserAgent();
+        }
+
         return $headers;
     }
 
