@@ -733,8 +733,9 @@ class Instagram
         $this->userSession['csrftoken'] = $cookies['csrftoken'];
         $jsonResponse = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
         $medias = [];
-        foreach ($jsonResponse['tag']['top_posts']['nodes'] as $mediaArray) {
-            $medias[] = Media::create($mediaArray);
+        $nodes = (array) @$jsonResponse['graphql']['hashtag']['edge_hashtag_to_media']['edges'];
+        foreach ($nodes as $mediaArray) {
+            $medias[] = Media::create($mediaArray['node']);
         }
         return $medias;
     }
