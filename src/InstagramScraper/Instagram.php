@@ -51,6 +51,7 @@ class Instagram
         if (is_string($sessionFolder)) {
             CacheManager::setDefaultConfig([
                 'path' => $sessionFolder,
+                'ignoreSymfonyNotice' => true,
             ]);
             static::$instanceCache = CacheManager::getInstance('files');
         } else {
