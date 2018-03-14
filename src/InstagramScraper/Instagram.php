@@ -30,6 +30,7 @@ class Instagram
     private $sessionUsername;
     private $sessionPassword;
     private $userSession;
+    private $userAgent = null;
 
     public $pagingTimeLimitSec = self::PAGING_TIME_LIMIT_SEC;
     public $pagingDelayMinimumMicrosec = self::PAGING_DELAY_MINIMUM_MICROSEC;
@@ -50,6 +51,7 @@ class Instagram
         if (is_string($sessionFolder)) {
             CacheManager::setDefaultConfig([
                 'path' => $sessionFolder,
+                'ignoreSymfonyNotice' => true,
             ]);
             static::$instanceCache = CacheManager::getInstance('files');
         } else {
@@ -153,6 +155,35 @@ class Instagram
     }
 
     /**
+     * @param $userAgent
+     *
+     * @return string
+     */
+    public function setUserAgent($userAgent)
+    {
+        return $this->userAgent = $userAgent;
+    }
+
+    /**
+     * @param $userAgent
+     *
+     * @return null
+     */
+    public function resetUserAgent($userAgent)
+    {
+        return $this->userAgent = null;
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getUserAgent()
+    {
+        return $this->userAgent;
+    }
+
+    /**
      * @param $session
      *
      * @return array
@@ -166,11 +197,17 @@ class Instagram
                 $cookies .= "$key=$value; ";
             }
             $headers = [
-                'cookie' => $cookies,
-                'referer' => Endpoints::BASE_URL . '/',
+                'cookie'      => $cookies,
+                'referer'     => Endpoints::BASE_URL . '/',
                 'x-csrftoken' => $session['csrftoken'],
             ];
         }
+
+        if($this->getUserAgent())
+        {
+            $headers['user-agent'] = $this->getUserAgent();
+        }
+
         return $headers;
     }
 
@@ -697,8 +734,9 @@ class Instagram
         $this->userSession['csrftoken'] = $cookies['csrftoken'];
         $jsonResponse = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
         $medias = [];
-        foreach ($jsonResponse['tag']['top_posts']['nodes'] as $mediaArray) {
-            $medias[] = Media::create($mediaArray);
+        $nodes = (array) @$jsonResponse['graphql']['hashtag']['edge_hashtag_to_media']['edges'];
+        foreach ($nodes as $mediaArray) {
+            $medias[] = Media::create($mediaArray['node']);
         }
         return $medias;
     }

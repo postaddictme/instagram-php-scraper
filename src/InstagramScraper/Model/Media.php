@@ -136,6 +136,11 @@ class Media extends AbstractModel
     protected $commentsCount = 0;
 
     /**
+     * @var Media[]|array
+     */
+    protected $sidecarMedias = [];
+
+    /**
      * @param string $code
      *
      * @return int
@@ -367,6 +372,14 @@ class Media extends AbstractModel
     }
 
     /**
+     * @return Media[]|array
+     */
+    public function getSidecarMedias()
+    {
+        return $this->sidecarMedias;
+    }
+
+    /**
      * @param $value
      * @param $prop
      */
@@ -493,6 +506,19 @@ class Media extends AbstractModel
                             $this->caption = $arr[$prop]['edges'][0]['node']['text'];
                         }
                     }
+                }
+                break;
+            case 'edge_sidecar_to_children':
+                if (!is_array($arr[$prop]['edges'])) {
+                    break;
+                }
+
+                foreach ($arr[$prop]['edges'] as $edge) {
+                    if (!isset($edge['node'])) {
+                        continue;
+                    }
+
+                    $this->sidecarMedias[] = static::create($edge['node']);
                 }
                 break;
             case 'owner':
