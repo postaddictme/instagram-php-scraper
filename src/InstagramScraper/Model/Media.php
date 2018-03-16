@@ -63,6 +63,11 @@ class Media extends AbstractModel
     /**
      * @var array
      */
+    protected $squareThumbnailsUrl = [];
+
+    /**
+     * @var array
+     */
     protected $carouselMedia = [];
 
     /**
@@ -129,6 +134,11 @@ class Media extends AbstractModel
      * @var string
      */
     protected $commentsCount = 0;
+
+    /**
+     * @var Media[]|array
+     */
+    protected $sidecarMedias = [];
 
     /**
      * @param string $code
@@ -248,6 +258,15 @@ class Media extends AbstractModel
         return $this->imageHighResolutionUrl;
     }
 
+
+    /**
+     * @return array
+     */
+    public function getSquareThumbnailsUrl() {
+        return $this->squareThumbnailsUrl;
+    }
+
+
     /**
      * @return array
      */
@@ -353,6 +372,14 @@ class Media extends AbstractModel
     }
 
     /**
+     * @return Media[]|array
+     */
+    public function getSidecarMedias()
+    {
+        return $this->sidecarMedias;
+    }
+
+    /**
      * @param $value
      * @param $prop
      */
@@ -370,6 +397,7 @@ class Media extends AbstractModel
                 break;
             case 'code':
                 $this->shortCode = $value;
+                $this->link = Endpoints::getMediaPageLink($this->shortCode);
                 break;
             case 'link':
                 $this->link = $value;
@@ -387,6 +415,13 @@ class Media extends AbstractModel
                 $this->imageStandardResolutionUrl = $images['standard'];
                 $this->imageHighResolutionUrl = $images['high'];
                 break;
+            case 'thumbnail_resources':
+                $thumbnailsUrl = [];
+                foreach( $value as $thumbnail ) {
+                    $thumbnailsUrl[] = $thumbnail['src'];
+                }
+                $this->squareThumbnailsUrl = $thumbnailsUrl;
+                break;
             case 'carousel_media':
                 $this->type = self::TYPE_CAROUSEL;
                 $this->carouselMedia = [];
@@ -399,28 +434,34 @@ class Media extends AbstractModel
                 break;
             case 'video_views':
                 $this->videoViews = $value;
+                $this->type = static::TYPE_VIDEO;
                 break;
             case 'videos':
                 $this->videoLowResolutionUrl = $arr[$prop]['low_resolution']['url'];
                 $this->videoStandardResolutionUrl = $arr[$prop]['standard_resolution']['url'];
                 $this->videoLowBandwidthUrl = $arr[$prop]['low_bandwidth']['url'];
                 break;
-            case 'location':
-                switch ($prop) {
-                    case 'id':
-                        $this->locationId = $value[$prop];
-                        break;
-                    case 'name':
-                        $this->locationId = $value[$prop];
-                        break;
+            case 'video_resources':
+                foreach ($value as $video) {
+                    if ($video['profile'] == 'MAIN') {
+                        $this->videoStandardResolutionUrl = $video['src'];
+                    } elseif ($video['profile'] == 'BASELINE') {
+                        $this->videoLowResolutionUrl = $video['src'];
+                        $this->videoLowBandwidthUrl = $video['src'];
+                    }
                 }
+                break;
+            case 'location':
+                $this->locationId = $arr[$prop]['id'];
                 $this->locationName = $arr[$prop]['name'];
                 break;
             case 'user':
                 $this->owner = Account::create($arr[$prop]);
                 break;
             case 'is_video':
-                $this->type = self::TYPE_VIDEO;
+                if ((bool)$value) {
+                    $this->type = static::TYPE_VIDEO;
+                }
                 break;
             case 'video_url':
                 $this->videoStandardResolutionUrl = $value;
@@ -443,7 +484,12 @@ class Media extends AbstractModel
                 break;
             case 'edge_media_to_comment':
                 $this->commentsCount = $arr[$prop]['count'];
+                break;
+            case 'edge_media_preview_like':
                 $this->likesCount = $arr[$prop]['count'];
+                break;
+            case 'edge_liked_by':
+            	$this->likesCount = $arr[$prop]['count'];
                 break;
             case 'display_url':
                 $images = self::getImageUrls($arr[$prop]);
@@ -453,7 +499,27 @@ class Media extends AbstractModel
                 $this->imageThumbnailUrl = $images['thumbnail'];
                 break;
             case 'edge_media_to_caption':
-                $this->caption = $arr[$prop]['edges'][0]['node']['text'];
+                if (is_array($arr[$prop]['edges']) && !empty($arr[$prop]['edges'])) {
+                    $first_caption = $arr[$prop]['edges'][0];
+                    if (is_array($first_caption) && isset($first_caption['node'])) {
+                        if (is_array($first_caption['node']) && isset($first_caption['node']['text'])) {
+                            $this->caption = $arr[$prop]['edges'][0]['node']['text'];
+                        }
+                    }
+                }
+                break;
+            case 'edge_sidecar_to_children':
+                if (!is_array($arr[$prop]['edges'])) {
+                    break;
+                }
+
+                foreach ($arr[$prop]['edges'] as $edge) {
+                    if (!isset($edge['node'])) {
+                        continue;
+                    }
+
+                    $this->sidecarMedias[] = static::create($edge['node']);
+                }
                 break;
             case 'owner':
                 $this->owner = Account::create($arr[$prop]);
@@ -462,12 +528,23 @@ class Media extends AbstractModel
                 $this->createdTime = (int)$value;
                 break;
             case 'display_src':
-                $images = self::getImageUrls($value);
+                $images = static::getImageUrls($value);
                 $this->imageStandardResolutionUrl = $images['standard'];
                 $this->imageLowResolutionUrl = $images['low'];
                 $this->imageHighResolutionUrl = $images['high'];
                 $this->imageThumbnailUrl = $images['thumbnail'];
-                $this->type = self::TYPE_IMAGE;
+                if (!isset($this->type)) {
+                    $this->type = static::TYPE_IMAGE;
+                }
+                break;
+            case '__typename':
+                if ($value == 'GraphImage') {
+                    $this->type = static::TYPE_IMAGE;
+                } else if ($value == 'GraphVideo') {
+                    $this->type = static::TYPE_VIDEO;
+                } else if ($value == 'GraphSidecar') {
+                    $this->type = static::TYPE_SIDECAR;
+                }
                 break;
         }
         if (!$this->ownerId && !is_null($this->owner)) {

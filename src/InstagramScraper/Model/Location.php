@@ -15,6 +15,7 @@ class Location extends AbstractModel
         'slug' => 'slug',
         'lat' => 'lat',
         'lng' => 'lng',
+        'modified' => 'modified'
     ];
     /**
      * @var
@@ -44,6 +45,11 @@ class Location extends AbstractModel
      * @var bool
      */
     protected $isLoaded = false;
+
+    /**
+     * @var 
+     */
+    protected $modified;
 
     /**
      * @return mixed
@@ -91,5 +97,13 @@ class Location extends AbstractModel
     public function getLat()
     {
         return $this->lat;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getModified()
+    {
+        return $this->modified;
     }
 }

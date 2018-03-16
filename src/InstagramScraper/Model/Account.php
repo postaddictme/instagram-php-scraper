@@ -33,6 +33,12 @@ class Account extends AbstractModel
     protected $profilePicUrl = '';
 
     /**
+     * Profile picture url HD
+     * @var string
+     */
+    protected $profilePicUrlHd = '';
+
+    /**
      * Information filled by user
      * @var string
      */
@@ -100,7 +106,11 @@ class Account extends AbstractModel
      */
     public function getId()
     {
-        return (int)$this->id;
+        if (PHP_INT_SIZE > 4) {
+            $this->id = (int)$this->id;
+        }
+
+        return $this->id;
     }
 
     /**
@@ -117,6 +127,20 @@ class Account extends AbstractModel
     public function getProfilePicUrl()
     {
         return $this->profilePicUrl;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProfilePicUrlHd()
+    {
+        $toReturn = $this->profilePicUrl;
+
+        if ($this->profilePicUrlHd !== '') {
+            $toReturn = $this->profilePicUrlHd;
+        }
+
+        return $toReturn;
     }
 
     /**
@@ -184,7 +208,7 @@ class Account extends AbstractModel
     {
         switch ($prop) {
             case 'id':
-                $this->id = (int)$value;
+                $this->id = $value;
                 break;
             case 'username':
                 $this->username = $value;
@@ -195,19 +219,22 @@ class Account extends AbstractModel
             case 'profile_pic_url':
                 $this->profilePicUrl = $value;
                 break;
+            case 'profile_pic_url_hd':
+                $this->profilePicUrlHd = $value;
+                break;
             case 'biography':
                 $this->biography = $value;
                 break;
             case 'external_url':
                 $this->externalUrl = $value;
                 break;
-            case 'follows':
+            case 'edge_follow':
                 $this->followsCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
                 break;
-            case 'followed_by':
+            case 'edge_followed_by':
                 $this->followedByCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
                 break;
-            case 'media':
+            case 'edge_owner_to_timeline_media':
                 $this->mediaCount = !empty($array[$prop]['count']) ? $array[$prop]['count'] : 0;
                 break;
             case 'is_private':
