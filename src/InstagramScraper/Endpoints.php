@@ -55,13 +55,6 @@ class Endpoints
     	return str_replace('{max_id}', urlencode($maxId), $url);
     }
     
-    public static function getAccountMediasByUserIdJsonLink($id, $count=12, $cursor = '')
-    {
-        $url = str_replace('{id}', urlencode($id), static::ACCOUNT_MEDIAS_BY_USER_ID);
-        $url = str_replace('{count}', urlencode($count), $url);
-        return str_replace('{end_cursor}', urlencode($cursor), $url);
-    }
-
     public static function getMediaPageLink($code)
     {
         return str_replace('{code}', urlencode($code), static::MEDIA_LINK);
