@@ -54,7 +54,7 @@ class Endpoints
     	$url = str_replace('{user_id}', urlencode($userId), static::ACCOUNT_MEDIAS);
     	return str_replace('{max_id}', urlencode($maxId), $url);
     }
-    
+
     public static function getMediaPageLink($code)
     {
         return str_replace('{code}', urlencode($code), static::MEDIA_LINK);
