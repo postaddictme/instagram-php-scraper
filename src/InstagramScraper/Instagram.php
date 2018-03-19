@@ -101,6 +101,15 @@ class Instagram
     }
 
     /**
+     * Set how many media objects should be retrieved in a single request
+     * @param int $count
+     */
+    public static function setAccountMediasRequestCount($count)
+    {
+        Endpoints::setAccountMediasRequestCount($count);
+    }
+
+    /**
      * @param \stdClass|string $rawError
      *
      * @return string
