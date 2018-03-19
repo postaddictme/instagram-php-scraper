@@ -228,13 +228,13 @@ class Account extends AbstractModel
             case 'external_url':
                 $this->externalUrl = $value;
                 break;
-            case 'follows':
+            case 'edge_follow':
                 $this->followsCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
                 break;
-            case 'followed_by':
+            case 'edge_followed_by':
                 $this->followedByCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
                 break;
-            case 'media':
+            case 'edge_owner_to_timeline_media':
                 $this->mediaCount = !empty($array[$prop]['count']) ? $array[$prop]['count'] : 0;
                 break;
             case 'is_private':
