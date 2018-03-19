@@ -571,37 +571,37 @@ class Instagram
     {
         // Use the follow page to get the account. The follow url will redirect to the home page for the user,
         // which has the username embedded in the url.
-        
+
         if (!is_numeric($id)) {
             throw new \InvalidArgumentException('User id must be integer or integer wrapped in string');
         }
-        
+
         $url = Endpoints::getFollowUrl($id);
-        
+
         // Cut a request by disabling redirects.
         Request::curlOpt(CURLOPT_FOLLOWLOCATION, FALSE);
         $response = Request::get($url, $this->generateHeaders($this->userSession));
         Request::curlOpt(CURLOPT_FOLLOWLOCATION, TRUE);
-        
+
         if ($response->code === 400) {
             throw new InstagramException('Account with this id does not exist.');
         }
-        
+
         if ($response->code !== 302) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->raw_body) . ' Something went wrong. Please report issue.');
         }
-        
+
         $cookies = static::parseCookies($response->headers['Set-Cookie']);
         $this->userSession['csrftoken'] = $cookies['csrftoken'];
-        
+
         // Get the username from the response url.
         $responseUrl = $response->headers['Location'];
         $urlParts = explode('/', rtrim($responseUrl, '/'));
         $username = end($urlParts);
-        
+
         return $username;
     }
-    
+
     /**
      * @param string $username
      *
