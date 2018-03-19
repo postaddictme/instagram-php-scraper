@@ -358,7 +358,7 @@ class Instagram
     	}
     	
     	$maxId = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor'];
-    	$isMoreAvailable = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['has_next_page'];
+        $hasNextPage = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['has_next_page'];
     	
     	$toReturn = [
     		'medias' => $medias,
