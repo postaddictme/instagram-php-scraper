@@ -591,7 +591,7 @@ class Instagram
 
         $userArray = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
         if (!isset($userArray['graphql']['user'])) {
-            throw new InstagramException('Account with this username does not exist');
+            throw new InstagramNotFoundException('Account with this username does not exist', 404);
         }
         return Account::create($userArray['graphql']['user']);
     }
