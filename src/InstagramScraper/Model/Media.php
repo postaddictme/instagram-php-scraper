@@ -408,20 +408,33 @@ class Media extends AbstractModel
             case 'likes':
                 $this->likesCount = $arr[$prop]['count'];
                 break;
-            case 'images':
-                $images = self::getImageUrls($arr[$prop]['standard_resolution']['url']);
-                $this->imageLowResolutionUrl = $images['low'];
-                $this->imageThumbnailUrl = $images['thumbnail'];
-                $this->imageStandardResolutionUrl = $images['standard'];
-                $this->imageHighResolutionUrl = $images['high'];
-                break;
             case 'thumbnail_resources':
-                $thumbnailsUrl = [];
                 foreach( $value as $thumbnail ) {
-                    $thumbnailsUrl[] = $thumbnail['src'];
+                	$thumbnailsUrl[] = $thumbnail['src'];
+                	switch ($thumbnail['config_width']) {
+                		case 150:
+                			$this->imageThumbnailUrl = $thumbnail['src'];
+                			break;
+                		case 320:
+                			$this->imageLowResolutionUrl = $thumbnail['src'];
+                			break;
+                		case 640:
+                			$this->imageStandardResolutionUrl = $thumbnail['src'];
+                			break;
+                		default:;
+                	}
                 }
                 $this->squareThumbnailsUrl = $thumbnailsUrl;
                 break;
+            case 'display_url':
+            	$this->imageHighResolutionUrl = $value;
+            	break;
+            case 'display_src':
+            	$this->imageHighResolutionUrl = $value;
+            	if (!isset($this->type)) {
+            		$this->type = static::TYPE_IMAGE;
+            	}
+            	break;
             case 'carousel_media':
                 $this->type = self::TYPE_CAROUSEL;
                 $this->carouselMedia = [];
@@ -491,13 +504,6 @@ class Media extends AbstractModel
             case 'edge_liked_by':
             	$this->likesCount = $arr[$prop]['count'];
                 break;
-            case 'display_url':
-                $images = self::getImageUrls($arr[$prop]);
-                $this->imageStandardResolutionUrl = $images['standard'];
-                $this->imageLowResolutionUrl = $images['low'];
-                $this->imageHighResolutionUrl = $images['high'];
-                $this->imageThumbnailUrl = $images['thumbnail'];
-                break;
             case 'edge_media_to_caption':
                 if (is_array($arr[$prop]['edges']) && !empty($arr[$prop]['edges'])) {
                     $first_caption = $arr[$prop]['edges'][0];
@@ -512,7 +518,6 @@ class Media extends AbstractModel
                 if (!is_array($arr[$prop]['edges'])) {
                     break;
                 }
-
                 foreach ($arr[$prop]['edges'] as $edge) {
                     if (!isset($edge['node'])) {
                         continue;
@@ -526,16 +531,6 @@ class Media extends AbstractModel
                 break;
             case 'date':
                 $this->createdTime = (int)$value;
-                break;
-            case 'display_src':
-                $images = static::getImageUrls($value);
-                $this->imageStandardResolutionUrl = $images['standard'];
-                $this->imageLowResolutionUrl = $images['low'];
-                $this->imageHighResolutionUrl = $images['high'];
-                $this->imageThumbnailUrl = $images['thumbnail'];
-                if (!isset($this->type)) {
-                    $this->type = static::TYPE_IMAGE;
-                }
                 break;
             case '__typename':
                 if ($value == 'GraphImage') {
