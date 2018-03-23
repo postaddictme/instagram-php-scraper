@@ -208,6 +208,7 @@ class Account extends AbstractModel
     {
         switch ($prop) {
             case 'id':
+            case 'pk':
                 $this->id = $value;
                 break;
             case 'username':
