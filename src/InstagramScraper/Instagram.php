@@ -221,39 +221,55 @@ class Instagram
      */
     public function getMedias($username, $count = 20, $maxId = '')
     {
-    	$account = $this->getAccount($username);
-    	$index = 0;
-    	$medias = [];
-    	$isMoreAvailable = true;
-    	while ($index < $count && $isMoreAvailable) {
-    		$response = Request::get(Endpoints::getAccountMediasJsonLink($account->getId(), $maxId), $this->generateHeaders($this->userSession));
-    		if (static::HTTP_OK !== $response->code) {
-    			throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
-    		}
-    		$arr = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
-    		if (!is_array($arr)) {
-    			throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
-    		}
-    		$nodes = $arr['data']['user']['edge_owner_to_timeline_media']['edges'];
-    		// fix - count takes longer/has more overhead
-    		if (!isset($nodes) || empty($nodes)) {
-    			return [];
-    		}
-    		foreach ($nodes as $mediaArray) {
-    			if ($index === $count) {
-    				return $medias;
-    			}
-    			$medias[] = Media::create($mediaArray['node']);
-    			$index++;
-    		}
-    		if (empty($nodes) || !isset($nodes)) {
-    			return $medias;
-    		}
-    		$maxId = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor'];
-    		$isMoreAvailable = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['has_next_page'];
-    	}
-    	return $medias;
+
+        $account = $this->getAccount($username);
+        return $this->getMediasByUserId($account->getId(), $count, $maxId);
     }
+
+    
+    /**
+     * @param int $id
+     * @param int $count
+     * @param string $maxId
+     *
+     * @return Media[]
+     * @throws InstagramException
+     */
+    public function getMediasByUserId($id, $count = 20, $maxId = '')
+    {
+        $index = 0;
+        $medias = [];
+        $isMoreAvailable = true;
+        while ($index < $count && $isMoreAvailable) {
+            $response = Request::get(Endpoints::getAccountMediasJsonLink($id, $maxId), $this->generateHeaders($this->userSession));
+            if (static::HTTP_OK !== $response->code) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+            }
+            $arr = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
+            if (!is_array($arr)) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+            }
+            $nodes = $arr['data']['user']['edge_owner_to_timeline_media']['edges'];
+            // fix - count takes longer/has more overhead
+            if (!isset($nodes) || empty($nodes)) {
+                return [];
+            }
+            foreach ($nodes as $mediaArray) {
+                if ($index === $count) {
+                    return $medias;
+                }
+                $medias[] = Media::create($mediaArray['node']);
+                $index++;
+            }
+            if (empty($nodes) || !isset($nodes)) {
+                return $medias;
+            }
+            $maxId = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor'];
+            $isMoreAvailable = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['has_next_page'];
+        }
+        return $medias;
+    }
+    
 
     /**
      * @param $mediaId
@@ -539,6 +555,20 @@ class Instagram
      */
     public function getAccountById($id)
     {
+        $username = $this->getUsernameById($id);
+        return $this->getAccount($username);
+    }
+
+    
+    /**
+     * @param string $id
+     *
+     * @return string
+     * @throws InstagramException
+     * @throws \InvalidArgumentException
+     */
+    public function getUsernameById($id)
+    {
         // Use the follow page to get the account. The follow url will redirect to the home page for the user,
         // which has the username embedded in the url.
 
@@ -569,7 +599,7 @@ class Instagram
         $urlParts = explode('/', rtrim($responseUrl, '/'));
         $username = end($urlParts);
 
-        return $this->getAccount($username);
+        return $username;
     }
 
     /**

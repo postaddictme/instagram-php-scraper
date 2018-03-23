@@ -31,6 +31,9 @@ class InstagramTest extends TestCase
         $this->assertEquals('3', $account->getId());
     }
 
+    /**
+     * @group getAccountById
+     */
     public function testGetAccountById()
     {
 
@@ -120,7 +123,26 @@ class InstagramTest extends TestCase
     {
         $comments = self::$instagram->getMediaCommentsByCode('BR5Njq1gKmB', 40);
         //TODO: check why returns less comments
-        $this->assertEquals(32, sizeof($comments));
+        $this->assertEquals(33, sizeof($comments));
+    }
+    
+    /**
+     * @group getUsernameById
+     */
+    public function testGetUsernameById()
+    {
+        $username = self::$instagram->getUsernameById(3);
+        $this->assertEquals('kevin', $username);
+    }
+    
+    /**
+     * @group getMediasByIserId
+     */
+    public function testGetMediasByUserId()
+    {
+        $instagram = new Instagram();
+        $nonPrivateAccountMedias = $instagram->getMediasByUserId(3);
+        $this->assertEquals(20, count($nonPrivateAccountMedias));
     }
 
     // TODO: Add test getMediaById
