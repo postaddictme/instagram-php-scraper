@@ -262,7 +262,8 @@ class Media extends AbstractModel
     /**
      * @return array
      */
-    public function getSquareThumbnailsUrl() {
+    public function getSquareThumbnailsUrl()
+    {
         return $this->squareThumbnailsUrl;
     }
 
@@ -409,32 +410,33 @@ class Media extends AbstractModel
                 $this->likesCount = $arr[$prop]['count'];
                 break;
             case 'thumbnail_resources':
-                foreach( $value as $thumbnail ) {
-                	$thumbnailsUrl[] = $thumbnail['src'];
-                	switch ($thumbnail['config_width']) {
-                		case 150:
-                			$this->imageThumbnailUrl = $thumbnail['src'];
-                			break;
-                		case 320:
-                			$this->imageLowResolutionUrl = $thumbnail['src'];
-                			break;
-                		case 640:
-                			$this->imageStandardResolutionUrl = $thumbnail['src'];
-                			break;
-                		default:;
-                	}
+                foreach ($value as $thumbnail) {
+                    $thumbnailsUrl[] = $thumbnail['src'];
+                    switch ($thumbnail['config_width']) {
+                        case 150:
+                            $this->imageThumbnailUrl = $thumbnail['src'];
+                            break;
+                        case 320:
+                            $this->imageLowResolutionUrl = $thumbnail['src'];
+                            break;
+                        case 640:
+                            $this->imageStandardResolutionUrl = $thumbnail['src'];
+                            break;
+                        default:
+                            ;
+                    }
                 }
                 $this->squareThumbnailsUrl = $thumbnailsUrl;
                 break;
             case 'display_url':
-            	$this->imageHighResolutionUrl = $value;
-            	break;
+                $this->imageHighResolutionUrl = $value;
+                break;
             case 'display_src':
-            	$this->imageHighResolutionUrl = $value;
-            	if (!isset($this->type)) {
-            		$this->type = static::TYPE_IMAGE;
-            	}
-            	break;
+                $this->imageHighResolutionUrl = $value;
+                if (!isset($this->type)) {
+                    $this->type = static::TYPE_IMAGE;
+                }
+                break;
             case 'carousel_media':
                 $this->type = self::TYPE_CAROUSEL;
                 $this->carouselMedia = [];
@@ -502,7 +504,7 @@ class Media extends AbstractModel
                 $this->likesCount = $arr[$prop]['count'];
                 break;
             case 'edge_liked_by':
-            	$this->likesCount = $arr[$prop]['count'];
+                $this->likesCount = $arr[$prop]['count'];
                 break;
             case 'edge_media_to_caption':
                 if (is_array($arr[$prop]['edges']) && !empty($arr[$prop]['edges'])) {
@@ -548,24 +550,6 @@ class Media extends AbstractModel
     }
 
     /**
-     * @param string $imageUrl
-     *
-     * @return array
-     */
-    private static function getImageUrls($imageUrl)
-    {
-        $parts = explode('/', parse_url($imageUrl)['path']);
-        $imageName = $parts[sizeof($parts) - 1];
-        $urls = [
-            'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName,
-            'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
-            'standard' => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
-            'high' => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
-        ];
-        return $urls;
-    }
-
-    /**
      * @param $mediaArray
      * @param $carouselArray
      * @param $instance
@@ -597,6 +581,24 @@ class Media extends AbstractModel
         }
         array_push($instance->carouselMedia, $carouselMedia);
         return $mediaArray;
+    }
+
+    /**
+     * @param string $imageUrl
+     *
+     * @return array
+     */
+    private static function getImageUrls($imageUrl)
+    {
+        $parts = explode('/', parse_url($imageUrl)['path']);
+        $imageName = $parts[sizeof($parts) - 1];
+        $urls = [
+            'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName,
+            'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
+            'standard' => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
+            'high' => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
+        ];
+        return $urls;
     }
 
     /**
