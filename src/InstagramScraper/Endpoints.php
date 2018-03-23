@@ -8,7 +8,7 @@ class Endpoints
     const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
     const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
     const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
-    const ACCOUNT_MEDIAS = 'https://instagram.com/graphql/query/?query_id=17888483320059182&id={user_id}&first=30&after={max_id}';
+    const ACCOUNT_MEDIAS = 'https://instagram.com/graphql/query/?query_id=17888483320059182&id={user_id}&first={count}&after={max_id}';
     const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
     const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
     const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
@@ -34,6 +34,16 @@ class Endpoints
 
     const GRAPH_QL_QUERY_URL = 'https://www.instagram.com/graphql/query/?query_id={{queryId}}';
 
+    private static $requestMediaCount = 30;
+
+    /**
+     * @param int $count
+     */
+    public static function setAccountMediasRequestCount($count)
+    {
+        static::$requestMediaCount = $count;
+    }
+
     public static function getAccountPageLink($username)
     {
         return str_replace('{username}', urlencode($username), static::ACCOUNT_PAGE);
@@ -52,6 +62,7 @@ class Endpoints
     public static function getAccountMediasJsonLink($userId, $maxId = '')
     {
     	$url = str_replace('{user_id}', urlencode($userId), static::ACCOUNT_MEDIAS);
+        $url = str_replace('{count}', static::$requestMediaCount, $url);
     	return str_replace('{max_id}', urlencode($maxId), $url);
     }
 
