@@ -43,6 +43,11 @@ class Media extends AbstractModel
     /**
      * @var string
      */
+    protected $displayUrl = '';
+
+    /**
+     * @var string
+     */
     protected $imageLowResolutionUrl = '';
 
     /**
@@ -224,6 +229,14 @@ class Media extends AbstractModel
     public function getLink()
     {
         return $this->link;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDisplayUrl()
+    {
+        return $this->displayUrl;
     }
 
     /**
@@ -493,6 +506,7 @@ class Media extends AbstractModel
                 break;
             case 'display_url':
                 $images = self::getImageUrls($arr[$prop]);
+                $this->displayUrl = $arr[$prop];
                 $this->imageStandardResolutionUrl = $images['standard'];
                 $this->imageLowResolutionUrl = $images['low'];
                 $this->imageHighResolutionUrl = $images['high'];
