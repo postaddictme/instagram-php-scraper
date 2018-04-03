@@ -136,6 +136,21 @@ class Media extends AbstractModel
     protected $commentsCount = 0;
 
     /**
+     * @var Comment[]
+     */
+    protected $comments = [];
+
+    /**
+     * @var bool
+     */
+    protected $hasMoreComments = false;
+
+    /**
+     * @var string
+     */
+    protected $commentsNextPage = '';
+
+    /**
      * @var Media[]|array
      */
     protected $sidecarMedias = [];
@@ -373,6 +388,30 @@ class Media extends AbstractModel
     }
 
     /**
+     * @return Comment[]
+     */
+    public function getComments()
+    {
+        return $this->comments;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasMoreComments()
+    {
+        return $this->hasMoreComments;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCommentsNextPage()
+    {
+        return $this->commentsNextPage;
+    }
+
+    /**
      * @return Media[]|array
      */
     public function getSidecarMedias()
@@ -498,7 +537,20 @@ class Media extends AbstractModel
                 $this->link = Endpoints::getMediaPageLink($this->shortCode);
                 break;
             case 'edge_media_to_comment':
-                $this->commentsCount = $arr[$prop]['count'];
+                if (isset($arr[$prop]['count'])) {
+                    $this->commentsCount = (int) $arr[$prop]['count'];
+                }
+                if (isset($arr[$prop]['edges']) && is_array($arr[$prop]['edges'])) {
+                    foreach ($arr[$prop]['edges'] as $commentData) {
+                        $this->comments[] = Comment::create($commentData['node']);
+                    }
+                }
+                if (isset($arr[$prop]['page_info']['has_next_page'])) {
+                    $this->hasMoreComments = (bool) $arr[$prop]['page_info']['has_next_page'];
+                }
+                if (isset($arr[$prop]['page_info']['end_cursor'])) {
+                    $this->commentsNextPage = (string) $arr[$prop]['page_info']['end_cursor'];
+                }
                 break;
             case 'edge_media_preview_like':
                 $this->likesCount = $arr[$prop]['count'];
