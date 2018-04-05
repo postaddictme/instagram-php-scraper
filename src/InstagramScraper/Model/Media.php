@@ -409,17 +409,17 @@ class Media extends AbstractModel
             case 'likes':
                 $this->likesCount = $arr[$prop]['count'];
                 break;
-            case 'thumbnail_resources':
+            case 'display_resources':
                 foreach ($value as $thumbnail) {
                     $thumbnailsUrl[] = $thumbnail['src'];
                     switch ($thumbnail['config_width']) {
-                        case 150:
+                        case 640:
                             $this->imageThumbnailUrl = $thumbnail['src'];
                             break;
-                        case 320:
+                        case 750:
                             $this->imageLowResolutionUrl = $thumbnail['src'];
                             break;
-                        case 640:
+                        case 1080:
                             $this->imageStandardResolutionUrl = $thumbnail['src'];
                             break;
                         default:
