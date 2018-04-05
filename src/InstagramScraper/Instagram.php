@@ -516,7 +516,7 @@ class Instagram
             if (sizeof($nodes) == 0) {
                 return $comments;
             }
-            $maxId = $nodes[sizeof($nodes) - 1]['node']['id'];
+            $maxId = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['end_cursor'];
         }
         return $comments;
     }
