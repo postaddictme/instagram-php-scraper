@@ -217,7 +217,7 @@ class Instagram
             $headers = [
                 'cookie' => $cookies,
                 'referer' => Endpoints::BASE_URL . '/',
-                'x-csrftoken' => $session['csrftoken'],
+                'x-csrftoken' => isset($session['csrftoken']) ? $session['csrftoken'] : ''
             ];
         }
 
