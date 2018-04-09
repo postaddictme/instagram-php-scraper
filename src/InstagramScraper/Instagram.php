@@ -306,35 +306,48 @@ class Instagram
      */
     public function getMediasByUserId($id, $count = 20, $maxId = '')
     {
+
         $index = 0;
         $medias = [];
-        $isMoreAvailable = true;
-        while ($index < $count && $isMoreAvailable) {
-            $response = Request::get(Endpoints::getAccountMediasJsonLink($id, $maxId), $this->generateHeaders($this->userSession));
-            if (static::HTTP_OK !== $response->code) {
+        $mediaIds = [];
+        $hasNextPage = true;
+        while ($index < $count && $hasNextPage) {
+            $this->userSession['ig_pr'] = "2.5";
+            $response = Request::get(Endpoints::getAccountMediasJsonLink($id, $maxId),
+                $this->generateHeaders($this->userSession));
+            if ($response->code !== 200) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
             }
+            $cookies = static::parseCookies($response->headers['Set-Cookie']);
+            $this->userSession['csrftoken'] = $cookies['csrftoken'];
             $arr = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
             if (!is_array($arr)) {
-                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+                throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
             }
-            $nodes = $arr['data']['user']['edge_owner_to_timeline_media']['edges'];
-            // fix - count takes longer/has more overhead
-            if (!isset($nodes) || empty($nodes)) {
+            if (empty($arr['data']['user']['edge_owner_to_timeline_media']['count'])) {
                 return [];
             }
+            $nodes = $arr['data']['user']['edge_owner_to_timeline_media']['edges'];
             foreach ($nodes as $mediaArray) {
                 if ($index === $count) {
                     return $medias;
                 }
-                $medias[] = Media::create($mediaArray['node']);
+                $media = Media::create($mediaArray['node']);
+                if (in_array($media->getId(), $mediaIds)) {
+                    return $medias;
+                }
+                if (isset($minTimestamp) && $media->getCreatedTime() < $minTimestamp) {
+                    return $medias;
+                }
+                $mediaIds[] = $media->getId();
+                $medias[] = $media;
                 $index++;
             }
-            if (empty($nodes) || !isset($nodes)) {
+            if (empty($nodes)) {
                 return $medias;
             }
             $maxId = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor'];
-            $isMoreAvailable = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['has_next_page'];
+            $hasNextPage = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['has_next_page'];
         }
         return $medias;
     }
