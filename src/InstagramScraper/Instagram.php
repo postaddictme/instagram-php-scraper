@@ -217,7 +217,7 @@ class Instagram
             $headers = [
                 'cookie' => $cookies,
                 'referer' => Endpoints::BASE_URL . '/',
-                'x-csrftoken' => $session['csrftoken'],
+                'x-csrftoken' => isset($session['csrftoken']) ? $session['csrftoken'] : ''
             ];
         }
 
@@ -310,10 +310,13 @@ class Instagram
         $medias = [];
         $isMoreAvailable = true;
         while ($index < $count && $isMoreAvailable) {
+            $this->userSession['ig_pr'] = 1;
             $response = Request::get(Endpoints::getAccountMediasJsonLink($id, $maxId), $this->generateHeaders($this->userSession));
             if (static::HTTP_OK !== $response->code) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
             }
+            $cookies = self::parseCookies($response->headers['Set-Cookie']);
+            $this->userSession['csrftoken'] = $cookies['csrftoken'];
             $arr = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
             if (!is_array($arr)) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
