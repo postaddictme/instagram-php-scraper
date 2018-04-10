@@ -465,10 +465,11 @@ class Media extends AbstractModel
                 }
                 break;
             case 'thumbnail_resources':
-                foreach ($value as $thumbnail) {
-                    $thumbnailsUrl[] = $thumbnail['src'];
+                $squareImagesUrl = [];
+                foreach ($value as $squareImage) {
+                    $squareImagesUrl[] = $squareImage['src'];
                 }
-                $this->squareImages = $thumbnailsUrl;
+                $this->squareImages = $squareImagesUrl;
                 break;
             case 'display_url':
                 $this->imageHighResolutionUrl = $value;
