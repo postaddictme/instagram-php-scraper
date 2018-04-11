@@ -219,6 +219,9 @@ class Instagram
                 'referer' => Endpoints::BASE_URL . '/',
                 'x-csrftoken' => $session['csrftoken'],
             ];
+        } else {
+            $headers = ['cookie' => 'Content-Type:application/x-www-form-urlencoded; sessionid=IGSC020ee8ab76d1e8b01223ab92304cbcd58075ce0bdbc771e872b77046bd82cf40:KXP3eyA1gJybewPt4CDR6ICsiF1y99Eq:{"_auth_user_id":7204036595,"_auth_user_backend":"accounts.backends.CaseInsensitiveModelBackend","_auth_user_hash":"","_platform":4,"_token_ver":2,"_token":"7204036595:iWyZVjjdX5sVFV5VsozthzDCIzBh0muN:99a84e59d3aa505f433844956d47d95e4bf095a24a6e1e397f2418c6384671d2","last_refreshed":1523431960.5035405159}; ',
+            ];
         }
 
         if ($this->getUserAgent()) {
