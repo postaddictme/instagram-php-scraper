@@ -281,7 +281,7 @@ class Instagram
      */
     public function getAccount($username)
     {
-        $response = Request::get(Endpoints::getAccountJsonLink($username), $this->generateHeaders($this->userSession));
+        $response = Request::get(Endpoints::getAccountPageLink($username), $this->generateHeaders($this->userSession));
         if (static::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
@@ -289,11 +289,13 @@ class Instagram
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
         }
 
-        $userArray = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
-        if (!isset($userArray['graphql']['user'])) {
+		preg_match_all('#\_sharedData \= (.*?)\;\<\/script\>#', $response->raw_body, $out);
+		$userArray = json_decode($out[1][0], true, 512, JSON_BIGINT_AS_STRING);
+		
+        if (!isset($userArray['entry_data']['ProfilePage'][0]['graphql']['user'])) {
             throw new InstagramNotFoundException('Account with this username does not exist', 404);
         }
-        return Account::create($userArray['graphql']['user']);
+        return Account::create($userArray['entry_data']['ProfilePage'][0]['graphql']['user']);
     }
 
     /**
