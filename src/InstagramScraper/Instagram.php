@@ -338,7 +338,48 @@ class Instagram
         }
         return $medias;
     }
+    
+    /**
+     * @param string $username
+     * @param int $count
+     *
+     * @return Media[]
+     * @throws InstagramException
+     */
+    public function getMediasFromFeed($username, $count = 20)
+    {
+        $medias = [];
+        $index = 0;
+        $response = Request::get(Endpoints::getAccountJsonLink($username), $this->generateHeaders($this->userSession));
+        if (static::HTTP_NOT_FOUND === $response->code) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if (static::HTTP_OK !== $response->code) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+        }
 
+        $userArray = json_decode($response->raw_body, true, 512, JSON_BIGINT_AS_STRING);
+        if (!isset($userArray['graphql']['user'])) {
+            throw new InstagramNotFoundException('Account with this username does not exist', 404);
+        }
+
+        $nodes = $userArray['graphql']['user']['edge_owner_to_timeline_media']['edges'];
+
+        if (!isset($nodes) || empty($nodes)) {
+            return [];
+        }
+
+        foreach ($nodes as $mediaArray) {
+            if ($index === $count) {
+                return $medias;
+            }
+            $medias[] = Media::create($mediaArray['node']);
+            $index++;
+        }
+
+        return $medias;
+    }    
+    
     /**
      * @param $mediaId
      *
