@@ -219,6 +219,9 @@ class Instagram
                 'referer' => Endpoints::BASE_URL . '/',
                 'x-csrftoken' => $session['csrftoken'],
             ];
+        } else {
+            $headers = ['cookie' => 'Content-Type:application/x-www-form-urlencoded; mid=WrydegAEAAHP_05XykIVRtzgFNI4; datr=uhrLWsLBAvwiK5wYPtXhWvaR; ig_vw=1280; ig_pr=1; ig_vh=918; ig_or=landscape-primary; csrftoken=aHDkSof4EMJsHBMc0Q6b8UhX0M1kKJcm; ds_user_id=7204036595; sessionid=IGSC67d9cc7adc88b29aa0461c13fa9570288ef869b2a6ef6015b481b89920abb73c%3AfeoDACr9J1GeikQFRS5ZzglcR1VOfHQ3%3A%7B%22_auth_user_id%22%3A7204036595%2C%22_auth_user_backend%22%3A%22accounts.backends.CaseInsensitiveModelBackend%22%2C%22_auth_user_hash%22%3A%22%22%2C%22_platform%22%3A4%2C%22_token_ver%22%3A2%2C%22_token%22%3A%227204036595%3ArrX4rOPdNCyQcmqkvZhLCQbckN9EFcac%3A75f5d3e66071b8364e82f8601ebb87cb4bcd4da44155b3d0fc8373fb9162578c%22%2C%22last_refreshed%22%3A1523510507.1015851498%7D; rur=FTW; urlgen="{\"time\": 1523509826}:1f6VpN:3KI0UnDrpDAiBMsEXuQMEuEyneU" ',];
+            ];
         }
 
         if ($this->getUserAgent()) {
