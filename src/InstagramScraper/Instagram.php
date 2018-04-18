@@ -33,7 +33,8 @@ class Instagram
     private $sessionUsername;
     private $sessionPassword;
     private $userSession;
-    private $userAgent = null;
+    private $rhxGis = null;
+    private $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.106 Safari/537.36';
 
     /**
      * @param string $username
@@ -203,10 +204,11 @@ class Instagram
 
     /**
      * @param $session
+     * @param $gisToken
      *
      * @return array
      */
-    private function generateHeaders($session)
+    private function generateHeaders($session, $gisToken = null)
     {
         $headers = [];
         if ($session) {
@@ -223,6 +225,10 @@ class Instagram
 
         if ($this->getUserAgent()) {
             $headers['user-agent'] = $this->getUserAgent();
+
+            if (!is_null($gisToken)) {
+                $headers['x-instagram-gis'] = $gisToken;
+            }
         }
 
         return $headers;
@@ -298,6 +304,35 @@ class Instagram
         return Account::create($userArray['entry_data']['ProfilePage'][0]['graphql']['user']);
     }
 
+    private function getSharedDataFromPage($url = Endpoints::BASE_URL)
+    {
+        $response = Request::get(rtrim($url, '/') . '/', $this->generateHeaders($this->userSession));
+        if (static::HTTP_NOT_FOUND === $response->code) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if (static::HTTP_OK !== $response->code) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+        }
+
+        preg_match_all('#\_sharedData \= (.*?)\;\<\/script\>#', $response->raw_body, $out);
+        return json_decode($out[1][0], true, 512, JSON_BIGINT_AS_STRING);
+    }
+
+    private function getRhxGis()
+    {
+        if ($this->rhxGis === null) {
+            $sharedData = $this->getSharedDataFromPage();
+            $this->rhxGis = $sharedData['rhx_gis'];
+        }
+
+        return $this->rhxGis;
+    }
+
+    private function generateGisToken($variables)
+    {
+        return md5(implode(':', [$this->getRhxGis(), $variables ]));
+    }
+
     /**
      * @param int $id
      * @param int $count
@@ -306,13 +341,22 @@ class Instagram
      * @return Media[]
      * @throws InstagramException
      */
-    public function getMediasByUserId($id, $count = 20, $maxId = '')
+    public function getMediasByUserId($id, $count = 12, $maxId = '')
     {
         $index = 0;
         $medias = [];
         $isMoreAvailable = true;
         while ($index < $count && $isMoreAvailable) {
-            $response = Request::get(Endpoints::getAccountMediasJsonLink($id, $maxId), $this->generateHeaders($this->userSession));
+            $variables = json_encode([
+                'id' => (string) $id,
+                'first' => (string) $count,
+                'after' => (string) $maxId
+            ]);
+
+            var_dump($this->getRhxGis(), $variables, $this->generateGisToken($variables));
+
+            $response = Request::get(Endpoints::getAccountMediasJsonLink($variables), $this->generateHeaders($this->userSession, $this->generateGisToken($variables)));
+
             if (static::HTTP_OK !== $response->code) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
             }
@@ -340,13 +384,13 @@ class Instagram
         }
         return $medias;
     }
-    
+
     /**
      * @param string $username
      * @param int $count
-     *
      * @return Media[]
      * @throws InstagramException
+     * @throws InstagramNotFoundException
      */
     public function getMediasFromFeed($username, $count = 20)
     {
