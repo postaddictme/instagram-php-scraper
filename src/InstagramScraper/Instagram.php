@@ -353,8 +353,6 @@ class Instagram
                 'after' => (string) $maxId
             ]);
 
-            var_dump($this->getRhxGis(), $variables, $this->generateGisToken($variables));
-
             $response = Request::get(Endpoints::getAccountMediasJsonLink($variables), $this->generateHeaders($this->userSession, $this->generateGisToken($variables)));
 
             if (static::HTTP_OK !== $response->code) {
