@@ -486,6 +486,7 @@ class Instagram
      *
      * @return array
      * @throws InstagramException
+     * @throws InstagramNotFoundException
      */
     public function getPaginateMedias($username, $maxId = '')
     {
@@ -499,8 +500,16 @@ class Instagram
             'hasNextPage' => $hasNextPage,
         ];
 
-        $response = Request::get(Endpoints::getAccountMediasJsonLink($account->getId(), $maxId),
-            $this->generateHeaders($this->userSession));
+        $variables = json_encode([
+            'id' => (string) $account->getId(),
+            'first' => (string) Endpoints::getAccountMediasRequestCount(),
+            'after' => (string) $maxId
+        ]);
+
+        $response = Request::get(
+            Endpoints::getAccountMediasJsonLink($variables),
+            $this->generateHeaders($this->userSession, $this->generateGisToken($variables))
+        );
 
         // use a raw constant in the code is not a good idea!!
         //if ($response->code !== 200) {
