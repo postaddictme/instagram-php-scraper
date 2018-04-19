@@ -1,9 +1,7 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-$instagram = \InstagramScraper\Instagram::withCredentials('username', 'password', '/path/to/cache/folder');
-$instagram->login();
-$account = $instagram->getAccountById('3');
+$account = (new \InstagramScraper\Instagram())->getAccountById('3');
 
 // Available fields
 echo "Account info:\n";

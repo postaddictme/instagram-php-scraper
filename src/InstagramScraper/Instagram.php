@@ -714,44 +714,31 @@ class Instagram
 
     /**
      * @param string $id
-     *
      * @return string
      * @throws InstagramException
-     * @throws \InvalidArgumentException
+     * @throws InstagramNotFoundException
      */
     public function getUsernameById($id)
     {
-        // Use the follow page to get the account. The follow url will redirect to the home page for the user,
-        // which has the username embedded in the url.
+        $response = Request::get(Endpoints::getAccountJsonPrivateInfoLinkByAccountId($id), $this->generateHeaders($this->userSession));
 
-        if (!is_numeric($id)) {
-            throw new \InvalidArgumentException('User id must be integer or integer wrapped in string');
+        if (static::HTTP_NOT_FOUND === $response->code) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
         }
 
-        $url = Endpoints::getFollowUrl($id);
-
-        // Cut a request by disabling redirects.
-        Request::curlOpt(CURLOPT_FOLLOWLOCATION, FALSE);
-        $response = Request::get($url, $this->generateHeaders($this->userSession));
-        Request::curlOpt(CURLOPT_FOLLOWLOCATION, TRUE);
-
-        if ($response->code === 400) {
-            throw new InstagramException('Account with this id does not exist.');
+        if (static::HTTP_OK !== $response->code) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
         }
 
-        if ($response->code !== 302) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->raw_body) . ' Something went wrong. Please report issue.');
+        if (!($responseArray = json_decode($response->raw_body, true))) {
+            throw new InstagramException('Response does not JSON');
         }
 
-        $cookies = static::parseCookies($response->headers['Set-Cookie']);
-        $this->userSession['csrftoken'] = $cookies['csrftoken'];
+        if ($responseArray['status'] !== 'ok') {
+            throw new InstagramException((isset($responseArray['message']) ? $responseArray['message'] : 'Unknown Error'));
+        }
 
-        // Get the username from the response url.
-        $responseUrl = $response->headers['Location'];
-        $urlParts = explode('/', rtrim($responseUrl, '/'));
-        $username = end($urlParts);
-
-        return $username;
+        return $responseArray['user']['username'];
     }
 
     /**
