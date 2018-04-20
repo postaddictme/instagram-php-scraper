@@ -26,6 +26,7 @@ class Endpoints
     const USER_FEED2 = 'https://www.instagram.com/?__a=1';
     const INSTAGRAM_QUERY_URL = 'https://www.instagram.com/query/';
     const INSTAGRAM_CDN_URL = 'https://scontent.cdninstagram.com/';
+    const ACCOUNT_JSON_PRIVATE_INFO_BY_ID = 'https://i.instagram.com/api/v1/users/{userId}/info/';
 
     const ACCOUNT_MEDIAS2 = 'https://www.instagram.com/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
 
@@ -62,6 +63,11 @@ class Endpoints
     public static function getAccountJsonInfoLinkByAccountId($id)
     {
         return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_INFO_BY_ID);
+    }
+
+    public static function getAccountJsonPrivateInfoLinkByAccountId($id)
+    {
+        return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_PRIVATE_INFO_BY_ID);
     }
 
     public static function getAccountMediasJsonLink($variables)
