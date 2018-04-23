@@ -480,6 +480,9 @@ class Media extends AbstractModel
                     $this->type = static::TYPE_IMAGE;
                 }
                 break;
+            case 'thumbnail_src':
+                $this->imageThumbnailUrl = $value;
+                break;
             case 'carousel_media':
                 $this->type = self::TYPE_CAROUSEL;
                 $this->carouselMedia = [];
