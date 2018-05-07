@@ -8,7 +8,7 @@ class Endpoints
     const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
     const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
     const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
-    const ACCOUNT_MEDIAS = 'https://instagram.com/graphql/query/?query_id=17888483320059182&id={user_id}&first=30&after={max_id}';
+    const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=42323d64886122307be10013ad2dcc44&variables={variables}';
     const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
     const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
     const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
@@ -26,6 +26,7 @@ class Endpoints
     const USER_FEED2 = 'https://www.instagram.com/?__a=1';
     const INSTAGRAM_QUERY_URL = 'https://www.instagram.com/query/';
     const INSTAGRAM_CDN_URL = 'https://scontent.cdninstagram.com/';
+    const ACCOUNT_JSON_PRIVATE_INFO_BY_ID = 'https://i.instagram.com/api/v1/users/{userId}/info/';
 
     const ACCOUNT_MEDIAS2 = 'https://www.instagram.com/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
 
@@ -33,6 +34,21 @@ class Endpoints
     const URL_SIMILAR = 'https://www.instagram.com/graphql/query/?query_id=17845312237175864&id=4663052';
 
     const GRAPH_QL_QUERY_URL = 'https://www.instagram.com/graphql/query/?query_id={{queryId}}';
+
+    private static $requestMediaCount = 30;
+
+    /**
+     * @param int $count
+     */
+    public static function setAccountMediasRequestCount($count)
+    {
+        static::$requestMediaCount = $count;
+    }
+
+    public static function getAccountMediasRequestCount()
+    {
+        return static::$requestMediaCount;
+    }
 
     public static function getAccountPageLink($username)
     {
@@ -49,10 +65,14 @@ class Endpoints
         return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_INFO_BY_ID);
     }
 
-    public static function getAccountMediasJsonLink($userId, $maxId = '')
+    public static function getAccountJsonPrivateInfoLinkByAccountId($id)
     {
-    	$url = str_replace('{user_id}', urlencode($userId), static::ACCOUNT_MEDIAS);
-    	return str_replace('{max_id}', urlencode($maxId), $url);
+        return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_PRIVATE_INFO_BY_ID);
+    }
+
+    public static function getAccountMediasJsonLink($variables)
+    {
+    	return str_replace('{variables}', urlencode($variables), static::ACCOUNT_MEDIAS);
     }
 
     public static function getMediaPageLink($code)

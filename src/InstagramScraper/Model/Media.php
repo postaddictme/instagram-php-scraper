@@ -63,7 +63,7 @@ class Media extends AbstractModel
     /**
      * @var array
      */
-    protected $squareThumbnailsUrl = [];
+    protected $squareImages = [];
 
     /**
      * @var array
@@ -134,6 +134,21 @@ class Media extends AbstractModel
      * @var string
      */
     protected $commentsCount = 0;
+
+    /**
+     * @var Comment[]
+     */
+    protected $comments = [];
+
+    /**
+     * @var bool
+     */
+    protected $hasMoreComments = false;
+
+    /**
+     * @var string
+     */
+    protected $commentsNextPage = '';
 
     /**
      * @var Media[]|array
@@ -262,8 +277,9 @@ class Media extends AbstractModel
     /**
      * @return array
      */
-    public function getSquareThumbnailsUrl() {
-        return $this->squareThumbnailsUrl;
+    public function getSquareImages()
+    {
+        return $this->squareImages;
     }
 
 
@@ -372,6 +388,30 @@ class Media extends AbstractModel
     }
 
     /**
+     * @return Comment[]
+     */
+    public function getComments()
+    {
+        return $this->comments;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasMoreComments()
+    {
+        return $this->hasMoreComments;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCommentsNextPage()
+    {
+        return $this->commentsNextPage;
+    }
+
+    /**
      * @return Media[]|array
      */
     public function getSidecarMedias()
@@ -408,19 +448,40 @@ class Media extends AbstractModel
             case 'likes':
                 $this->likesCount = $arr[$prop]['count'];
                 break;
-            case 'images':
-                $images = self::getImageUrls($arr[$prop]['standard_resolution']['url']);
-                $this->imageLowResolutionUrl = $images['low'];
-                $this->imageThumbnailUrl = $images['thumbnail'];
-                $this->imageStandardResolutionUrl = $images['standard'];
-                $this->imageHighResolutionUrl = $images['high'];
+            case 'display_resources':
+                foreach ($value as $media) {
+                    $mediasUrl[] = $media['src'];
+                    switch ($media['config_width']) {
+                        case 640:
+                            $this->imageThumbnailUrl = $media['src'];
+                            break;
+                        case 750:
+                            $this->imageLowResolutionUrl = $media['src'];
+                            break;
+                        case 1080:
+                            $this->imageStandardResolutionUrl = $media['src'];
+                            break;
+                    }
+                }
                 break;
             case 'thumbnail_resources':
-                $thumbnailsUrl = [];
-                foreach( $value as $thumbnail ) {
-                    $thumbnailsUrl[] = $thumbnail['src'];
+                $squareImagesUrl = [];
+                foreach ($value as $squareImage) {
+                    $squareImagesUrl[] = $squareImage['src'];
                 }
-                $this->squareThumbnailsUrl = $thumbnailsUrl;
+                $this->squareImages = $squareImagesUrl;
+                break;
+            case 'display_url':
+                $this->imageHighResolutionUrl = $value;
+                break;
+            case 'display_src':
+                $this->imageHighResolutionUrl = $value;
+                if (!isset($this->type)) {
+                    $this->type = static::TYPE_IMAGE;
+                }
+                break;
+            case 'thumbnail_src':
+                $this->imageThumbnailUrl = $value;
                 break;
             case 'carousel_media':
                 $this->type = self::TYPE_CAROUSEL;
@@ -483,20 +544,26 @@ class Media extends AbstractModel
                 $this->link = Endpoints::getMediaPageLink($this->shortCode);
                 break;
             case 'edge_media_to_comment':
-                $this->commentsCount = $arr[$prop]['count'];
+                if (isset($arr[$prop]['count'])) {
+                    $this->commentsCount = (int) $arr[$prop]['count'];
+                }
+                if (isset($arr[$prop]['edges']) && is_array($arr[$prop]['edges'])) {
+                    foreach ($arr[$prop]['edges'] as $commentData) {
+                        $this->comments[] = Comment::create($commentData['node']);
+                    }
+                }
+                if (isset($arr[$prop]['page_info']['has_next_page'])) {
+                    $this->hasMoreComments = (bool) $arr[$prop]['page_info']['has_next_page'];
+                }
+                if (isset($arr[$prop]['page_info']['end_cursor'])) {
+                    $this->commentsNextPage = (string) $arr[$prop]['page_info']['end_cursor'];
+                }
                 break;
             case 'edge_media_preview_like':
                 $this->likesCount = $arr[$prop]['count'];
                 break;
             case 'edge_liked_by':
-            	$this->likesCount = $arr[$prop]['count'];
-                break;
-            case 'display_url':
-                $images = self::getImageUrls($arr[$prop]);
-                $this->imageStandardResolutionUrl = $images['standard'];
-                $this->imageLowResolutionUrl = $images['low'];
-                $this->imageHighResolutionUrl = $images['high'];
-                $this->imageThumbnailUrl = $images['thumbnail'];
+                $this->likesCount = $arr[$prop]['count'];
                 break;
             case 'edge_media_to_caption':
                 if (is_array($arr[$prop]['edges']) && !empty($arr[$prop]['edges'])) {
@@ -512,7 +579,6 @@ class Media extends AbstractModel
                 if (!is_array($arr[$prop]['edges'])) {
                     break;
                 }
-
                 foreach ($arr[$prop]['edges'] as $edge) {
                     if (!isset($edge['node'])) {
                         continue;
@@ -527,16 +593,6 @@ class Media extends AbstractModel
             case 'date':
                 $this->createdTime = (int)$value;
                 break;
-            case 'display_src':
-                $images = static::getImageUrls($value);
-                $this->imageStandardResolutionUrl = $images['standard'];
-                $this->imageLowResolutionUrl = $images['low'];
-                $this->imageHighResolutionUrl = $images['high'];
-                $this->imageThumbnailUrl = $images['thumbnail'];
-                if (!isset($this->type)) {
-                    $this->type = static::TYPE_IMAGE;
-                }
-                break;
             case '__typename':
                 if ($value == 'GraphImage') {
                     $this->type = static::TYPE_IMAGE;
@@ -550,24 +606,6 @@ class Media extends AbstractModel
         if (!$this->ownerId && !is_null($this->owner)) {
             $this->ownerId = $this->getOwner()->getId();
         }
-    }
-
-    /**
-     * @param string $imageUrl
-     *
-     * @return array
-     */
-    private static function getImageUrls($imageUrl)
-    {
-        $parts = explode('/', parse_url($imageUrl)['path']);
-        $imageName = $parts[sizeof($parts) - 1];
-        $urls = [
-            'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName,
-            'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
-            'standard' => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
-            'high' => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
-        ];
-        return $urls;
     }
 
     /**
@@ -602,6 +640,24 @@ class Media extends AbstractModel
         }
         array_push($instance->carouselMedia, $carouselMedia);
         return $mediaArray;
+    }
+
+    /**
+     * @param string $imageUrl
+     *
+     * @return array
+     */
+    private static function getImageUrls($imageUrl)
+    {
+        $parts = explode('/', parse_url($imageUrl)['path']);
+        $imageName = $parts[sizeof($parts) - 1];
+        $urls = [
+            'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName,
+            'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
+            'standard' => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
+            'high' => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
+        ];
+        return $urls;
     }
 
     /**
