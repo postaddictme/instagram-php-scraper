@@ -1201,9 +1201,12 @@ class Instagram
             if ($response->code !== 200) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
             }
-            $cookies = static::parseCookies($response->headers['Set-Cookie']);
+			preg_match('/"csrf_token":"(.*?)"/', $response->body, $match);
+			if(isset($match[1])) {
+				$csrfToken = $match[1];
+			}
+			$cookies = static::parseCookies($response->headers['Set-Cookie']);
             $mid = $cookies['mid'];
-            $csrfToken = $cookies['csrftoken'];
             $headers = ['cookie' => "csrftoken=$csrfToken; mid=$mid;",
                 'referer' => Endpoints::BASE_URL . '/',
                 'x-csrftoken' => $csrfToken,
