@@ -595,8 +595,15 @@ class Instagram
                 $maxId = '';
 
             }
-            $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($code, $numberOfCommentsToRetreive, $maxId);
-            $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession));
+		
+            $variables = json_encode([
+                'shortcode' => (string) $code,
+                'first' => (string) $numberOfCommentsToRetreive,
+                'after' => (string) $maxId
+            ]);
+
+            $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($variables);		
+            $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession, $this->generateGisToken($variables)));
             // use a raw constant in the code is not a good idea!!
             //if ($response->code !== 200) {
             if (static::HTTP_OK !== $response->code) {
