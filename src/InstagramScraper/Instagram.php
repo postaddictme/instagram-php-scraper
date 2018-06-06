@@ -235,6 +235,9 @@ class Instagram
                 $headers['x-instagram-gis'] = $gisToken;
             }
         }
+	    
+	// accept cookies for csrf token
+        $headers[''] = 'ig_cb=1;';
 
         return $headers;
     }
