@@ -1205,14 +1205,18 @@ class Instagram
 			if(isset($match[1])) {
 				$csrfToken = $match[1];
 			}
-			$cookies = static::parseCookies($response->headers['Set-Cookie']);
-            $mid = $cookies['mid'];
-            $headers = ['cookie' => "csrftoken=$csrfToken; mid=$mid;",
+
+            $headers = ['cookie' => "csrftoken=$csrfToken;",
                 'referer' => Endpoints::BASE_URL . '/',
                 'x-csrftoken' => $csrfToken,
             ];
+
+
             $response = Request::post(Endpoints::LOGIN_URL, $headers,
                 ['username' => $this->sessionUsername, 'password' => $this->sessionPassword]);
+
+            $cookies = static::parseCookies($response->headers['Set-Cookie']);
+            $mid = $cookies['mid'];
 
             if ($response->code !== 200) {
                 if ($response->code === 400 && isset($response->body->message) && $response->body->message == 'checkpoint_required' && $support_two_step_verification) {
