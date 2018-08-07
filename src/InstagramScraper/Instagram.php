@@ -582,26 +582,32 @@ class Instagram
      */
     public function getMediaCommentsByCode($code, $count = 10, $maxId = null)
     {
-        $remain = $count;
         $comments = [];
         $index = 0;
         $hasPrevious = true;
-        while ($hasPrevious && $index < $count) {
-            if ($remain > static::MAX_COMMENTS_PER_REQUEST) {
-                $numberOfCommentsToRetreive = static::MAX_COMMENTS_PER_REQUEST;
-                $remain -= static::MAX_COMMENTS_PER_REQUEST;
-                $index += static::MAX_COMMENTS_PER_REQUEST;
-            } else {
-                $numberOfCommentsToRetreive = $remain;
-                $index += $remain;
-                $remain = 0;
-            }
+        while ($hasPrevious && $index < $count) {            
             if (!isset($maxId)) {
                 $maxId = '';
-
             }
-            $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($code, $numberOfCommentsToRetreive, $maxId);
-            $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession));
+            
+            if ($count - $index > static::MAX_COMMENTS_PER_REQUEST)
+            {
+                $numberOfCommentsToRetreive = static::MAX_COMMENTS_PER_REQUEST;
+            }
+            else
+            {
+                $numberOfCommentsToRetreive = $count - $index;
+            }
+            
+            $variables = json_encode([
+                'shortcode' => (string) $code,
+                'first' => (string) $numberOfCommentsToRetreive,
+                'after' => (string) $maxId
+            ]);           
+            
+            $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($variables);		
+            $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession, $this->generateGisToken($variables)));
+            
             // use a raw constant in the code is not a good idea!!
             //if ($response->code !== 200) {
             if (static::HTTP_OK !== $response->code) {
@@ -611,18 +617,21 @@ class Instagram
             $this->userSession['csrftoken'] = $cookies['csrftoken'];
             $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
             $nodes = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['edges'];
-            foreach ($nodes as $commentArray) {
+            foreach ($nodes as $commentArray) 
+            {
                 $comments[] = Comment::create($commentArray['node']);
+                $index += 1;
             }
             $hasPrevious = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['has_next_page'];
+            
             $numberOfComments = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['count'];
             if ($count > $numberOfComments) {
                 $count = $numberOfComments;
             }
-            if (sizeof($nodes) == 0) {
+            if (sizeof($nodes) == 0) {              
                 return $comments;
             }
-            $maxId = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['end_cursor'];
+            $maxId = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['end_cursor'];          
         }
         return $comments;
     }
