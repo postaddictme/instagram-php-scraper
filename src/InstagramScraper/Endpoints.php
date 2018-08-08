@@ -15,7 +15,7 @@ class Endpoints
     const MEDIA_JSON_BY_TAG = 'https://www.instagram.com/explore/tags/{tag}/?__a=1&max_id={max_id}';
     const GENERAL_SEARCH = 'https://www.instagram.com/web/search/topsearch/?query={query}';
     const ACCOUNT_JSON_INFO_BY_ID = 'ig_user({userId}){id,username,external_url,full_name,profile_pic_url,biography,followed_by{count},follows{count},media{count},is_private,is_verified}';
-    const COMMENTS_BEFORE_COMMENT_ID_BY_CODE = 'https://www.instagram.com/graphql/query/?query_id=17852405266163336&shortcode={{shortcode}}&first={{count}}&after={{commentId}}';
+    const COMMENTS_BEFORE_COMMENT_ID_BY_CODE = 'https://www.instagram.com/graphql/query/?query_hash=33ba35852cb50da46f5b5e889df7d159&variables={variables}';
     const LAST_LIKES_BY_CODE = 'ig_shortcode({{code}}){likes{nodes{id,user{id,profile_pic_url,username,follows{count},followed_by{count},biography,full_name,media{count},is_private,external_url,is_verified}},page_info}}';
     const LIKES_BY_SHORTCODE = 'https://www.instagram.com/graphql/query/?query_id=17864450716183058&variables={"shortcode":"{{shortcode}}","first":{{count}},"after":"{{likeId}}"}';
     const FOLLOWING_URL = 'https://www.instagram.com/graphql/query/?query_id=17874545323001329&id={{accountId}}&first={{count}}&after={{after}}';
@@ -102,11 +102,9 @@ class Endpoints
         return str_replace('{query}', urlencode($query), static::GENERAL_SEARCH);
     }
 
-    public static function getCommentsBeforeCommentIdByCode($code, $count, $commentId)
+    public static function getCommentsBeforeCommentIdByCode($variables)
     {
-        $url = str_replace('{{shortcode}}', urlencode($code), static::COMMENTS_BEFORE_COMMENT_ID_BY_CODE);
-        $url = str_replace('{{count}}', urlencode($count), $url);
-        return str_replace('{{commentId}}', urlencode($commentId), $url);
+        return str_replace('{variables}', urlencode($variables), static::COMMENTS_BEFORE_COMMENT_ID_BY_CODE);
     }
 
     public static function getLastLikesByCodeLink($code)
