@@ -86,6 +86,16 @@ class Account extends AbstractModel
     protected $isLoaded = false;
 
     /**
+     * @var bool
+     */
+    protected $isFollowsViewer = false;
+
+    /**
+     * @var bool
+     */
+    protected $isFollowedByViewer = false;
+
+    /**
      * @return bool
      */
     public function isLoaded()
@@ -200,6 +210,23 @@ class Account extends AbstractModel
     }
 
     /**
+     * @return bool
+     */
+    public function isFollowsViewer(): bool
+    {
+      return $this->isFollowsViewer;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFollowedByViewer(): bool
+    {
+      return $this->isFollowedByViewer;
+    }
+
+
+    /**
      * @param $value
      * @param $prop
      * @param $array
@@ -243,6 +270,12 @@ class Account extends AbstractModel
                 break;
             case 'is_verified':
                 $this->isVerified = (bool)$value;
+                break;
+            case 'follows_viewer':
+                $this->isFollowsViewer = !empty($array[$prop]) ? $array[$prop] : false;
+                break;
+            case 'followed_by_viewer':
+                $this->isFollowedByViewer = !empty($array[$prop]) ? $array[$prop] : false;
                 break;
         }
     }
