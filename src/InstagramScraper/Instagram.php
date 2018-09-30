@@ -312,6 +312,21 @@ class Instagram
     }
 
     /**
+     * @param $mediaId
+     *
+     * @return bool
+     */
+    public function like($mediaId)
+    {
+      $response = Request::post(
+        Endpoints::getLikeLink($mediaId),
+        $this->generateHeaders($this->userSession)
+      );
+
+      return $response->code == 200;
+    }
+
+    /**
      * @return null
      * @throws InstagramException
      */
