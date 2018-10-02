@@ -619,23 +619,17 @@ class Instagram
      */
     public function getMediaCommentsByCode($code, $count = 10, $maxId = null)
     {
-        $remain = $count;
         $comments = [];
         $index = 0;
         $hasPrevious = true;
         while ($hasPrevious && $index < $count) {
-            if ($remain > static::MAX_COMMENTS_PER_REQUEST) {
-                $numberOfCommentsToRetreive = static::MAX_COMMENTS_PER_REQUEST;
-                $remain -= static::MAX_COMMENTS_PER_REQUEST;
-                $index += static::MAX_COMMENTS_PER_REQUEST;
-            } else {
-                $numberOfCommentsToRetreive = $remain;
-                $index += $remain;
-                $remain = 0;
-            }
             if (!isset($maxId)) {
                 $maxId = '';
-
+            }
+            if ($count - $index > static::MAX_COMMENTS_PER_REQUEST) {
+                $numberOfCommentsToRetreive = static::MAX_COMMENTS_PER_REQUEST;
+            } else {
+                $numberOfCommentsToRetreive = $count - $index;
             }
 
             $variables = json_encode([
@@ -657,8 +651,10 @@ class Instagram
             $nodes = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['edges'];
             foreach ($nodes as $commentArray) {
                 $comments[] = Comment::create($commentArray['node']);
+                $index++;
             }
             $hasPrevious = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['has_next_page'];
+
             $numberOfComments = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['count'];
             if ($count > $numberOfComments) {
                 $count = $numberOfComments;
@@ -790,7 +786,7 @@ class Instagram
         $response = Request::get(Endpoints::getAccountJsonPrivateInfoLinkByAccountId($id), $this->generateHeaders($this->userSession));
 
         if (static::HTTP_NOT_FOUND === $response->code) {
-            throw new InstagramNotFoundException('Account with given username does not exist.');
+            throw new InstagramNotFoundException('Failed to fetch account with given id');
         }
 
         if (static::HTTP_OK !== $response->code) {
@@ -1010,6 +1006,7 @@ class Instagram
             $this->userSession['csrftoken'] = $cookies['csrftoken'];
             $arr = $this->decodeRawBodyToJson($response->raw_body);
             $nodes = $arr['location']['media']['nodes'];
+            printf($nodes);
             foreach ($nodes as $mediaArray) {
                 if ($index === $quantity) {
                     return $medias;
@@ -1048,7 +1045,7 @@ class Instagram
         $cookies = static::parseCookies($response->headers['Set-Cookie']);
         $this->userSession['csrftoken'] = $cookies['csrftoken'];
         $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
-        return Location::create($jsonResponse['location']);
+        return Location::create($jsonResponse['graphql']['location']);
     }
 
     /**
