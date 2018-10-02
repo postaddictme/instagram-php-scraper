@@ -3,7 +3,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 function printMediaInfo(\InstagramScraper\Model\Media $media, $padding = '') {
     echo "${padding}Id: {$media->getId()}\n";
-    echo "${padding}Shotrcode: {$media->getShortCode()}\n";
+    echo "${padding}Shortcode: {$media->getShortCode()}\n";
     echo "${padding}Created at: {$media->getCreatedTime()}\n";
     echo "${padding}Caption: {$media->getCaption()}\n";
     echo "${padding}Number of comments: {$media->getCommentsCount()}\n";

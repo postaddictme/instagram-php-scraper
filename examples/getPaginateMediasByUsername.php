@@ -9,7 +9,7 @@ foreach ($response['medias'] as $media) {
 
     echo "Media info:" . PHP_EOL;
     echo "Id: {$media->getId()}" . PHP_EOL;
-    echo "Shotrcode: {$media->getShortCode()}" . PHP_EOL;
+    echo "Shortcode: {$media->getShortCode()}" . PHP_EOL;
     echo "Created at: {$media->getCreatedTime()}" . PHP_EOL;
     echo "Caption: {$media->getCaption()}" . PHP_EOL;
     echo "Number of comments: {$media->getCommentsCount()}" . PHP_EOL;
