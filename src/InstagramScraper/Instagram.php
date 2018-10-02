@@ -262,6 +262,15 @@ class Instagram
     }
 
     /**
+     * @param $rawBody
+     * @return mixed
+     */
+    private function decodeRawBodyToJson($rawBody)
+    {
+        return json_decode($rawBody, true, 512, JSON_BIGINT_AS_STRING);
+    }
+
+    /**
      * @return null
      */
     public function resetUserAgent()
@@ -311,32 +320,12 @@ class Instagram
         return Account::create($userArray['entry_data']['ProfilePage'][0]['graphql']['user']);
     }
 
-    /**
-     * @return null
-     * @throws InstagramException
-     */
-    private function getRhxGis()
+    private static function extractSharedDataFromBody($body)
     {
-        if ($this->rhxGis === null) {
-            try {
-                $sharedData = $this->getSharedDataFromPage();
-                $this->rhxGis = $sharedData['rhx_gis'];
-            } catch (\Exception $exception) {
-                throw new InstagramException('Could not extract gis from page');
-            }
+        if (preg_match_all('#\_sharedData \= (.*?)\;\<\/script\>#', $body, $out)) {
+            return json_decode($out[1][0], true, 512, JSON_BIGINT_AS_STRING);
         }
-
-        return $this->rhxGis;
-    }
-
-    /**
-     * @param $variables
-     * @return string
-     * @throws InstagramException
-     */
-    private function generateGisToken($variables)
-    {
-        return md5(implode(':', [$this->getRhxGis(), $variables ]));
+        return null;
     }
 
     /**
@@ -354,9 +343,9 @@ class Instagram
         $isMoreAvailable = true;
         while ($index < $count && $isMoreAvailable) {
             $variables = json_encode([
-                'id' => (string) $id,
-                'first' => (string) $count,
-                'after' => (string) $maxId
+                'id' => (string)$id,
+                'first' => (string)$count,
+                'after' => (string)$maxId
             ]);
 
             $response = Request::get(Endpoints::getAccountMediasJsonLink($variables), $this->generateHeaders($this->userSession, $this->generateGisToken($variables)));
@@ -390,6 +379,54 @@ class Instagram
             $isMoreAvailable = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['has_next_page'];
         }
         return $medias;
+    }
+
+    /**
+     * @param $variables
+     * @return string
+     * @throws InstagramException
+     */
+    private function generateGisToken($variables)
+    {
+        return md5(implode(':', [$this->getRhxGis(), $variables]));
+    }
+
+    /**
+     * @return null
+     * @throws InstagramException
+     */
+    private function getRhxGis()
+    {
+        if ($this->rhxGis === null) {
+            try {
+                $sharedData = $this->getSharedDataFromPage();
+                $this->rhxGis = $sharedData['rhx_gis'];
+            } catch (\Exception $exception) {
+                throw new InstagramException('Could not extract gis from page');
+            }
+        }
+
+        return $this->rhxGis;
+    }
+
+    /**
+     * @param string $url
+     * @return mixed|null
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    private function getSharedDataFromPage($url = Endpoints::BASE_URL)
+    {
+        $response = Request::get(rtrim($url, '/') . '/', $this->generateHeaders($this->userSession));
+        if (static::HTTP_NOT_FOUND === $response->code) {
+            throw new InstagramNotFoundException("Page {$url} not found");
+        }
+
+        if (static::HTTP_OK !== $response->code) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        return self::extractSharedDataFromBody($response->raw_body);
     }
 
     /**
@@ -513,9 +550,9 @@ class Instagram
         ];
 
         $variables = json_encode([
-            'id' => (string) $account->getId(),
-            'first' => (string) Endpoints::getAccountMediasRequestCount(),
-            'after' => (string) $maxId
+            'id' => (string)$account->getId(),
+            'first' => (string)Endpoints::getAccountMediasRequestCount(),
+            'after' => (string)$maxId
         ]);
 
         $response = Request::get(
@@ -600,14 +637,14 @@ class Instagram
                 $maxId = '';
 
             }
-		
+
             $variables = json_encode([
-                'shortcode' => (string) $code,
-                'first' => (string) $numberOfCommentsToRetreive,
-                'after' => (string) $maxId
+                'shortcode' => (string)$code,
+                'first' => (string)$numberOfCommentsToRetreive,
+                'after' => (string)$maxId
             ]);
 
-            $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($variables);		
+            $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($variables);
             $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession, $this->generateGisToken($variables)));
             // use a raw constant in the code is not a good idea!!
             //if ($response->code !== 200) {
@@ -1224,7 +1261,7 @@ class Instagram
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
             preg_match('/"csrf_token":"(.*?)"/', $response->body, $match);
-            if(isset($match[1])) {
+            if (isset($match[1])) {
                 $csrfToken = $match[1];
             }
             $cookies = static::parseCookies($response->headers['Set-Cookie']);
@@ -1386,42 +1423,5 @@ class Instagram
     {
         $cachedString = static::$instanceCache->getItem($this->sessionUsername);
         $cachedString->set($this->userSession);
-    }
-
-    private static function extractSharedDataFromBody($body)
-    {
-        if (preg_match_all('#\_sharedData \= (.*?)\;\<\/script\>#', $body, $out)) {
-            return json_decode($out[1][0], true, 512, JSON_BIGINT_AS_STRING);
-        }
-        return null;
-    }
-
-    /**
-     * @param string $url
-     * @return mixed|null
-     * @throws InstagramException
-     * @throws InstagramNotFoundException
-     */
-    private function getSharedDataFromPage($url = Endpoints::BASE_URL)
-    {
-        $response = Request::get(rtrim($url, '/') . '/', $this->generateHeaders($this->userSession));
-        if (static::HTTP_NOT_FOUND === $response->code) {
-            throw new InstagramNotFoundException("Page {$url} not found");
-        }
-
-        if (static::HTTP_OK !== $response->code) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
-        }
-
-        return self::extractSharedDataFromBody($response->raw_body);
-    }
-
-    /**
-     * @param $rawBody
-     * @return mixed
-     */
-    private function decodeRawBodyToJson($rawBody)
-    {
-        return json_decode($rawBody, true, 512, JSON_BIGINT_AS_STRING);
     }
 }

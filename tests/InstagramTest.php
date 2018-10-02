@@ -19,7 +19,7 @@ class InstagramTest extends TestCase
             'path' => $sessionFolder
         ]);
         $instanceCache = CacheManager::getInstance('files');
-        self::$instagram = Instagram::withCredentials('raiym', 'youneverknow', $instanceCache);
+        self::$instagram = Instagram::withCredentials('raiym', 'vpfhAdqmffGxnnJ@a84t', $instanceCache);
         self::$instagram->login();
 
     }
@@ -125,7 +125,7 @@ class InstagramTest extends TestCase
         //TODO: check why returns less comments
         $this->assertEquals(33, sizeof($comments));
     }
-    
+
     /**
      * @group getUsernameById
      */
@@ -134,7 +134,7 @@ class InstagramTest extends TestCase
         $username = self::$instagram->getUsernameById(3);
         $this->assertEquals('kevin', $username);
     }
-    
+
     /**
      * @group getMediasByIserId
      */
