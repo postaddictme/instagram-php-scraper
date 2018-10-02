@@ -72,7 +72,7 @@ class Endpoints
 
     public static function getAccountMediasJsonLink($variables)
     {
-    	return str_replace('{variables}', urlencode($variables), static::ACCOUNT_MEDIAS);
+        return str_replace('{variables}', urlencode($variables), static::ACCOUNT_MEDIAS);
     }
 
     public static function getMediaPageLink($code)
@@ -122,16 +122,6 @@ class Endpoints
         return $url;
     }
 
-    public static function getGraphQlUrl($queryId, $parameters)
-    {
-        $url = str_replace('{{queryId}}', urlencode($queryId), static::GRAPH_QL_QUERY_URL);
-        if (!empty($parameters)) {
-            $query_string = http_build_query($parameters);
-            $url .= '&' . $query_string;
-        }
-        return $url;
-    }
-
     public static function getFollowUrl($accountId)
     {
         $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOW_URL);
@@ -169,6 +159,16 @@ class Endpoints
     public static function getUserStoriesLink()
     {
         $url = self::getGraphQlUrl(InstagramQueryId::USER_STORIES, ['variables' => json_encode([])]);
+        return $url;
+    }
+
+    public static function getGraphQlUrl($queryId, $parameters)
+    {
+        $url = str_replace('{{queryId}}', urlencode($queryId), static::GRAPH_QL_QUERY_URL);
+        if (!empty($parameters)) {
+            $query_string = http_build_query($parameters);
+            $url .= '&' . $query_string;
+        }
         return $url;
     }
 
