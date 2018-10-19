@@ -326,6 +326,31 @@ class Instagram
       return $response->code == 200;
     }
 
+    public function sendTwoFactorVerification($data)
+    {
+        $cachedString = static::$instanceCache->getItem($this->sessionUsername);
+        $session = $cachedString->get();
+        $post_data = [
+            'username' => $data['username'],
+            'verificationCode' => $data['verificationCode'],
+            'identifier' => $data['identifier'],
+            'queryParams' => '{"source":"auth_switcher"}'
+        ];
+        $response = Request::post(
+            Endpoints::getTwoFactorLoginLink(),
+            $this->generateHeaders($session),
+            $post_data
+        );
+
+
+        $cookies = static::parseCookies($response->headers['Set-Cookie']);
+        $cachedString->set($cookies);
+        static::$instanceCache->save($cachedString);
+        $this->userSession = $cookies;
+
+        return $this->decodeRawBodyToJson($response->raw_body);
+    }
+
     /**
      * @return null
      * @throws InstagramException
@@ -716,6 +741,7 @@ class Instagram
             $commentsUrl = Endpoints::getLastLikesByCode($code, $numberOfLikesToRetreive, $maxId);
             $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession));
             if ($response->code !== static::HTTP_OK) {
+                var_dump($response);
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
             }
             $cookies = self::parseCookies($response->headers['Set-Cookie']);
@@ -724,6 +750,10 @@ class Instagram
             $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
 
             $nodes = $jsonResponse['data']['shortcode_media']['edge_liked_by']['edges'];
+
+            if (is_null($nodes)) {
+                return $likes;
+            }
 
             foreach ($nodes as $likesArray) {
                 $likes[] = Like::create($likesArray['node']);
@@ -841,6 +871,7 @@ class Instagram
             }
             $maxId = $arr['graphql']['hashtag']['edge_hashtag_to_media']['page_info']['end_cursor'];
             $hasNextPage = $arr['graphql']['hashtag']['edge_hashtag_to_media']['page_info']['has_next_page'];
+            sleep(1);
         }
         return $medias;
     }
@@ -1234,6 +1265,7 @@ class Instagram
         $cachedString = static::$instanceCache->getItem($this->sessionUsername);
         $session = $cachedString->get();
         if ($force || !$this->isLoggedIn($session)) {
+            $two_factor_data = null;
             $response = Request::get(Endpoints::BASE_URL);
             if ($response->code !== static::HTTP_OK) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
@@ -1252,8 +1284,21 @@ class Instagram
                 ['username' => $this->sessionUsername, 'password' => $this->sessionPassword]);
 
             if ($response->code !== static::HTTP_OK) {
-                if ($response->code === static::HTTP_BAD_REQUEST && isset($response->body->message) && $response->body->message == 'checkpoint_required' && $support_two_step_verification) {
+                if ($response->code === static::HTTP_BAD_REQUEST && //@todo Эта комбинация свойств уже устарела
+                    isset($response->body->message) &&
+                    $response->body->message == 'checkpoint_required' &&
+                    $support_two_step_verification
+                ) {
                     $response = $this->verifyTwoStep($response, $cookies);
+                } elseif (
+                    $response->body->two_factor_required
+                ) {
+                    //@todo вынести этот кусок кода
+                    $info = $response->body->two_factor_info;
+                    $two_factor_data = [
+                        'username' => $info->username,
+                        'identifier' => $info->two_factor_identifier,
+                    ];
                 } elseif ((is_string($response->code) || is_numeric($response->code)) && is_string($response->body)) {
                     throw new InstagramAuthException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
                 } else {
@@ -1262,7 +1307,9 @@ class Instagram
             }
 
             if (is_object($response->body)) {
-                if (!$response->body->authenticated) {
+                if (property_exists($response->body, 'authenticated') &&
+                    !$response->body->authenticated
+                ) {
                     throw new InstagramAuthException('User credentials are wrong.');
                 }
             }
@@ -1272,6 +1319,9 @@ class Instagram
             $cachedString->set($cookies);
             static::$instanceCache->save($cachedString);
             $this->userSession = $cookies;
+            if (property_exists($response->body, 'two_factor_required') && $response->body->two_factor_required) {
+                return $two_factor_data;
+            }
         } else {
             $this->userSession = $session;
         }
