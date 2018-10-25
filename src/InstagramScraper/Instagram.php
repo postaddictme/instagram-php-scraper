@@ -224,11 +224,15 @@ class Instagram
             foreach ($session as $key => $value) {
                 $cookies .= "$key=$value; ";
             }
+             
+            $csrf = empty($session['csrftoken']) ? $session['x-csrftoken'] : $session['csrftoken'];
+            
             $headers = [
                 'cookie' => $cookies,
                 'referer' => Endpoints::BASE_URL . '/',
-                'x-csrftoken' => $session['csrftoken'],
+                'x-csrftoken' => $csrf,
             ];
+
         }
 
         if ($this->getUserAgent()) {
