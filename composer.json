@@ -25,8 +25,13 @@
     "phpunit/phpunit": "5.5.*"
   },
   "autoload": {
-    "psr-0": {
-      "InstagramScraper": "src"
+    "psr-4": {
+      "InstagramScraper\\": "src/InstagramScraper/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "InstagramScraper\\Tests\\": "tests/"
     }
   },
   "support": {
