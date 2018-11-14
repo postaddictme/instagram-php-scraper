@@ -136,7 +136,12 @@ class Instagram
     {
         Endpoints::setAccountMediasRequestCount($count);
     }
-
+	/**
+	 * Set custom curl opts
+	 */
+	public static function curlOpts($opts) {
+		Request::curlOpts($opts);
+	}
     /**
      * @param array $config
      */
@@ -1265,12 +1270,17 @@ class Instagram
             if (isset($match[1])) {
                 $csrfToken = $match[1];
             }
-            $cookies = static::parseCookies($response->headers['Set-Cookie']);
+            if(isset($response->headers['Set-Cookie'])):
+				$cookies        = static::parseCookies( $response->headers['Set-Cookie'] );
+			else:
+				$cookies        = static::parseCookies( $response->headers['set-cookie'] );
+			endif;
             $mid = $cookies['mid'];
             $headers = [
                 'cookie' => "csrftoken=$csrfToken; mid=$mid;",
                 'referer' => Endpoints::BASE_URL . '/',
                 'x-csrftoken' => $csrfToken,
+                'X-CSRFToken' => $csrfToken,
                 'user-agent' => $this->getUserAgent(),
             ];
             $response = Request::post(Endpoints::LOGIN_URL, $headers,
@@ -1292,7 +1302,11 @@ class Instagram
                 }
             }
 
-            $cookies = static::parseCookies($response->headers['Set-Cookie']);
+            if(isset($response->headers['Set-Cookie'])):
+				$cookies        = static::parseCookies( $response->headers['Set-Cookie'] );
+			else:
+				$cookies        = static::parseCookies( $response->headers['set-cookie'] );
+			endif;
             $cookies['mid'] = $mid;
             $cachedString->set($cookies);
             static::$instanceCache->save($cachedString);
@@ -1320,6 +1334,7 @@ class Instagram
             'cookie' => "csrftoken=$csrfToken; sessionid=$sessionId;",
             'referer' => Endpoints::BASE_URL . '/',
             'x-csrftoken' => $csrfToken,
+            'X-CSRFToken' => $csrfToken,
             'user-agent' => $this->getUserAgent(),
         ];
         $response = Request::get(Endpoints::BASE_URL, $headers);
