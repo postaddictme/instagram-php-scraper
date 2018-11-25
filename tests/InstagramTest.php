@@ -1,15 +1,15 @@
 <?php
 
-require '../vendor/autoload.php';
-
 use InstagramScraper\Instagram;
 use InstagramScraper\Model\Media;
 use phpFastCache\CacheManager;
 use PHPUnit\Framework\TestCase;
 
-
 class InstagramTest extends TestCase
 {
+    /**
+     * @var Instagram
+     */
     private static $instagram;
 
     public static function setUpBeforeClass()
@@ -19,7 +19,11 @@ class InstagramTest extends TestCase
             'path' => $sessionFolder
         ]);
         $instanceCache = CacheManager::getInstance('files');
-        self::$instagram = Instagram::withCredentials('raiym', 'redacted', $instanceCache);
+        self::$instagram = Instagram::withCredentials($_ENV['LOGIN'], $_ENV['PASSWORD'], $instanceCache);
+
+        if (isset($_ENV['USER_AGENT'])) {
+            self::$instagram->setUserAgent($_ENV['USER_AGENT']);
+        }
         self::$instagram->login();
 
     }
@@ -123,7 +127,7 @@ class InstagramTest extends TestCase
     {
         $comments = self::$instagram->getMediaCommentsByCode('BR5Njq1gKmB', 40);
         //TODO: check why returns less comments
-        $this->assertEquals(33, sizeof($comments));
+        $this->assertLessThanOrEqual(40, sizeof($comments));
     }
 
     /**
@@ -142,7 +146,19 @@ class InstagramTest extends TestCase
     {
         $instagram = new Instagram();
         $nonPrivateAccountMedias = $instagram->getMediasByUserId(3);
-        $this->assertEquals(20, count($nonPrivateAccountMedias));
+        $this->assertEquals(12, count($nonPrivateAccountMedias));
+    }
+
+    public function testLikeMediaById()
+    {
+        self::$instagram->like('1663256735663694497');
+        $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
+    }
+
+    public function testUnlikeMediaById()
+    {
+        self::$instagram->unlike('1663256735663694497');
+        $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
     }
 
     // TODO: Add test getMediaById

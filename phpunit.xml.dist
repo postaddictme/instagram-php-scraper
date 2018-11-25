@@ -1,0 +1,11 @@
+<phpunit
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/5.5/phpunit.xsd"
+         bootstrap="./vendor/autoload.php"
+         >
+    <php>
+        <env name="LOGIN" value="raiym"/>
+        <env name="PASSWORD" value="redacted"/>
+        <env name="USER_AGENT" value=""/>
+    </php>
+</phpunit>
