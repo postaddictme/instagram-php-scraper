@@ -161,6 +161,20 @@ class InstagramTest extends TestCase
         $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
     }
 
+    public function testAddAndDeleteComment()
+    {
+        $comment1 = self::$instagram->addComment('1749588524134301232', 'Cool!');
+        $this->assertInstanceOf('InstagramScraper\Model\Comment', $comment1);
+
+        $comment2 = self::$instagram->addComment('1749588524134301232', '+1', $comment1);
+        $this->assertInstanceOf('InstagramScraper\Model\Comment', $comment2);
+
+        self::$instagram->deleteComment('1749588524134301232', $comment2);
+        $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
+
+        self::$instagram->deleteComment('1749588524134301232', $comment1);
+        $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
+    }
     // TODO: Add test getMediaById
     // TODO: Add test getLocationById
 }
