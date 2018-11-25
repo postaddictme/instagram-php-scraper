@@ -151,28 +151,31 @@ class InstagramTest extends TestCase
 
     public function testLikeMediaById()
     {
+        // https://www.instagram.com/p/BcVEzBTgqKh/
         self::$instagram->like('1663256735663694497');
         $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
     }
 
     public function testUnlikeMediaById()
     {
+        // https://www.instagram.com/p/BcVEzBTgqKh/
         self::$instagram->unlike('1663256735663694497');
         $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
     }
 
     public function testAddAndDeleteComment()
     {
-        $comment1 = self::$instagram->addComment('1749588524134301232', 'Cool!');
+        // https://www.instagram.com/p/BcVEzBTgqKh/
+        $comment1 = self::$instagram->addComment('1663256735663694497', 'Cool!');
         $this->assertInstanceOf('InstagramScraper\Model\Comment', $comment1);
 
-        $comment2 = self::$instagram->addComment('1749588524134301232', '+1', $comment1);
+        $comment2 = self::$instagram->addComment('1663256735663694497', '+1', $comment1);
         $this->assertInstanceOf('InstagramScraper\Model\Comment', $comment2);
 
-        self::$instagram->deleteComment('1749588524134301232', $comment2);
+        self::$instagram->deleteComment('1663256735663694497', $comment2);
         $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
 
-        self::$instagram->deleteComment('1749588524134301232', $comment1);
+        self::$instagram->deleteComment('1663256735663694497', $comment1);
         $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
     }
     // TODO: Add test getMediaById
