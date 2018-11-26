@@ -1277,7 +1277,7 @@ class Instagram
 			endif;
             $mid = $cookies['mid'];
             $headers = [
-                'cookie' => "csrftoken=$csrfToken; mid=$mid;",
+                'cookie' => "ig_cb=1; csrftoken=$csrfToken; mid=$mid;",
                 'referer' => Endpoints::BASE_URL . '/',
                 'x-csrftoken' => $csrfToken,
                 'X-CSRFToken' => $csrfToken,
@@ -1331,7 +1331,7 @@ class Instagram
         $sessionId = $session['sessionid'];
         $csrfToken = $session['csrftoken'];
         $headers = [
-            'cookie' => "csrftoken=$csrfToken; sessionid=$sessionId;",
+            'cookie' => "ig_cb=1; csrftoken=$csrfToken; sessionid=$sessionId;",
             'referer' => Endpoints::BASE_URL . '/',
             'x-csrftoken' => $csrfToken,
             'X-CSRFToken' => $csrfToken,
