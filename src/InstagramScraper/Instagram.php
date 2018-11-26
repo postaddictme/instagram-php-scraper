@@ -136,12 +136,15 @@ class Instagram
     {
         Endpoints::setAccountMediasRequestCount($count);
     }
-	/**
-	 * Set custom curl opts
-	 */
-	public static function curlOpts($opts) {
-		Request::curlOpts($opts);
-	}
+
+    /**
+     * Set custom curl opts
+     */
+    public static function curlOpts($opts)
+    {
+        Request::curlOpts($opts);
+    }
+
     /**
      * @param array $config
      */
@@ -229,9 +232,9 @@ class Instagram
             foreach ($session as $key => $value) {
                 $cookies .= "$key=$value; ";
             }
-             
+
             $csrf = empty($session['csrftoken']) ? $session['x-csrftoken'] : $session['csrftoken'];
-            
+
             $headers = [
                 'cookie' => $cookies,
                 'referer' => Endpoints::BASE_URL . '/',
@@ -1000,7 +1003,7 @@ class Instagram
      * @return Media[]
      * @throws InstagramException
      */
-    public function getMediasByLocationId($facebookLocationId, $quantity = 12, $offset = '')
+    public function getMediasByLocationId($facebookLocationId, $quantity = 24, $offset = '')
     {
         $index = 0;
         $medias = [];
@@ -1014,20 +1017,19 @@ class Instagram
             $cookies = static::parseCookies($response->headers['Set-Cookie']);
             $this->userSession['csrftoken'] = $cookies['csrftoken'];
             $arr = $this->decodeRawBodyToJson($response->raw_body);
-            $nodes = $arr['location']['media']['nodes'];
-            printf($nodes);
+            $nodes = $arr['graphql']['location']['edge_location_to_media']['edges'];
             foreach ($nodes as $mediaArray) {
                 if ($index === $quantity) {
                     return $medias;
                 }
-                $medias[] = Media::create($mediaArray);
+                $medias[] = Media::create($mediaArray['node']);
                 $index++;
             }
             if (empty($nodes)) {
                 return $medias;
             }
-            $hasNext = $arr['location']['media']['page_info']['has_next_page'];
-            $offset = $arr['location']['media']['page_info']['end_cursor'];
+            $hasNext = $arr['graphql']['location']['edge_location_to_media']['page_info']['has_next_page'];
+            $offset = $arr['graphql']['location']['edge_location_to_media']['page_info']['end_cursor'];
         }
         return $medias;
     }
@@ -1270,11 +1272,11 @@ class Instagram
             if (isset($match[1])) {
                 $csrfToken = $match[1];
             }
-            if(isset($response->headers['Set-Cookie'])):
-				$cookies        = static::parseCookies( $response->headers['Set-Cookie'] );
-			else:
-				$cookies        = static::parseCookies( $response->headers['set-cookie'] );
-			endif;
+            if (isset($response->headers['Set-Cookie'])):
+                $cookies = static::parseCookies($response->headers['Set-Cookie']);
+            else:
+                $cookies = static::parseCookies($response->headers['set-cookie']);
+            endif;
             $mid = $cookies['mid'];
             $headers = [
                 'cookie' => "ig_cb=1; csrftoken=$csrfToken; mid=$mid;",
@@ -1302,11 +1304,11 @@ class Instagram
                 }
             }
 
-            if(isset($response->headers['Set-Cookie'])):
-				$cookies        = static::parseCookies( $response->headers['Set-Cookie'] );
-			else:
-				$cookies        = static::parseCookies( $response->headers['set-cookie'] );
-			endif;
+            if (isset($response->headers['Set-Cookie'])):
+                $cookies = static::parseCookies($response->headers['Set-Cookie']);
+            else:
+                $cookies = static::parseCookies($response->headers['set-cookie']);
+            endif;
             $cookies['mid'] = $mid;
             $cachedString->set($cookies);
             static::$instanceCache->save($cachedString);

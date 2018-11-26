@@ -91,8 +91,8 @@ class InstagramTest extends TestCase
 
     public function testGetLocationMediasById()
     {
-        $medias = self::$instagram->getMediasByLocationId(1);
-        $this->assertEquals(12, count($medias));
+        $medias = self::$instagram->getMediasByLocationId(1, 56);
+        $this->assertEquals(56, count($medias));
     }
 
     public function testGetLocationById()
