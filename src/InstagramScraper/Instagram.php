@@ -657,7 +657,11 @@ class Instagram
             if (static::HTTP_OK !== $response->code) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
-            $cookies = static::parseCookies($response->headers['Set-Cookie']);
+            if (isset($response->headers['Set-Cookie'])):
+                $cookies = static::parseCookies($response->headers['Set-Cookie']);
+            else:
+                $cookies = static::parseCookies($response->headers['set-cookie']);
+            endif;
             $this->userSession['csrftoken'] = $cookies['csrftoken'];
             $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
             $nodes = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['edges'];
@@ -838,7 +842,11 @@ class Instagram
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
 
-            $cookies = static::parseCookies($response->headers['Set-Cookie']);
+            if (isset($response->headers['Set-Cookie'])):
+                $cookies = static::parseCookies($response->headers['Set-Cookie']);
+            else:
+                $cookies = static::parseCookies($response->headers['set-cookie']);
+            endif;
             $this->userSession['csrftoken'] = $cookies['csrftoken'];
 
             $arr = $this->decodeRawBodyToJson($response->raw_body);
@@ -1343,7 +1351,11 @@ class Instagram
         if ($response->code !== static::HTTP_OK) {
             return false;
         }
-        $cookies = static::parseCookies($response->headers['Set-Cookie']);
+        if (isset($response->headers['Set-Cookie'])):
+            $cookies = static::parseCookies($response->headers['Set-Cookie']);
+        else:
+            $cookies = static::parseCookies($response->headers['set-cookie']);
+        endif;
         if (!isset($cookies['ds_user_id'])) {
             return false;
         }
