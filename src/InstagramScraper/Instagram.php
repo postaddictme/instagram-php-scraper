@@ -260,7 +260,7 @@ class Instagram
      */
     private function setCsrftoken($headers)
     {
-        if (isset($response->headers['Set-Cookie'])) {
+        if (isset($headers['Set-Cookie'])) {
             $cookies = static::parseCookies($headers['Set-Cookie']);
             if (isset($cookies['csrftoken'])) {
                 $this->userSession['csrftoken'] = $cookies['csrftoken'];
