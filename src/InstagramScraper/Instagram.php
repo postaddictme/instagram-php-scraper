@@ -552,6 +552,24 @@ class Instagram
     public function getPaginateMedias($username, $maxId = '')
     {
         $account = $this->getAccount($username);
+
+        return $this->getPaginateMediasByUserId(
+            $account->getId(),
+            Endpoints::getAccountMediasRequestCount(),
+            $maxId
+        );
+    }
+
+    /**
+     * @param int $id
+     * @param int $count
+     * @param string $maxId
+     *
+     * @return array
+     * @throws InstagramException
+     */
+    public function getPaginateMediasByUserId($id, $count = 12, $maxId = '')
+    {
         $hasNextPage = false;
         $medias = [];
 
@@ -562,8 +580,8 @@ class Instagram
         ];
 
         $variables = json_encode([
-            'id' => (string)$account->getId(),
-            'first' => (string)Endpoints::getAccountMediasRequestCount(),
+            'id' => (string)$id,
+            'first' => (string)$count,
             'after' => (string)$maxId
         ]);
 
