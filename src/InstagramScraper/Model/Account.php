@@ -69,6 +69,12 @@ class Account extends AbstractModel
     protected $mediaCount = 0;
 
     /**
+     * Latest medias published by user
+     * @var array of Media objects
+     */
+    protected $mediaLatest = [];
+
+    /**
      * true if account is private
      * @var boolean
      */
@@ -184,6 +190,14 @@ class Account extends AbstractModel
     }
 
     /**
+     * @return array
+     */
+    public function getMediaLatest()
+    {
+        return $this->mediaLatest;
+    }
+
+    /**
      * @return bool
      */
     public function isPrivate()
@@ -237,6 +251,10 @@ class Account extends AbstractModel
                 break;
             case 'edge_owner_to_timeline_media':
                 $this->mediaCount = !empty($array[$prop]['count']) ? $array[$prop]['count'] : 0;
+                while(!empty($array[$prop]['edges'])){
+                  $post = array_shift($array[$prop]['edges']);
+                  $this->mediaLatest[] = Media::create($post['node']);
+                }
                 break;
             case 'is_private':
                 $this->isPrivate = (bool)$value;
