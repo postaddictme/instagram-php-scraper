@@ -156,6 +156,11 @@ class Media extends AbstractModel
     protected $sidecarMedias = [];
 
     /**
+     * @var string
+     */
+    protected $locationSlug;
+
+    /**
      * @param string $code
      *
      * @return int
@@ -420,6 +425,14 @@ class Media extends AbstractModel
     }
 
     /**
+     * @return string
+     */
+    public function getLocationSlug()
+    {
+        return $this->locationSlug;
+    }
+
+    /**
      * @param $value
      * @param $prop
      */
@@ -515,6 +528,7 @@ class Media extends AbstractModel
             case 'location':
                 $this->locationId = $arr[$prop]['id'];
                 $this->locationName = $arr[$prop]['name'];
+                $this->locationSlug = $arr[$prop]['slug'];
                 break;
             case 'user':
                 $this->owner = Account::create($arr[$prop]);
