@@ -687,7 +687,7 @@ class Instagram
      */
     private function parseCookies($headers)
     {
-        $rawCookies = isset($headers['Set-Cookie']) ? $headers['Set-Cookie'] : isset($headers['set-cookie']) ? $headers['set-cookie'] : [];
+        $rawCookies = isset($headers['Set-Cookie']) ? $headers['Set-Cookie'] : (isset($headers['set-cookie']) ? $headers['set-cookie'] : []);
         
         if (!is_array($rawCookies)) {
             $rawCookies = [$rawCookies];
