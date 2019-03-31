@@ -780,6 +780,48 @@ class Instagram
         return $likes;
     }
 
+     /**
+     * @param $code
+     *
+     * @return array
+     * @throws InstagramException
+     */
+    public function getMediaTaggedUsersByCode($code) {
+    	$url = Endpoints::getMediaJsonLink($code);
+
+    	$response = Request::get($url, $this->generateHeaders($this->userSession));
+            if ($response->code !== static::HTTP_OK) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
+            }
+            $this->parseCookies($response->headers);
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        $tag_data = $jsonResponse['graphql']['shortcode_media']['edge_media_to_tagged_user']['edges'];
+        
+        // no users tagged in Media
+        if (is_null($tag_data)) {
+            return array();
+        }
+        
+        $tagged_users = array();
+        foreach($tag_data as $tag) {
+            $xPos = $tag['node']['x'];
+            $yPos = $tag['node']['y'];
+
+            $user = $tag['node']['user'];
+            
+            $tagged_user['xPos'] = $xPos;
+            $tagged_user['yPos'] = $yPos;
+            $tagged_user['user'] = $user;
+            //TODO: add Model and add Data to it instead of Dict
+
+            array_push($tagged_users, $tagged_user);
+        }
+
+        return $tagged_users;
+    }
+
     /**
      * @param string $id
      *
