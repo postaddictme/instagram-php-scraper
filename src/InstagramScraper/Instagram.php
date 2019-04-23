@@ -554,7 +554,7 @@ class Instagram
     public function getPaginateMedias($username, $maxId = '')
     {
         $account = $this->getAccount($username);
-        $hasNextPage = true;
+        $hasNextPage = false;
         $medias = [];
 
         $toReturn = [
@@ -890,7 +890,7 @@ class Instagram
      */
     public function getPaginateMediasByTag($tag, $maxId = '')
     {
-        $hasNextPage = true;
+        $hasNextPage = false;
         $medias = [];
 
         $toReturn = [
