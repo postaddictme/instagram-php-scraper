@@ -1,5 +1,7 @@
 <?php
 
+namespace InstagramScraper\Tests;
+
 use InstagramScraper\Instagram;
 use InstagramScraper\Model\Media;
 use phpFastCache\CacheManager;
