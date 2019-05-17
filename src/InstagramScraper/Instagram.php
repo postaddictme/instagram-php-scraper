@@ -402,7 +402,8 @@ class Instagram
      */
     private function generateGisToken($variables)
     {
-        return md5(implode(':', [$this->getRhxGis(), $variables]));
+        return null;
+//        return md5(implode(':', [$this->getRhxGis(), $variables]));
     }
 
     /**
