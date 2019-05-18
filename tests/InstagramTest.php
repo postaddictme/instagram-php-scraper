@@ -180,6 +180,15 @@ class InstagramTest extends TestCase
         self::$instagram->deleteComment('1663256735663694497', $comment1);
         $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
     }
+
+    /**
+     * @group getPaginateMediasByLocationId
+     */
+    public function testGetPaginateMediasByLocationId()
+    {
+        $medias = self::$instagram->getPaginateMediasByLocationId('201176299974017');
+        echo json_encode($medias);
+    }
     // TODO: Add test getMediaById
     // TODO: Add test getLocationById
 }
