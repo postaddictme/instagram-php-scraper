@@ -455,7 +455,7 @@ class Media extends AbstractModel
             case 'link':
                 $this->link = $value;
                 break;
-            case 'comments':
+            case 'edge_media_to_comment':
                 $this->commentsCount = $arr[$prop]['count'];
                 break;
             case 'likes':
