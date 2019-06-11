@@ -73,7 +73,7 @@ class Instagram
      *
      * @var integer
      */
-    private static $maxNbRetries = false;
+    private static $maxNbRetries = 3;
 
     /**
      * @var \GuzzleHttp\Client

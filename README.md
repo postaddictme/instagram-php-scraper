@@ -42,7 +42,7 @@ Instagram::disableProxy();
 $account = $instagram->getAccount('kevin');
 ```
 
-Using a list of failbacks proxies for requests : 
+Using a list of fallbacks proxies for requests :
 
 ```php
 Instagram::setProxies([
