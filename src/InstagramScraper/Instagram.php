@@ -180,13 +180,12 @@ class Instagram
                     throw new Instagram2FactorException('2 Factor Authentication required', $e->getResponse()->getStatusCode(), $e);
                 }
             }
-            if (static::HTTP_OK !== $e->getResponse()->getStatusCode()) {
-                $this->markFailRequest();
-                if ($this->canRetry()) {
-                    return $this->makeRequest($method, $url, $options, $notFoundMessage, $accessDeniedMessage);
-                }
-                throw new InstagramException('Response code is ' . $e->getResponse()->getStatusCode() . '. Something went wrong. Please report issue.', $e->getResponse()->getStatusCode(), $e);
+
+            $this->markFailRequest();
+            if ($this->canRetry()) {
+                return $this->makeRequest($method, $url, $options, $notFoundMessage, $accessDeniedMessage);
             }
+            throw new InstagramException('Response code is ' . $e->getResponse()->getStatusCode() . '. Something went wrong. Please report issue.', $e->getResponse()->getStatusCode(), $e);
         }
 
         $this->cleanFailedRequest();
@@ -419,7 +418,7 @@ class Instagram
      * @param  array|string $proxy
      * @return string
      */
-    private function getProxyUri($proxy)
+    private static function getProxyUri($proxy)
     {
         if (is_array($proxy)) {
             return self::buildProxyURI($proxy);
