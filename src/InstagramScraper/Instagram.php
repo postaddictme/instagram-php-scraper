@@ -152,6 +152,13 @@ class Instagram
             throw $e;
         }
         catch (ClientException|RequestException $e) {
+            if (null === $e->getResponse()) {
+                $this->markFailRequest();
+                if ($this->canRetry()) {
+                    return $this->makeRequest($method, $url, $options, $notFoundMessage, $accessDeniedMessage);
+                }
+                throw new InstagramException('No Response fetched. Something went wrong. Please report issue.', $e->getCode(), $e);
+            }
             if (static::HTTP_NOT_FOUND === $e->getResponse()->getStatusCode()) {
                 throw new InstagramNotFoundException($notFoundMessage, $e->getResponse()->getStatusCode(), $e);
             }
