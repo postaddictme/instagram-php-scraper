@@ -15,10 +15,9 @@
     }
   ],
   "require": {
-    "php": ">=5.4.0",
-    "mashape/unirest-php": "3.0.*",
-    "phpFastCache/phpFastCache": "5.0.*",
-    "ext-curl": "*",
+    "php": ">=5.5",
+    "guzzlehttp/guzzle": "^6.2",
+    "phpfastcache/phpfastcache": "5.0.*",
     "ext-json": "*"
   },
   "require-dev": {

@@ -42,6 +42,24 @@ Instagram::disableProxy();
 $account = $instagram->getAccount('kevin');
 ```
 
+Using a list of failbacks proxies for requests : 
+
+```php
+Instagram::setProxies([
+    '', // Empty or null can be set : no proxy will be used when selected
+    'tcp://127.0.0.1:123',
+    'http://foo:bar@127.0.0.1:456',
+]);
+```
+
+
+Auto Retry Failed Requests (for connections errors, 4xx and 5xx) : 
+
+```php
+Instagram::setAutoRetry(true); // default: false
+Instagram::setMaxNbRetries(3); // default: 3
+```
+
 ## Installation
 
 ### Using composer

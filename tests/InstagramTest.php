@@ -2,6 +2,7 @@
 
 namespace InstagramScraper\Tests;
 
+use InstagramScraper\Exception\InstagramNotFoundException;
 use InstagramScraper\Instagram;
 use InstagramScraper\Model\Media;
 use phpFastCache\CacheManager;
@@ -51,7 +52,7 @@ class InstagramTest extends TestCase
     public function testGetAccountByIdWithInvalidNumericId()
     {
         // PHP_INT_MAX is far larger than the greatest id so far and thus does not represent a valid account.
-        $this->expectExceptionMessage('Failed to fetch account with given id');
+        $this->expectException(InstagramNotFoundException::class);
         self::$instagram->getAccountById(PHP_INT_MAX);
     }
 
