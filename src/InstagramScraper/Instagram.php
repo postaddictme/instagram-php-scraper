@@ -603,7 +603,7 @@ class Instagram
             $arr = $this->decodeRawBodyToJson($response);
 
             if (!is_array($arr)) {
-                throw new InstagramException('Something went wrong. Please report issue. Unable to decode response.', $response);
+                throw new InstagramException('Something went wrong. Please report issue. Unable to decode response.');
             }
 
             $nodes = $arr['data']['user']['edge_owner_to_timeline_media']['edges'];
@@ -789,7 +789,7 @@ class Instagram
         $arr = $this->decodeRawBodyToJson($response);
 
         if (!is_array($arr)) {
-            throw new InstagramException('Something went wrong. Please report issue. Unable to decode response.', $response);
+            throw new InstagramException('Something went wrong. Please report issue. Unable to decode response.');
         }
 
         $nodes = $arr['data']['user']['edge_owner_to_timeline_media']['edges'];
