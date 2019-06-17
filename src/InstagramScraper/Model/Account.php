@@ -55,6 +55,12 @@ class Account extends AbstractModel
      * @var integer
      */
     protected $followsCount = 0;
+    
+    /**
+     * Number of followers
+     * @var integer
+     */
+    protected $followersCount = 0;
 
     /**
      * Number of followers
@@ -250,6 +256,14 @@ class Account extends AbstractModel
     public function getFollowsCount()
     {
         return $this->followsCount;
+    }
+    
+    /**
+     * @return int
+     */
+    public function getFollowersCount()
+    {
+        return $this->followersCount;
     }
 
     /**
@@ -463,6 +477,9 @@ class Account extends AbstractModel
                 break;
             case 'edge_follow':
                 $this->followsCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
+                break;
+            case 'follower_count':
+                $this->followersCount = $value;
                 break;
             case 'edge_followed_by':
                 $this->followedByCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
