@@ -1351,14 +1351,21 @@ class Instagram
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
             preg_match('/"csrf_token":"(.*?)"/', $response->body, $match);
-            if (isset($match[1])) {
-                $csrfToken = $match[1];
-            }
+            $csrfToken = isset($match[1]) ? $match[1] : '';
             $cookies = $this->parseCookies($response->headers);
 
-            $mid = $cookies['mid'];
+            $mid = array_key_exists('mid', $cookies) ? $cookies['mid'] : '';
+
+            $cookieString = 'ig_cb=1';
+            if ($csrfToken !== '') {
+                $cookieString .= '; csrftoken=' . $csrfToken;
+            }
+            if ($mid !== '') {
+                $cookieString .= '; mid=' . $mid;
+            }
+
             $headers = [
-                'cookie' => "ig_cb=1; csrftoken=$csrfToken; mid=$mid;",
+                'cookie' => $cookieString,
                 'referer' => Endpoints::BASE_URL . '/',
                 'x-csrftoken' => $csrfToken,
                 'X-CSRFToken' => $csrfToken,
