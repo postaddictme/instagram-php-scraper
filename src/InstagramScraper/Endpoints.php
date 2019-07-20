@@ -5,7 +5,7 @@ namespace InstagramScraper;
 class Endpoints
 {
     const BASE_URL = 'https://www.instagram.com';
-    const LOGIN_URL = 'https://www.instagram.com/accounts/login/';
+    const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
     const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
     const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
     const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=42323d64886122307be10013ad2dcc44&variables={variables}';
