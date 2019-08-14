@@ -252,6 +252,10 @@ class Instagram
                 $headers['x-instagram-gis'] = $gisToken;
             }
         }
+        
+        if (empty($headers['x-csrftoken'])) {
+            $headers['x-csrftoken'] = md5(uniqid()); // this can be whatever, insta doesn't like an empty value
+        }        
 
         return $headers;
     }
