@@ -30,6 +30,8 @@ class Instagram
 {
     const HTTP_NOT_FOUND = 404;
     const HTTP_OK = 200;
+    const HTTP_REDIRECT_PERMANENT = 302;
+    const HTTP_REDIRECT_TEMP = 301;
     const HTTP_FORBIDDEN = 403;
     const HTTP_BAD_REQUEST = 400;
     const HTTP_TOO_MANY_REQUESTS = 429;
@@ -111,6 +113,7 @@ class Instagram
         $this->client = new Client([
             'cookies' => $cookies,
             'timeout' => self::NETWORK_TIMEOUT,
+            'allow_redirects' => false,
             'headers' => [
                 'User-Agent' => $this->getUserAgent(),
                 'Accept' => '*/*',
@@ -143,6 +146,12 @@ class Instagram
 
         try {
             $response = $this->client->request($method, $url, $options);
+            if ($response->getStatusCode() === static::HTTP_REDIRECT_PERMANENT && $response->getHeaders()['Location'][0] === Endpoints::BASE_LOGIN_URL) {
+                $this->markFailRequest();
+                if ($this->canRetry()) {
+                    return $this->makeRequest($method, $url, $options, $notFoundMessage, $accessDeniedMessage);
+                }
+            }
         }
         catch (ConnectException $e) {
             $this->markFailRequest();
@@ -277,6 +286,18 @@ class Instagram
         }
 
         return false;
+    }
+
+    /**
+     * @return array
+     */
+    public function getProxiesInfo()
+    {
+        return [
+            'proxies' => static::$proxies,
+            'retries' => $this->retries,
+            'currentProxy' => $this->currentProxy,
+        ];
     }
 
     /**
