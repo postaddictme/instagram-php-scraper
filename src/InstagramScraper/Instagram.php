@@ -78,6 +78,13 @@ class Instagram
     private static $maxNbRetries = 3;
 
     /**
+     * Number of seconds for maximum timeout before throwing exception.
+     *
+     * @var integer
+     */
+    private static $maxTimeout = self::NETWORK_TIMEOUT;
+
+    /**
      * @var \GuzzleHttp\Client
      */
     private $client;
@@ -112,7 +119,7 @@ class Instagram
 
         $this->client = new Client([
             'cookies' => $cookies,
-            'timeout' => self::NETWORK_TIMEOUT,
+            'timeout' => self::$maxTimeout,
             'allow_redirects' => false,
             'headers' => [
                 'User-Agent' => $this->getUserAgent(),
@@ -408,6 +415,14 @@ class Instagram
     public static function setMaxNbRetries($maxNbRetries)
     {
         static::$maxNbRetries = $maxNbRetries;
+    }
+
+    /**
+     * @param integer $maxTimeout
+     */
+    public static function setMaxTimeout($maxTimeout)
+    {
+        static::$maxTimeout = $maxTimeout;
     }
 
     /**
