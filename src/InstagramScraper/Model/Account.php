@@ -468,7 +468,7 @@ class Account extends AbstractModel
                 $this->followedByCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
                 break;
             case 'follower_count':
-                $this->followedByCount = $value;
+                $this->followedByCount = empty($array[$prop]['count']) ? $value : 0;
                 break;
             case 'edge_owner_to_timeline_media':
                 $this->initMedia($array[$prop]);
