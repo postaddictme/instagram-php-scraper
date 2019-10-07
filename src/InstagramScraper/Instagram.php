@@ -44,6 +44,8 @@ class Instagram
 
     const NETWORK_TIMEOUT = 10; // 10 seconds default timeout
 
+    const DEFAULT_USERAGENT = 'Mozilla/5.0 (Linux; Android 8.1.0; motorola one Build/OPKS28.63-18-3; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.80 Mobile Safari/537.36 Instagram 72.0.0.21.98 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 132081645)';
+
     /** @var ExtendedCacheItemPoolInterface $instanceCache */
     private static $instanceCache;
 
@@ -97,7 +99,7 @@ class Instagram
     private $sessionPassword;
     private $userSession;
     private $rhxGis = null;
-    private $userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36';
+    private static $userAgent = self::DEFAULT_USERAGENT;
 
     /**
      * Instanciate Guzzle Client.
@@ -122,7 +124,7 @@ class Instagram
             'timeout' => self::$maxTimeout,
             'allow_redirects' => false,
             'headers' => [
-                'User-Agent' => $this->getUserAgent(),
+                'User-Agent' => self::$userAgent,
                 'Accept' => '*/*',
                 'Referer' => Endpoints::BASE_URL . '/',
             ],
@@ -192,8 +194,13 @@ class Instagram
                 // Try to decode response to check if it's a 2 factor response
                 $data = json_decode($e->getResponse()->getBody()->getContents(), true);
 
-                if (null !== $data && $data['two_factor_required'] === true) {
-                    throw new Instagram2FactorException('2 Factor Authentication required', $e->getResponse()->getStatusCode(), $e);
+                if (null !== $data) {
+                    if (isset($data['two_factor_required']) && $data['two_factor_required'] === true) {
+                        throw new Instagram2FactorException('2 Factor Authentication required', $e->getResponse()->getStatusCode(), $e);
+                    }
+                    else {
+                        throw new InstagramException('Bad Request. Please report issue. '.json_encode($data), $e->getResponse()->getStatusCode());
+                    }
                 }
             }
 
@@ -536,22 +543,13 @@ class Instagram
     }
 
     /**
-     *
-     * @return string
-     */
-    public function getUserAgent()
-    {
-        return $this->userAgent;
-    }
-
-    /**
      * @param $userAgent
      *
      * @return string
      */
-    public function setUserAgent($userAgent)
+    public static function setUserAgent($userAgent)
     {
-        return $this->userAgent = $userAgent;
+        self::$userAgent = $userAgent;
     }
 
     /**
@@ -561,14 +559,6 @@ class Instagram
     private function decodeRawBodyToJson($rawBody)
     {
         return json_decode($rawBody, true, 512, JSON_BIGINT_AS_STRING);
-    }
-
-    /**
-     * @return null
-     */
-    public function resetUserAgent()
-    {
-        return $this->userAgent = null;
     }
 
     /**
@@ -1529,7 +1519,7 @@ class Instagram
             'cookie' => $cookie_string,
             'referer' => Endpoints::LOGIN_URL,
             'x-csrftoken' => $cookies['csrftoken'],
-            'user-agent' => $this->getUserAgent(),
+            'user-agent' => self::$userAgent,
         ];
 
         $url = Endpoints::BASE_URL . $response->body->checkpoint_url;
