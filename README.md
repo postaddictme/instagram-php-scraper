@@ -19,7 +19,7 @@ echo $nonPrivateAccountMedias[0]->getLink();
 If you use authentication it is recommended to cache the user session. In this case you don't need to run the `$instagram->login()` method every time your program runs:
 
 ```php
-$instagram = Instagram::withCredentials('username', 'password', '/path/to/cache/folder/');
+$instagram = Instagram::withCredentials('username', 'password', new SimpleCacheImplementation);
 $instagram->login(); // will use cached session if you can force login $instagram->login(true)
 $account = $instagram->getAccountById(3);
 echo $account->getUsername();

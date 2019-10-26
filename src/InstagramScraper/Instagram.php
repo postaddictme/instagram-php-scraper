@@ -1405,7 +1405,7 @@ class Instagram
             $twoStepVerificator = new ConsoleVerification();
         }
 
-        $session = static::$instanceCache->get(md5($this->sessionUsername));
+        $session = static::$instanceCache->get($this->getCacheKey());
         if ($force || !$this->isLoggedIn($session)) {
             $response = Request::get(Endpoints::BASE_URL);
             if ($response->code !== static::HTTP_OK) {
@@ -1459,7 +1459,7 @@ class Instagram
             $cookies = $this->parseCookies($response->headers);
 
             $cookies['mid'] = $mid;
-            static::$instanceCache->set(md5($this->sessionUsername), $cookies);
+            static::$instanceCache->set($this->getCacheKey(), $cookies);
             $this->userSession = $cookies;
         } else {
             $this->userSession = $session;
@@ -1568,7 +1568,7 @@ class Instagram
      */
     public function saveSession()
     {
-        static::$instanceCache->set(md5($this->sessionUsername), $this->userSession);
+        static::$instanceCache->set($this->getCacheKey(), $this->userSession);
     }
 
     /**
@@ -1665,5 +1665,13 @@ class Instagram
         if ($jsonResponse['status'] !== 'ok') {
             throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
+    }
+
+    /**
+     * @return string
+     */
+    private function getCacheKey()
+    {
+        return md5($this->sessionUsername);
     }
 }
