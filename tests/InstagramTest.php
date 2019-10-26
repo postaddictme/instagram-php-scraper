@@ -4,7 +4,8 @@ namespace InstagramScraper\Tests;
 
 use InstagramScraper\Instagram;
 use InstagramScraper\Model\Media;
-use phpFastCache\CacheManager;
+use Phpfastcache\Config\ConfigurationOption;
+use Phpfastcache\Helper\Psr16Adapter;
 use PHPUnit\Framework\TestCase;
 
 class InstagramTest extends TestCase
@@ -17,10 +18,12 @@ class InstagramTest extends TestCase
     public static function setUpBeforeClass()
     {
         $sessionFolder = __DIR__ . DIRECTORY_SEPARATOR . 'sessions' . DIRECTORY_SEPARATOR;
-        CacheManager::setDefaultConfig([
+        $defaultDriver = 'Files';
+        $options = new ConfigurationOption([
             'path' => $sessionFolder
         ]);
-        $instanceCache = CacheManager::getInstance('files');
+        $instanceCache = new Psr16Adapter($defaultDriver, $options);
+
         self::$instagram = Instagram::withCredentials($_ENV['LOGIN'], $_ENV['PASSWORD'], $instanceCache);
 
         if (isset($_ENV['USER_AGENT'])) {

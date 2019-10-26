@@ -16,8 +16,7 @@ use InstagramScraper\Model\UserStories;
 use InstagramScraper\TwoStepVerification\ConsoleVerification;
 use InstagramScraper\TwoStepVerification\TwoStepVerificationInterface;
 use InvalidArgumentException;
-use phpFastCache\Cache\ExtendedCacheItemPoolInterface;
-use phpFastCache\CacheManager;
+use Psr\SimpleCache\CacheInterface;
 use Unirest\Request;
 
 class Instagram
@@ -33,7 +32,7 @@ class Instagram
     const PAGING_DELAY_MINIMUM_MICROSEC = 1000000; // 1 sec min delay to simulate browser
     const PAGING_DELAY_MAXIMUM_MICROSEC = 3000000; // 3 sec max delay to simulate browser
 
-    /** @var ExtendedCacheItemPoolInterface $instanceCache */
+    /** @var CacheInterface $instanceCache */
     private static $instanceCache = null;
 
     public $pagingTimeLimitSec = self::PAGING_TIME_LIMIT_SEC;
@@ -48,27 +47,13 @@ class Instagram
     /**
      * @param string $username
      * @param string $password
-     * @param null $sessionFolder
+     * @param CacheInterface|null $cache
      *
      * @return Instagram
-     * @throws \phpFastCache\Exceptions\phpFastCacheDriverCheckException
      */
-    public static function withCredentials($username, $password, $sessionFolder = null)
+    public static function withCredentials($username, $password, CacheInterface $cache)
     {
-        if (is_null($sessionFolder)) {
-            $sessionFolder = __DIR__ . DIRECTORY_SEPARATOR . 'sessions' . DIRECTORY_SEPARATOR;
-        }
-        if (is_string($sessionFolder)) {
-            CacheManager::setDefaultConfig([
-                'path' => $sessionFolder,
-                'ignoreSymfonyNotice' => true,
-            ]);
-            if (static::$instanceCache === null) {
-                static::$instanceCache = CacheManager::getInstance('files');
-            }
-        } else {
-            static::$instanceCache = $sessionFolder;
-        }
+        static::$instanceCache = $cache;
         $instance = new self();
         $instance->sessionUsername = $username;
         $instance->sessionPassword = $password;
@@ -1420,8 +1405,7 @@ class Instagram
             $twoStepVerificator = new ConsoleVerification();
         }
 
-        $cachedString = static::$instanceCache->getItem($this->sessionUsername);
-        $session = $cachedString->get();
+        $session = static::$instanceCache->get($this->getCacheKey());
         if ($force || !$this->isLoggedIn($session)) {
             $response = Request::get(Endpoints::BASE_URL);
             if ($response->code !== static::HTTP_OK) {
@@ -1475,8 +1459,7 @@ class Instagram
             $cookies = $this->parseCookies($response->headers);
 
             $cookies['mid'] = $mid;
-            $cachedString->set($cookies);
-            static::$instanceCache->save($cachedString);
+            static::$instanceCache->set($this->getCacheKey(), $cookies);
             $this->userSession = $cookies;
         } else {
             $this->userSession = $session;
@@ -1585,8 +1568,7 @@ class Instagram
      */
     public function saveSession()
     {
-        $cachedString = static::$instanceCache->getItem($this->sessionUsername);
-        $cachedString->set($this->userSession);
+        static::$instanceCache->set($this->getCacheKey(), $this->userSession);
     }
 
     /**
@@ -1683,5 +1665,13 @@ class Instagram
         if ($jsonResponse['status'] !== 'ok') {
             throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
+    }
+
+    /**
+     * @return string
+     */
+    private function getCacheKey()
+    {
+        return md5($this->sessionUsername);
     }
 }
