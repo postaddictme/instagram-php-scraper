@@ -166,6 +166,11 @@ class Media extends AbstractModel
     protected $locationSlug;
 
     /**
+     * @var string
+     */
+    protected $altText;
+
+    /**
      * @param string $code
      *
      * @return int
@@ -444,6 +449,13 @@ class Media extends AbstractModel
     {
         return $this->locationSlug;
     }
+    /**
+     * @return string
+     */
+    public function getAltText()
+    {
+        return $this->altText;
+    }
 
     /**
      * @param $value
@@ -518,6 +530,9 @@ class Media extends AbstractModel
                 break;
             case 'caption':
                 $this->caption = $arr[$prop];
+                break;
+            case 'accessibility_caption':
+                $this->caption = $value;
                 break;
             case 'video_views':
                 $this->videoViews = $value;
