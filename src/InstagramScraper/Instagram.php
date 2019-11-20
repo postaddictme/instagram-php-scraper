@@ -47,7 +47,7 @@ class Instagram
     /**
      * @param string $username
      * @param string $password
-     * @param CacheInterface|null $cache
+     * @param CacheInterface $cache
      *
      * @return Instagram
      */
