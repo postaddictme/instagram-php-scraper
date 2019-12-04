@@ -211,7 +211,7 @@ class Media extends AbstractModel
         while ($id > 0) {
             $remainder = $id % 64;
             $id = ($id - $remainder) / 64;
-            $code = $alphabet{$remainder} . $code;
+            $code = $alphabet[$remainder] . $code;
         };
         return $code;
     }
@@ -488,7 +488,6 @@ class Media extends AbstractModel
                 break;
             case 'display_resources':
                 foreach ($value as $media) {
-                    $mediasUrl[] = $media['src'];
                     switch ($media['config_width']) {
                         case 640:
                             $this->imageThumbnailUrl = $media['src'];
