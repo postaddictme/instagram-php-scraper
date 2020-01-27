@@ -350,7 +350,7 @@ class Instagram
         $userArray = self::extractSharedDataFromBody($response->raw_body);
 
         if (!isset($userArray['entry_data']['ProfilePage'][0]['graphql']['user'])) {
-            throw new InstagramNotFoundException('Account with this username does not exist');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
         return Account::create($userArray['entry_data']['ProfilePage'][0]['graphql']['user']);
     }
@@ -489,7 +489,7 @@ class Instagram
         $userArray = $this->decodeRawBodyToJson($response->raw_body);
 
         if (!isset($userArray['graphql']['user'])) {
-            throw new InstagramNotFoundException('Account with this username does not exist');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
 
         $nodes = $userArray['graphql']['user']['edge_owner_to_timeline_media']['edges'];
