@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 require __DIR__ . '/../../vendor/autoload.php';
 
 use InstagramScraper\Exception\InstagramAuthException;
@@ -15,8 +16,8 @@ use SSilence\ImapClient\ImapClientException;
  */
 class EmailVerification implements TwoStepVerificationInterface
 {
-    const MAIL_MAX_WAIT_TIME = 600;
-    const MAIL_WAIT_STEP_TIME = 10;
+    public const MAIL_MAX_WAIT_TIME = 600;
+    public const MAIL_WAIT_STEP_TIME = 10;
 
     private $imapHost;
     private $email;
@@ -60,8 +61,8 @@ class EmailVerification implements TwoStepVerificationInterface
 
     /**
      * @param array $choices
-     * @return string
      * @throws InstagramAuthException
+     * @return string
      */
     public function getVerificationType(array $choices)
     {
@@ -74,21 +75,9 @@ class EmailVerification implements TwoStepVerificationInterface
         throw new InstagramAuthException('Login error. Two step verification via Email is not an option.');
     }
 
-    private function getMaskedEmail()
-    {
-        $mail = explode('@', $this->email);
-        $mail[0] = $mail[0][0]
-            . \str_repeat('*', min(strlen($mail[0]) - 2,7))
-            . $mail[0][strlen($mail[0]) - 1];
-        $domain = explode('.', $mail[1]);
-        $zone = array_pop($domain);
-        $domain = $domain[0][0] . \str_repeat('*', strlen(implode('.', $domain)) - 1);
-        return $mail[0] . '@' . $domain . '.' . $zone;
-    }
-
     /**
-     * @return string
      * @throws InstagramAuthException
+     * @return string
      */
     public function getSecurityCode()
     {
@@ -110,9 +99,21 @@ class EmailVerification implements TwoStepVerificationInterface
         throw new InstagramAuthException('Login error. Verification email read timeout.');
     }
 
+    private function getMaskedEmail()
+    {
+        $mail = explode('@', $this->email);
+        $mail[0] = $mail[0][0]
+            . \str_repeat('*', min(strlen($mail[0]) - 2,7))
+            . $mail[0][strlen($mail[0]) - 1];
+        $domain = explode('.', $mail[1]);
+        $zone = array_pop($domain);
+        $domain = $domain[0][0] . \str_repeat('*', strlen(implode('.', $domain)) - 1);
+        return $mail[0] . '@' . $domain . '.' . $zone;
+    }
+
     /**
-     * @return bool
      * @throws ImapClientException
+     * @return bool
      */
     private function getCodeFromEmail()
     {

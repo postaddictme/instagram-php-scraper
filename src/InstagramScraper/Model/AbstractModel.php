@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace InstagramScraper\Model;
 
@@ -7,7 +8,6 @@ use InstagramScraper\Traits\InitializerTrait;
 
 /**
  * Class AbstractModel
- * @package InstagramScraper\Model
  */
 abstract class AbstractModel implements \ArrayAccess
 {

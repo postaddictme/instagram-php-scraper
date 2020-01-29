@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * File:    InitializerTrait.php
  * Project: instagram-php-scraper
@@ -65,6 +66,62 @@ trait InitializerTrait
             $this->init($props);
         }
         $this->afterInit();
+    }
+
+    /**
+     * @return $this
+     */
+    public static function fake()
+    {
+        return static::create()->setFake(true);
+    }
+
+    /**
+     * @param array $params
+     *
+     * @return static
+     */
+    public static function create(array $params = null)
+    {
+        return new static($params);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNotEmpty()
+    {
+        return !$this->isLoadEmpty;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFake()
+    {
+        return $this->isFake;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray()
+    {
+        $ret = [];
+        $map = static::$initPropertiesMap;
+        foreach ($map as $key => $init) {
+            if (\property_exists($this, $key)) {
+                //if there is property then it just assign value
+                $ret[$key] = $this->{$key};
+            } elseif (isset($this[$key])) {
+                //probably array access
+                $ret[$key] = $this[$key];
+            } else {
+                $ret[$key] = null;
+            }
+        }
+
+        return $ret;
     }
 
     /**
@@ -149,14 +206,6 @@ trait InitializerTrait
     }
 
     /**
-     * @return $this
-     */
-    public static function fake()
-    {
-        return static::create()->setFake(true);
-    }
-
-    /**
      * @param bool $value
      *
      * @return $this
@@ -166,54 +215,6 @@ trait InitializerTrait
         $this->isFake = (bool)$value;
 
         return $this;
-    }
-
-    /**
-     * @param array $params
-     *
-     * @return static
-     */
-    public static function create(array $params = null)
-    {
-        return new static($params);
-    }
-
-    /**
-     * @return bool
-     */
-    public function isNotEmpty()
-    {
-        return !$this->isLoadEmpty;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isFake()
-    {
-        return $this->isFake;
-    }
-
-    /**
-     * @return array
-     */
-    public function toArray()
-    {
-        $ret = [];
-        $map = static::$initPropertiesMap;
-        foreach ($map as $key => $init) {
-            if (\property_exists($this, $key)) {
-                //if there is property then it just assign value
-                $ret[$key] = $this->{$key};
-            } elseif (isset($this[$key])) {
-                //probably array access
-                $ret[$key] = $this[$key];
-            } else {
-                $ret[$key] = null;
-            }
-        }
-
-        return $ret;
     }
 
     /**
@@ -249,7 +250,7 @@ trait InitializerTrait
     {
         $keys = \func_get_args();
         unset($keys[0]); //remove value
-        if (\count($keys) > 1) {
+        if ((is_countable($keys) ? \count($keys) : 0) > 1) {
             foreach ($keys as $key) {
                 if (\property_exists($this, $key)) { //first found set
                     $this->{$key} = $value;
@@ -307,12 +308,7 @@ trait InitializerTrait
     {
         $value = \json_decode($rawData, true, 512, JSON_BIGINT_AS_STRING);
         if (empty($value)) {
-            //could not resolve -
-            if ('null' === $rawData or '' === $rawData) {
-                $value = [];
-            } else {
-                $value = (array)$rawData;
-            }
+            $value = ('null' === $rawData or '' === $rawData) ? [] : (array)$rawData;
         } else {
             $value = (array)$value;
         }

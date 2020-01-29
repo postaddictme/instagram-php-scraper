@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 // If account is public you can query Instagram without auth
 $instagram = new \InstagramScraper\Instagram();
 

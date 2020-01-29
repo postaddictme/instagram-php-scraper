@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * File:    ArrayLikeTrait.php
  * Project: instagram-php-scraper
@@ -27,24 +28,6 @@ trait ArrayLikeTrait
     }
 
     /**
-     * @param $method
-     * @param $case
-     *
-     * @return bool|string
-     */
-    protected function isMethod($method, $case)
-    {
-        $uMethod = $case . \ucfirst($method);
-        if (\method_exists($this, $uMethod)) {
-            return $uMethod;
-        }
-        if (\method_exists($this, $method)) {
-            return $method;
-        }
-        return false;
-    }
-
-    /**
      * @param mixed $offset
      *
      * @return mixed
@@ -62,23 +45,6 @@ trait ArrayLikeTrait
         }
 
         return null;
-    }
-
-    /**
-     * @param $method
-     *
-     * @return mixed
-     */
-    protected function run($method)
-    {
-        if (\is_array($method)) {
-            $params = $method;
-            $method = \array_shift($params);
-            if ($params) {
-                return \call_user_func_array([$this, $method], $params);
-            }
-        }
-        return \call_user_func([$this, $method]);
     }
 
     /**
@@ -108,6 +74,41 @@ trait ArrayLikeTrait
         } else {
             $this->{$offset} = null;
         }
+    }
+
+    /**
+     * @param $method
+     * @param $case
+     *
+     * @return bool|string
+     */
+    protected function isMethod($method, $case)
+    {
+        $uMethod = $case . \ucfirst($method);
+        if (\method_exists($this, $uMethod)) {
+            return $uMethod;
+        }
+        if (\method_exists($this, $method)) {
+            return $method;
+        }
+        return false;
+    }
+
+    /**
+     * @param $method
+     *
+     * @return mixed
+     */
+    protected function run($method)
+    {
+        if (\is_array($method)) {
+            $params = $method;
+            $method = \array_shift($params);
+            if ($params) {
+                return \call_user_func_array([$this, $method], $params);
+            }
+        }
+        return \call_user_func([$this, $method]);
     }
 
 }

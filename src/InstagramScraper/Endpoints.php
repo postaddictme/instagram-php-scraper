@@ -1,43 +1,44 @@
 <?php
+declare(strict_types=1);
 
 namespace InstagramScraper;
 
 class Endpoints
 {
-    const BASE_URL = 'https://www.instagram.com';
-    const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
-    const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
-    const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
-    const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=42323d64886122307be10013ad2dcc44&variables={variables}';
-    const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
-    const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
-    const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
-    const MEDIA_JSON_BY_TAG = 'https://www.instagram.com/explore/tags/{tag}/?__a=1&max_id={max_id}';
-    const GENERAL_SEARCH = 'https://www.instagram.com/web/search/topsearch/?query={query}&count={count}';
-    const ACCOUNT_JSON_INFO_BY_ID = 'ig_user({userId}){id,username,external_url,full_name,profile_pic_url,biography,followed_by{count},follows{count},media{count},is_private,is_verified}';
-    const COMMENTS_BEFORE_COMMENT_ID_BY_CODE = 'https://www.instagram.com/graphql/query/?query_hash=33ba35852cb50da46f5b5e889df7d159&variables={variables}';
-    const LAST_LIKES_BY_CODE = 'ig_shortcode({{code}}){likes{nodes{id,user{id,profile_pic_url,username,follows{count},followed_by{count},biography,full_name,media{count},is_private,external_url,is_verified}},page_info}}';
-    const LIKES_BY_SHORTCODE = 'https://www.instagram.com/graphql/query/?query_id=17864450716183058&variables={"shortcode":"{{shortcode}}","first":{{count}},"after":"{{likeId}}"}';
-    const FOLLOWING_URL = 'https://www.instagram.com/graphql/query/?query_id=17874545323001329&id={{accountId}}&first={{count}}&after={{after}}';
-    const FOLLOWERS_URL = 'https://www.instagram.com/graphql/query/?query_id=17851374694183129&id={{accountId}}&first={{count}}&after={{after}}';
-    const FOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/follow/';
-    const UNFOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/unfollow/';
-    const USER_FEED = 'https://www.instagram.com/graphql/query/?query_id=17861995474116400&fetch_media_item_count=12&fetch_media_item_cursor=&fetch_comment_count=4&fetch_like=10';
-    const USER_FEED2 = 'https://www.instagram.com/?__a=1';
-    const INSTAGRAM_QUERY_URL = 'https://www.instagram.com/query/';
-    const INSTAGRAM_CDN_URL = 'https://scontent.cdninstagram.com/';
-    const ACCOUNT_JSON_PRIVATE_INFO_BY_ID = 'https://i.instagram.com/api/v1/users/{userId}/info/';
-    const LIKE_URL = 'https://www.instagram.com/web/likes/{mediaId}/like/';
-    const UNLIKE_URL = 'https://www.instagram.com/web/likes/{mediaId}/unlike/';
-    const ADD_COMMENT_URL = 'https://www.instagram.com/web/comments/{mediaId}/add/';
-    const DELETE_COMMENT_URL = 'https://www.instagram.com/web/comments/{mediaId}/delete/{commentId}/';
+    public const BASE_URL = 'https://www.instagram.com';
+    public const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
+    public const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
+    public const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
+    public const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=42323d64886122307be10013ad2dcc44&variables={variables}';
+    public const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
+    public const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
+    public const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
+    public const MEDIA_JSON_BY_TAG = 'https://www.instagram.com/explore/tags/{tag}/?__a=1&max_id={max_id}';
+    public const GENERAL_SEARCH = 'https://www.instagram.com/web/search/topsearch/?query={query}&count={count}';
+    public const ACCOUNT_JSON_INFO_BY_ID = 'ig_user({userId}){id,username,external_url,full_name,profile_pic_url,biography,followed_by{count},follows{count},media{count},is_private,is_verified}';
+    public const COMMENTS_BEFORE_COMMENT_ID_BY_CODE = 'https://www.instagram.com/graphql/query/?query_hash=33ba35852cb50da46f5b5e889df7d159&variables={variables}';
+    public const LAST_LIKES_BY_CODE = 'ig_shortcode({{code}}){likes{nodes{id,user{id,profile_pic_url,username,follows{count},followed_by{count},biography,full_name,media{count},is_private,external_url,is_verified}},page_info}}';
+    public const LIKES_BY_SHORTCODE = 'https://www.instagram.com/graphql/query/?query_id=17864450716183058&variables={"shortcode":"{{shortcode}}","first":{{count}},"after":"{{likeId}}"}';
+    public const FOLLOWING_URL = 'https://www.instagram.com/graphql/query/?query_id=17874545323001329&id={{accountId}}&first={{count}}&after={{after}}';
+    public const FOLLOWERS_URL = 'https://www.instagram.com/graphql/query/?query_id=17851374694183129&id={{accountId}}&first={{count}}&after={{after}}';
+    public const FOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/follow/';
+    public const UNFOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/unfollow/';
+    public const USER_FEED = 'https://www.instagram.com/graphql/query/?query_id=17861995474116400&fetch_media_item_count=12&fetch_media_item_cursor=&fetch_comment_count=4&fetch_like=10';
+    public const USER_FEED2 = 'https://www.instagram.com/?__a=1';
+    public const INSTAGRAM_QUERY_URL = 'https://www.instagram.com/query/';
+    public const INSTAGRAM_CDN_URL = 'https://scontent.cdninstagram.com/';
+    public const ACCOUNT_JSON_PRIVATE_INFO_BY_ID = 'https://i.instagram.com/api/v1/users/{userId}/info/';
+    public const LIKE_URL = 'https://www.instagram.com/web/likes/{mediaId}/like/';
+    public const UNLIKE_URL = 'https://www.instagram.com/web/likes/{mediaId}/unlike/';
+    public const ADD_COMMENT_URL = 'https://www.instagram.com/web/comments/{mediaId}/add/';
+    public const DELETE_COMMENT_URL = 'https://www.instagram.com/web/comments/{mediaId}/delete/{commentId}/';
 
-    const ACCOUNT_MEDIAS2 = 'https://www.instagram.com/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
+    public const ACCOUNT_MEDIAS2 = 'https://www.instagram.com/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
 
     // Look alike??
-    const URL_SIMILAR = 'https://www.instagram.com/graphql/query/?query_id=17845312237175864&id=4663052';
+    public const URL_SIMILAR = 'https://www.instagram.com/graphql/query/?query_id=17845312237175864&id=4663052';
 
-    const GRAPH_QL_QUERY_URL = 'https://www.instagram.com/graphql/query/?query_id={{queryId}}';
+    public const GRAPH_QL_QUERY_URL = 'https://www.instagram.com/graphql/query/?query_id={{queryId}}';
 
     private static $requestMediaCount = 30;
 
@@ -114,23 +115,20 @@ class Endpoints
 
     public static function getLastLikesByCodeLink($code)
     {
-        $url = str_replace('{{code}}', urlencode($code), static::LAST_LIKES_BY_CODE);
-        return $url;
+        return str_replace('{{code}}', urlencode($code), static::LAST_LIKES_BY_CODE);
     }
 
     public static function getLastLikesByCode($code, $count, $lastLikeID)
     {
         $url = str_replace('{{shortcode}}', urlencode($code), static::LIKES_BY_SHORTCODE);
         $url = str_replace('{{count}}', urlencode($count), $url);
-        $url = str_replace('{{likeId}}', urlencode($lastLikeID), $url);
 
-        return $url;
+        return str_replace('{{likeId}}', urlencode($lastLikeID), $url);
     }
 
     public static function getFollowUrl($accountId)
     {
-        $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOW_URL);
-        return $url;
+        return str_replace('{{accountId}}', urlencode($accountId), static::FOLLOW_URL);
     }
 
     public static function getFollowersJsonLink($accountId, $count, $after = '')
@@ -138,13 +136,7 @@ class Endpoints
         $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOWERS_URL);
         $url = str_replace('{{count}}', urlencode($count), $url);
 
-        if ($after === '') {
-            $url = str_replace('&after={{after}}', '', $url);
-        } else {
-            $url = str_replace('{{after}}', urlencode($after), $url);
-        }
-
-        return $url;
+        return $after === '' ? str_replace('&after={{after}}', '', $url) : str_replace('{{after}}', urlencode($after), $url);
     }
 
     public static function getFollowingJsonLink($accountId, $count, $after = '')
@@ -152,19 +144,12 @@ class Endpoints
         $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOWING_URL);
         $url = str_replace('{{count}}', urlencode($count), $url);
 
-        if ($after === '') {
-            $url = str_replace('&after={{after}}', '', $url);
-        } else {
-            $url = str_replace('{{after}}', urlencode($after), $url);
-        }
-
-        return $url;
+        return $after === '' ? str_replace('&after={{after}}', '', $url) : str_replace('{{after}}', urlencode($after), $url);
     }
 
     public static function getUserStoriesLink()
     {
-        $url = self::getGraphQlUrl(InstagramQueryId::USER_STORIES, ['variables' => json_encode([])]);
-        return $url;
+        return self::getGraphQlUrl(InstagramQueryId::USER_STORIES, ['variables' => json_encode([], JSON_THROW_ON_ERROR)]);
     }
 
     public static function getGraphQlUrl($queryId, $parameters)
@@ -179,8 +164,7 @@ class Endpoints
 
     public static function getStoriesLink($variables)
     {
-        $url = self::getGraphQlUrl(InstagramQueryId::STORIES, ['variables' => json_encode($variables)]);
-        return $url;
+        return self::getGraphQlUrl(InstagramQueryId::STORIES, ['variables' => json_encode($variables, JSON_THROW_ON_ERROR)]);
     }
 
     public static function getLikeUrl($mediaId) 
@@ -201,7 +185,6 @@ class Endpoints
     public static function getDeleteCommentUrl($mediaId, $commentId)
     {
         $url = str_replace('{mediaId}', $mediaId, static::DELETE_COMMENT_URL);
-        $url = str_replace('{commentId}', $commentId, $url);
-        return $url;
+        return str_replace('{commentId}', $commentId, $url);
     }
 }

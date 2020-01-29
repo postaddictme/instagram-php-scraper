@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 
@@ -13,4 +14,4 @@ if ($result['hasNextPage'] === true) {
     $medias = array_merge($medias, $result['medias']);
 }
 
-echo json_encode($medias);
+echo json_encode($medias, JSON_THROW_ON_ERROR);

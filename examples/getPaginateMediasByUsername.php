@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 $instagram = new \InstagramScraper\Instagram();
@@ -24,7 +25,7 @@ foreach ($response['medias'] as $media) {
     echo "Username: {$account->getUsername()}" . PHP_EOL;
     echo "Full name: {$account->getFullName()}" . PHP_EOL;
     echo "Profile pic url: {$account->getProfilePicUrl()}" . PHP_EOL;
-    echo  PHP_EOL  . PHP_EOL;
+    echo  PHP_EOL . PHP_EOL;
 }
 
 echo "HasNextPage: {$response['hasNextPage']}" . PHP_EOL;

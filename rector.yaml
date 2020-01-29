@@ -1,0 +1,10 @@
+parameters:
+    sets:
+        - 'code-quality'
+        - 'php71'
+        - 'php72'
+        - 'php73'
+        - 'phpunit50'
+        - 'phpunit60'
+        - 'phpunit70'
+        - 'phpunit75'

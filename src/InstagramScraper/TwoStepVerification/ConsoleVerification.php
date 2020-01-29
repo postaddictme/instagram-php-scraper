@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Created by PhpStorm.
  * User: macbook
@@ -20,21 +21,21 @@ class ConsoleVerification implements TwoStepVerificationInterface
     {
         if (count($choices) > 1) {
             $possible_values = [];
-            print 'Select where to send security code' .PHP_EOL;
+            print 'Select where to send security code' . PHP_EOL;
             foreach ($choices as $choice) {
-                print $choice['label'] . ' - ' . $choice['value'] .PHP_EOL;
+                print $choice['label'] . ' - ' . $choice['value'] . PHP_EOL;
                 $possible_values[$choice['value']] = true;
             }
             $selected_choice = null;
             while (empty($possible_values[$selected_choice])) {
                 if ($selected_choice) {
-                    print 'Wrong choice. Try again'.PHP_EOL;
+                    print 'Wrong choice. Try again' . PHP_EOL;
                 }
                 print 'Your choice: ';
                 $selected_choice = trim(fgets(STDIN));
             }
         } else {
-            print 'Message with security code sent to: ' . $choices[0]['label'] .PHP_EOL;
+            print 'Message with security code sent to: ' . $choices[0]['label'] . PHP_EOL;
             $selected_choice = $choices[0]['value'];
         }
         return $selected_choice;
@@ -47,8 +48,8 @@ class ConsoleVerification implements TwoStepVerificationInterface
     {
         $security_code = '';
         while (strlen($security_code) !== 6 && !is_int($security_code)) {
-            if ($security_code) {
-                print 'Wrong security code'.PHP_EOL;
+            if ($security_code !== '') {
+                print 'Wrong security code' . PHP_EOL;
             }
             print 'Enter security code: ';
             $security_code = trim(fgets(STDIN));

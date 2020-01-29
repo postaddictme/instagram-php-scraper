@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 // If account is public you can query Instagram without auth

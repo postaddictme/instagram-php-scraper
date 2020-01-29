@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 use InstagramScraper\Exception\InstagramException;
 
 require __DIR__ . '/../vendor/autoload.php';

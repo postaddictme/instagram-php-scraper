@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 require __DIR__ . '/../vendor/autoload.php';
 
 $account = (new \InstagramScraper\Instagram())->getAccountById('3');

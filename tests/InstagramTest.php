@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace InstagramScraper\Tests;
 
@@ -106,10 +107,13 @@ class InstagramTest extends TestCase
         $this->assertEquals('Dog Patch Labs', $location->getName());
     }
 
+    /**
+     * @doesNotPerformAssertion
+     */
     public function testGetMediaByTag()
     {
         $medias = self::$instagram->getMediasByTag('hello');
-        echo json_encode($medias);
+        echo json_encode($medias, JSON_THROW_ON_ERROR);
     }
 
     public function testGetIdFromCode()
@@ -186,11 +190,12 @@ class InstagramTest extends TestCase
 
     /**
      * @group getPaginateMediasByLocationId
+     * @doesNotPerformAssertion
      */
     public function testGetPaginateMediasByLocationId()
     {
         $medias = self::$instagram->getPaginateMediasByLocationId('201176299974017');
-        echo json_encode($medias);
+        echo json_encode($medias, JSON_THROW_ON_ERROR);
     }
     // TODO: Add test getMediaById
     // TODO: Add test getLocationById

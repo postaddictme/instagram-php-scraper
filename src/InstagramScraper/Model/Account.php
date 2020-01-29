@@ -1,10 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace InstagramScraper\Model;
 
 /**
  * Class Account
- * @package InstagramScraper\Model
  */
 class Account extends AbstractModel
 {

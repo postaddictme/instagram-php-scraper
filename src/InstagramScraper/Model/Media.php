@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace InstagramScraper\Model;
 
@@ -6,14 +7,13 @@ use InstagramScraper\Endpoints;
 
 /**
  * Class Media
- * @package InstagramScraper\Model
  */
 class Media extends AbstractModel
 {
-    const TYPE_IMAGE = 'image';
-    const TYPE_VIDEO = 'video';
-    const TYPE_SIDECAR = 'sidecar';
-    const TYPE_CAROUSEL = 'carousel';
+    public const TYPE_IMAGE = 'image';
+    public const TYPE_VIDEO = 'video';
+    public const TYPE_SIDECAR = 'sidecar';
+    public const TYPE_CAROUSEL = 'carousel';
 
     /**
      * @var string
@@ -156,7 +156,7 @@ class Media extends AbstractModel
     protected $commentsNextPage = '';
 
     /**
-     * @var Media[]|array
+     * @var array|Media[]
      */
     protected $sidecarMedias = [];
 
@@ -440,7 +440,7 @@ class Media extends AbstractModel
     }
 
     /**
-     * @return Media[]|array
+     * @return array|Media[]
      */
     public function getSidecarMedias()
     {
@@ -473,12 +473,21 @@ class Media extends AbstractModel
      */
     public function getLocationAddress()
     {
-        return json_decode($this->locationAddressJson);
+        return json_decode($this->locationAddressJson, false, 512, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * @return Account
+     */
+    public function getOwner()
+    {
+        return $this->owner;
     }
 
     /**
      * @param $value
      * @param $prop
+     * @param mixed $arr
      */
     protected function initPropertiesCustom($value, $prop, $arr)
     {
@@ -489,10 +498,12 @@ class Media extends AbstractModel
             case 'type':
                 $this->type = $value;
                 break;
+            case 'date':
             case 'created_time':
                 $this->createdTime = (int)$value;
                 break;
             case 'code':
+            case 'shortcode':
                 $this->shortCode = $value;
                 $this->link = Endpoints::getMediaPageLink($this->shortCode);
                 break;
@@ -502,6 +513,8 @@ class Media extends AbstractModel
             case 'comments':
                 $this->commentsCount = $arr[$prop]['count'];
                 break;
+            case 'edge_media_preview_like':
+            case 'edge_liked_by':
             case 'likes':
                 $this->likesCount = $arr[$prop]['count'];
                 break;
@@ -573,11 +586,12 @@ class Media extends AbstractModel
                 }
                 break;
             case 'location':
-                $this->locationId = $arr[$prop]['id'] ? $arr[$prop]['id'] : null;
-                $this->locationName = $arr[$prop]['name'] ? $arr[$prop]['name'] : null;
-                $this->locationSlug = $arr[$prop]['slug'] ? $arr[$prop]['slug'] : null;
-                $this->locationAddressJson = isset($arr[$prop]['address_json']) ? $arr[$prop]['address_json'] : null;
+                $this->locationId = $arr[$prop]['id'] ?? null;
+                $this->locationName = $arr[$prop]['name'] ?? null;
+                $this->locationSlug = $arr[$prop]['slug'] ?? null;
+                $this->locationAddressJson = $arr[$prop]['address_json'] ?? null;
                 break;
+            case 'owner':
             case 'user':
                 $this->owner = Account::create($arr[$prop]);
                 break;
@@ -600,10 +614,6 @@ class Media extends AbstractModel
                 break;
             case 'taken_at_timestamp':
                 $this->createdTime = $value;
-                break;
-            case 'shortcode':
-                $this->shortCode = $value;
-                $this->link = Endpoints::getMediaPageLink($this->shortCode);
                 break;
             case 'edge_media_preview_comment':
                 if (isset($arr[$prop]['count'])) {
@@ -632,19 +642,11 @@ class Media extends AbstractModel
                     $this->commentsNextPage = (string) $arr[$prop]['page_info']['end_cursor'];
                 }
                 break;
-            case 'edge_media_preview_like':
-                $this->likesCount = $arr[$prop]['count'];
-                break;
-            case 'edge_liked_by':
-                $this->likesCount = $arr[$prop]['count'];
-                break;
             case 'edge_media_to_caption':
                 if (is_array($arr[$prop]['edges']) && !empty($arr[$prop]['edges'])) {
                     $first_caption = $arr[$prop]['edges'][0];
-                    if (is_array($first_caption) && isset($first_caption['node'])) {
-                        if (is_array($first_caption['node']) && isset($first_caption['node']['text'])) {
-                            $this->caption = $arr[$prop]['edges'][0]['node']['text'];
-                        }
+                    if (is_array($first_caption) && isset($first_caption['node']) && (is_array($first_caption['node']) && isset($first_caption['node']['text']))) {
+                        $this->caption = $arr[$prop]['edges'][0]['node']['text'];
                     }
                 }
                 break;
@@ -660,18 +662,12 @@ class Media extends AbstractModel
                     $this->sidecarMedias[] = static::create($edge['node']);
                 }
                 break;
-            case 'owner':
-                $this->owner = Account::create($arr[$prop]);
-                break;
-            case 'date':
-                $this->createdTime = (int)$value;
-                break;
             case '__typename':
                 if ($value == 'GraphImage') {
                     $this->type = static::TYPE_IMAGE;
-                } else if ($value == 'GraphVideo') {
+                } elseif ($value == 'GraphVideo') {
                     $this->type = static::TYPE_VIDEO;
-                } else if ($value == 'GraphSidecar') {
+                } elseif ($value == 'GraphSidecar') {
                     $this->type = static::TYPE_SIDECAR;
                 }
                 break;
@@ -711,7 +707,7 @@ class Media extends AbstractModel
                 $carouselMedia->setVideoLowBandwidthUrl($carouselArray['videos']['low_bandwidth']['url']);
             }
         }
-        array_push($instance->carouselMedia, $carouselMedia);
+        $instance->carouselMedia[] = $carouselMedia;
         return $mediaArray;
     }
 
@@ -724,20 +720,11 @@ class Media extends AbstractModel
     {
         $parts = explode('/', parse_url($imageUrl)['path']);
         $imageName = $parts[sizeof($parts) - 1];
-        $urls = [
+        return [
             'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName,
             'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
             'standard' => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
             'high' => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
         ];
-        return $urls;
-    }
-
-    /**
-     * @return Account
-     */
-    public function getOwner()
-    {
-        return $this->owner;
     }
 }

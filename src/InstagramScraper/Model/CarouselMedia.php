@@ -1,10 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace InstagramScraper\Model;
 
 /**
  * Class CarouselMedia
- * @package InstagramScraper\Model
  */
 class CarouselMedia
 {
