@@ -471,7 +471,8 @@ class Instagram
      */
     public function getPaginateMediasByUserId($id, $count = 12, $maxId = '')
     {
-        $hasNextPage = false;
+        $index = 0;
+        $hasNextPage = true;
         $medias = [];
 
         $toReturn = [
@@ -480,46 +481,52 @@ class Instagram
             'hasNextPage' => $hasNextPage,
         ];
 
-        $variables = json_encode([
-            'id' => (string)$id,
-            'first' => (string)$count,
-            'after' => (string)$maxId
-        ], JSON_THROW_ON_ERROR);
+        while ($index < $count && $hasNextPage) {
+            $variables = json_encode([
+                'id' => (string)$id,
+                'first' => (string)$count,
+                'after' => (string)$maxId
+            ], JSON_THROW_ON_ERROR);
 
-        $response = Request::get(
-            Endpoints::getAccountMediasJsonLink($variables),
-            $this->generateHeaders($this->userSession, $this->generateGisToken($variables))
-        );
+            $response = Request::get(
+                Endpoints::getAccountMediasJsonLink($variables),
+                $this->generateHeaders($this->userSession, $this->generateGisToken($variables))
+            );
 
-        if (static::HTTP_NOT_FOUND === $response->code) {
-            throw new InstagramNotFoundException('Account with given id does not exist.');
+            if (static::HTTP_NOT_FOUND === $response->code) {
+                throw new InstagramNotFoundException('Account with given id does not exist.');
+            }
+
+            if (static::HTTP_OK !== $response->code) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+            }
+
+            $arr = $this->decodeRawBodyToJson($response->raw_body);
+
+            if (!is_array($arr)) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+            }
+
+            $nodes = $arr['data']['user']['edge_owner_to_timeline_media']['edges'];
+
+            //if (count($arr['items']) === 0) {
+            // I generally use empty. Im not sure why people would use count really - If the array is large then count takes longer/has more overhead.
+            // If you simply need to know whether or not the array is empty then use empty.
+            if (empty($nodes)) {
+                return $toReturn;
+            }
+
+            foreach ($nodes as $mediaArray) {
+                if ($index === $count) {
+                    return $medias;
+                }
+                $medias[] = Media::create($mediaArray['node']);
+                $index++;
+            }
+
+            $maxId = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor'];
+            $hasNextPage = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['has_next_page'];
         }
-
-        if (static::HTTP_OK !== $response->code) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
-        }
-
-        $arr = $this->decodeRawBodyToJson($response->raw_body);
-
-        if (!is_array($arr)) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
-        }
-
-        $nodes = $arr['data']['user']['edge_owner_to_timeline_media']['edges'];
-
-        //if (count($arr['items']) === 0) {
-        // I generally use empty. Im not sure why people would use count really - If the array is large then count takes longer/has more overhead.
-        // If you simply need to know whether or not the array is empty then use empty.
-        if (empty($nodes)) {
-            return $toReturn;
-        }
-
-        foreach ($nodes as $mediaArray) {
-            $medias[] = Media::create($mediaArray['node']);
-        }
-
-        $maxId = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor'];
-        $hasNextPage = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['has_next_page'];
 
         return [
             'medias' => $medias,
