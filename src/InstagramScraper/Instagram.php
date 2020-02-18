@@ -690,49 +690,53 @@ class Instagram
         $index = 0;
         $hasPrevious = true;
         while ($hasPrevious && $index < $count) {
-            if (!isset($maxId)) {
-                $maxId = '';
-            }
             if ($count - $index > static::MAX_COMMENTS_PER_REQUEST) {
-                $numberOfCommentsToRetreive = static::MAX_COMMENTS_PER_REQUEST;
+                $numberOfCommentsToRetrieve = static::MAX_COMMENTS_PER_REQUEST;
             } else {
-                $numberOfCommentsToRetreive = $count - $index;
+                $numberOfCommentsToRetrieve = $count - $index;
             }
 
             $variables = json_encode([
                 'shortcode' => (string)$code,
-                'first' => (string)$numberOfCommentsToRetreive,
+                'first' => (string)$numberOfCommentsToRetrieve,
                 'after' => (string)$maxId
             ]);
 
             $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($variables);
             $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession, $this->generateGisToken($variables)));
-            // use a raw constant in the code is not a good idea!!
-            //if ($response->code !== 200) {
+            
             if (static::HTTP_OK !== $response->code) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
             $this->parseCookies($response->headers);
             $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+            if (
+                !isset($jsonResponse['data']['shortcode_media']['edge_media_to_comment']['edges'])
+                || !isset($jsonResponse['data']['shortcode_media']['edge_media_to_comment']['count'])
+                || !isset($jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['has_next_page'])
+                || !array_key_exists('end_cursor', $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info'])
+            ) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+            }
+
             $nodes = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['edges'];
-            if (empty($nodes)) {
-                return [];
+            $hasPrevious = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['has_next_page'];
+            $numberOfComments = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['count'];
+            $maxId = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['end_cursor'];
+
+            if (empty($nodes) && $numberOfComments === 0) {
+                break;
             }
 
             foreach ($nodes as $commentArray) {
                 $comments[] = Comment::create($commentArray['node']);
                 $index++;
             }
-            $hasPrevious = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['has_next_page'];
-
-            $numberOfComments = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['count'];
+            
             if ($count > $numberOfComments) {
                 $count = $numberOfComments;
             }
-            if (sizeof($nodes) == 0) {
-                return $comments;
-            }
-            $maxId = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['end_cursor'];
         }
         return $comments;
     }
