@@ -27,7 +27,8 @@ If you use authentication it is recommended to cache the user session. In this c
 use Phpfastcache\Helper\Psr16Adapter;
 
 $instagram = Instagram::withCredentials('username', 'password', new Psr16Adapter('Files'));
-$instagram->login(); // will use cached session if you can force login $instagram->login(true)
+$instagram->login(); // will use cached session if you want to force login $instagram->login(true)
+$instagram->saveSession();  //DO NOT forget this in order to save the session, otherwise have no sense
 $account = $instagram->getAccountById(3);
 echo $account->getUsername();
 ```
