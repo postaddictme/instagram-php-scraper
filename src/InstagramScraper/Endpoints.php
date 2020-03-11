@@ -9,7 +9,7 @@ class Endpoints
     public const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
     public const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
     public const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
-    public const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=42323d64886122307be10013ad2dcc44&variables={variables}';
+    public const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables={variables}';
     public const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
     public const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
     public const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
@@ -167,12 +167,12 @@ class Endpoints
         return self::getGraphQlUrl(InstagramQueryId::STORIES, ['variables' => json_encode($variables, JSON_THROW_ON_ERROR)]);
     }
 
-    public static function getLikeUrl($mediaId) 
+    public static function getLikeUrl($mediaId)
     {
         return str_replace('{mediaId}', urlencode($mediaId), static::LIKE_URL);
     }
 
-    public static function getUnlikeUrl($mediaId) 
+    public static function getUnlikeUrl($mediaId)
     {
         return str_replace('{mediaId}', urlencode($mediaId), static::UNLIKE_URL);
     }

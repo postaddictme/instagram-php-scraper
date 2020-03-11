@@ -15,3 +15,4 @@ require_once __DIR__ . '/InstagramScraper/Model/Tag.php';
 require_once __DIR__ . '/InstagramScraper/Exception/InstagramException.php';
 require_once __DIR__ . '/InstagramScraper/Exception/InstagramAuthException.php';
 require_once __DIR__ . '/InstagramScraper/Exception/InstagramNotFoundException.php';
+require_once __DIR__ . '/InstagramScraper/Exception/InstagramAgeRestrictedException.php';

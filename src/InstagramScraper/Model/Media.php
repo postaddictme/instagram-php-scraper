@@ -564,7 +564,7 @@ class Media extends AbstractModel
                 $this->caption = $arr[$prop];
                 break;
             case 'accessibility_caption':
-                $this->caption = $value;
+                $this->altText = $value;
                 break;
             case 'video_views':
                 $this->videoViews = $value;
@@ -586,10 +586,12 @@ class Media extends AbstractModel
                 }
                 break;
             case 'location':
-                $this->locationId = $arr[$prop]['id'] ?? null;
-                $this->locationName = $arr[$prop]['name'] ?? null;
-                $this->locationSlug = $arr[$prop]['slug'] ?? null;
-                $this->locationAddressJson = $arr[$prop]['address_json'] ?? null;
+                if(isset($arr[$prop])) {
+                    $this->locationId = $arr[$prop]['id'] ?? null;
+                    $this->locationName = $arr[$prop]['name'] ?? null;
+                    $this->locationSlug = $arr[$prop]['slug'] ?? null;
+                    $this->locationAddressJson = $arr[$prop]['address_json'] ?? null;
+                }
                 break;
             case 'owner':
             case 'user':
