@@ -551,7 +551,7 @@ class Media extends AbstractModel
                 $this->caption = $arr[$prop];
                 break;
             case 'accessibility_caption':
-                $this->caption = $value;
+                $this->altText = $value;
                 break;
             case 'video_views':
                 $this->videoViews = $value;
