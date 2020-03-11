@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace InstagramScraper;
 
+use InstagramScraper\Exception\InstagramAgeRestrictedException;
 use InstagramScraper\Exception\InstagramAuthException;
 use InstagramScraper\Exception\InstagramException;
 use InstagramScraper\Exception\InstagramNotFoundException;
-use InstagramScraper\Exception\InstagramAgeRestrictedException;
 use InstagramScraper\Model\Account;
 use InstagramScraper\Model\Comment;
 use InstagramScraper\Model\Like;
@@ -290,15 +290,6 @@ class Instagram
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
         return Account::create($userArray['entry_data']['ProfilePage'][0]['graphql']['user']);
-    }
-
-    private function isAccountAgeRestricted($userArray, $body)
-    {
-        if ($userArray === null && strpos($body, '<h2>Restricted profile</h2>') !== false) {
-            return true;
-        }
-
-        return false;
     }
 
     /**
@@ -1446,6 +1437,15 @@ class Instagram
         if ($jsonResponse['status'] !== 'ok') {
             throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
+    }
+
+    private function isAccountAgeRestricted($userArray, $body)
+    {
+        if ($userArray === null && strpos($body, '<h2>Restricted profile</h2>') !== false) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
