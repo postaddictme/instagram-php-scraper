@@ -556,8 +556,8 @@ class Instagram
 
     /**
      * @param      $code
-     * @param int $count
-     * @param null $maxId
+     * @param      int $count
+     * @param      null $maxId
      *
      * @throws InstagramException
      * @return Comment[]
@@ -621,8 +621,8 @@ class Instagram
 
     /**
      * @param      $code
-     * @param int $count
-     * @param null $maxId
+     * @param      int $count
+     * @param      null $maxId
      *
      * @throws InstagramException
      * @return array
@@ -1335,9 +1335,6 @@ class Instagram
         return isset($cookies['ds_user_id']);
     }
 
-    /**
-     *
-     */
     public function saveSession()
     {
         static::$instanceCache->set($this->getCacheKey(), $this->userSession);
@@ -1441,11 +1438,7 @@ class Instagram
 
     private function isAccountAgeRestricted($userArray, $body)
     {
-        if ($userArray === null && strpos($body, '<h2>Restricted profile</h2>') !== false) {
-            return true;
-        }
-
-        return false;
+        return $userArray === null && strpos($body, '<h2>Restricted profile</h2>') !== false;
     }
 
     /**
