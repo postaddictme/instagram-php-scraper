@@ -8,7 +8,7 @@ This library is based on the Instagram web version. We develop it because nowada
 
 ## Code Example
 ```php
-$instagram = Instagram::withCredentials('username', 'password');
+$instagram = InstagramScraper\Instagram::withCredentials('username', 'password');
 $instagram->login();
 $account = $instagram->getAccountById(3);
 echo $account->getUsername();
@@ -16,7 +16,7 @@ echo $account->getUsername();
 
 Some methods do not require authentication: 
 ```php
-$instagram = new Instagram();
+$instagram = new InstagramScraper\Instagram();
 $nonPrivateAccountMedias = $instagram->getMedias('kevin');
 echo $nonPrivateAccountMedias[0]->getLink();
 ```
@@ -26,7 +26,7 @@ If you use authentication it is recommended to cache the user session. In this c
 ```php
 use Phpfastcache\Helper\Psr16Adapter;
 
-$instagram = Instagram::withCredentials('username', 'password', new Psr16Adapter('Files'));
+$instagram = InstagramScraper\Instagram::withCredentials('username', 'password', new Psr16Adapter('Files'));
 $instagram->login(); // will use cached session if you want to force login $instagram->login(true)
 $instagram->saveSession();  //DO NOT forget this in order to save the session, otherwise have no sense
 $account = $instagram->getAccountById(3);
@@ -36,7 +36,7 @@ echo $account->getUsername();
 Using proxy for requests:
 
 ```php
-$instagram = new Instagram();
+$instagram = new InstagramScraper\Instagram();
 Instagram::setProxy([
     'address' => '111.112.113.114',
     'port'    => '8080',
