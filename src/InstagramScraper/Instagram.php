@@ -1568,7 +1568,7 @@ class Instagram
             }
         }
 
-        if (!preg_match('/name="security_code"/', $response->raw_body, $matches)) {
+        if (!preg_match('/"input_name":"security_code"/', $response->raw_body, $matches)) {
             throw new InstagramAuthException('Something went wrong when try two step verification. Please report issue.', $response->code);
         }
 
