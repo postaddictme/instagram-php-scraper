@@ -44,6 +44,7 @@ class Instagram
     private $userSession;
     private $rhxGis = null;
     private $userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36';
+    private $userAgentApp = 'Instagram 126.0.0.25.121 Android (23/6.0.1; 320dpi; 720x1280; samsung; SM-A310F; a3xelte; samsungexynos7580; en_GB; 110937453)';
 
     /**
      * @param string $username
@@ -214,7 +215,7 @@ class Instagram
      *
      * @return array
      */
-    private function generateHeaders($session, $gisToken = null)
+    private function generateHeaders($session, $gisToken = null, $useAppUserAgent = false)
     {
         $headers = [];
         if ($session) {
@@ -233,17 +234,17 @@ class Instagram
 
         }
 
-        if ($this->getUserAgent()) {
-            $headers['user-agent'] = $this->getUserAgent();
+        if ($this->getUserAgent($useAppUserAgent)) {
+            $headers['user-agent'] = $this->getUserAgent($useAppUserAgent);
 
             if (!is_null($gisToken)) {
                 $headers['x-instagram-gis'] = $gisToken;
             }
         }
-        
+
         if (empty($headers['x-csrftoken'])) {
             $headers['x-csrftoken'] = md5(uniqid()); // this can be whatever, insta doesn't like an empty value
-        }        
+        }
 
         return $headers;
     }
@@ -252,9 +253,9 @@ class Instagram
      *
      * @return string
      */
-    public function getUserAgent()
+    public function getUserAgent($useAppUserAgent = false)
     {
-        return $this->userAgent;
+        return $useAppUserAgent ? $this->userAgentApp : $this->userAgent;
     }
 
     /**
@@ -339,7 +340,7 @@ class Instagram
      */
     public function getAccount($username)
     {
-        $response = Request::get(Endpoints::getAccountPageLink($username), $this->generateHeaders($this->userSession));
+        $response = Request::get(Endpoints::getAccountPageLink($username), $this->generateHeaders($this->userSession, null, true));
 
         if (static::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
@@ -718,7 +719,7 @@ class Instagram
 
             $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($variables);
             $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession, $this->generateGisToken($variables)));
-            
+
             if (static::HTTP_OK !== $response->code) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
@@ -747,7 +748,7 @@ class Instagram
                 $comments[] = Comment::create($commentArray['node']);
                 $index++;
             }
-            
+
             if ($count > $numberOfComments) {
                 $count = $numberOfComments;
             }
@@ -880,7 +881,7 @@ class Instagram
      */
     public function getUsernameById($id)
     {
-        $response = Request::get(Endpoints::getAccountJsonPrivateInfoLinkByAccountId($id), $this->generateHeaders($this->userSession));
+        $response = Request::get(Endpoints::getAccountJsonPrivateInfoLinkByAccountId($id), $this->generateHeaders($this->userSession, null, true));
 
         if (static::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Failed to fetch account with given id');
@@ -1567,7 +1568,7 @@ class Instagram
             }
         }
 
-        if (!preg_match('/"input_name":"security_code"/', $response->raw_body, $matches)) {
+        if (!preg_match('/name="security_code"/', $response->raw_body, $matches)) {
             throw new InstagramAuthException('Something went wrong when try two step verification. Please report issue.', $response->code);
         }
 
