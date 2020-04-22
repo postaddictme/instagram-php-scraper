@@ -858,7 +858,7 @@ class Instagram
         return $likes;
     }
 
-    /**
+     /**
      * @param string $id
      *
      * @return Account
@@ -880,6 +880,18 @@ class Instagram
      */
     public function getUsernameById($id)
     {
+        $privateInfo = $this->getAccountPrivateInfo($id);
+        return $privateInfo['username'];
+    }
+
+    /**
+     * @param string $id
+     * @return array
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function getAccountPrivateInfo($id)
+    {
         $response = Request::get(Endpoints::getAccountJsonPrivateInfoLinkByAccountId($id), $this->generateHeaders($this->userSession));
 
         if (static::HTTP_NOT_FOUND === $response->code) {
@@ -898,7 +910,7 @@ class Instagram
             throw new InstagramException((isset($responseArray['message']) ? $responseArray['message'] : 'Unknown Error'));
         }
 
-        return $responseArray['user']['username'];
+        return $responseArray['user'];
     }
 
     /**
