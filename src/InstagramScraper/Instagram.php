@@ -1229,6 +1229,7 @@ class Instagram
         return Location::create($jsonResponse['graphql']['location']);
     }
 
+    
     /**
      * @param string $accountId Account id of the profile to query
      * @param int $count Total followers to retrieve
@@ -1241,13 +1242,31 @@ class Instagram
      */
     public function getFollowers($accountId, $count = 20, $pageSize = 20, $delayed = true)
     {
+        $result = $this->getPaginateFollowers($accountId, $count, $pageSize, $delayed, '');
+        return $result['accounts'];
+    }
+
+    /**
+     * @param string $accountId Account id of the profile to query
+     * @param int $count Total followers to retrieve
+     * @param int $pageSize Internal page size for pagination
+     * @param bool $delayed Use random delay between requests to mimic browser behaviour
+     * @param bool $nextPage Use to paginate results (ontop of internal pagination)
+     *
+     * @return array
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function getPaginateFollowers($accountId, $count = 20, $pageSize = 20, $delayed = true, $nextPage = '')
+    {
         if ($delayed) {
             set_time_limit($this->pagingTimeLimitSec);
         }
 
         $index = 0;
         $accounts = [];
-        $endCursor = '';
+        $endCursor = $nextPage;
+        $lastPagingInfo = [];
 
         if ($count < $pageSize) {
             throw new InstagramException('Count must be greater than or equal to page size.');
@@ -1273,7 +1292,7 @@ class Instagram
             if (count($edgesArray) === 0) {
                 throw new InstagramException('Failed to get followers of account id ' . $accountId . '. The account is private.', static::HTTP_FORBIDDEN);
             }
-
+           
             foreach ($edgesArray as $edge) {
                 $accounts[] = $edge['node'];
                 $index++;
@@ -1281,8 +1300,8 @@ class Instagram
                     break 2;
                 }
             }
-
             $pageInfo = $jsonResponse['data']['user']['edge_followed_by']['page_info'];
+            $lastPagingInfo = $pageInfo;
             if ($pageInfo['has_next_page']) {
                 $endCursor = $pageInfo['end_cursor'];
             } else {
@@ -1295,10 +1314,15 @@ class Instagram
                 usleep($microsec);
             }
         }
-        return $accounts;
+        $toReturn = [
+            'hasNextPage' => $lastPagingInfo['has_next_page'], 
+            'nextPage' => $lastPagingInfo['end_cursor'],
+            'accounts' => $accounts
+        ];
+        return $toReturn;
     }
 
-    /**
+        /**
      * @param string $accountId Account id of the profile to query
      * @param int $count Total followed accounts to retrieve
      * @param int $pageSize Internal page size for pagination
@@ -1308,7 +1332,24 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getFollowing($accountId, $count = 20, $pageSize = 20, $delayed = true)
+     public function getFollowing($accountId, $count = 20, $pageSize = 20, $delayed = true )
+     {
+        $res = $this->getPaginateFollowers($accountId, $count, $pageSize, $delayed,  '');
+        return $res;
+	 }
+
+    /**
+     * @param string $accountId Account id of the profile to query
+     * @param int $count Total followed accounts to retrieve
+     * @param int $pageSize Internal page size for pagination
+     * @param bool $delayed Use random delay between requests to mimic browser behaviour
+     * @param bool $nextPage Use to paginate results (ontop of internal pagination)
+     *
+     * @return array
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function getPaginateFollowing($accountId, $count = 20, $pageSize = 20, $delayed = true,$nextPage = '')
     {
         if ($delayed) {
             set_time_limit($this->pagingTimeLimitSec);
@@ -1317,6 +1358,7 @@ class Instagram
         $index = 0;
         $accounts = [];
         $endCursor = '';
+        $lastPagingInfo = [];
 
         if ($count < $pageSize) {
             throw new InstagramException('Count must be greater than or equal to page size.');
@@ -1352,6 +1394,7 @@ class Instagram
             }
 
             $pageInfo = $jsonResponse['data']['user']['edge_follow']['page_info'];
+            $lastPagingInfo = $pageInfo;
             if ($pageInfo['has_next_page']) {
                 $endCursor = $pageInfo['end_cursor'];
             } else {
@@ -1364,7 +1407,12 @@ class Instagram
                 usleep($microsec);
             }
         }
-        return $accounts;
+        $toReturn = [
+            'hasNextPage' => $lastPagingInfo['has_next_page'], 
+            'nextPage' => $lastPagingInfo['end_cursor'], 
+            'accounts' => $accounts
+         ];
+        return $toReturn;
     }
 
     /**
