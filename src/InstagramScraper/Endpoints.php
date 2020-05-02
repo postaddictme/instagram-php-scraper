@@ -10,6 +10,7 @@ class Endpoints
     const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
     const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables={variables}';
     const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
+    const ACCOUNT_ACTIVITY = 'https://www.instagram.com/accounts/activity/?__a=1';
     const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
     const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
     const MEDIA_JSON_BY_TAG = 'https://www.instagram.com/explore/tags/{tag}/?__a=1&max_id={max_id}';
@@ -125,6 +126,11 @@ class Endpoints
         $url = str_replace('{{likeId}}', urlencode($lastLikeID), $url);
 
         return $url;
+    }
+
+    public static function getActivityUrl()
+    {
+        return static::ACCOUNT_ACTIVITY;
     }
 
     public static function getFollowUrl($accountId)
