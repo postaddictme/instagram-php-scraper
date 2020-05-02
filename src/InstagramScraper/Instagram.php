@@ -288,10 +288,10 @@ class Instagram
     /**
      * Gets logged user feed.
      *
-     * @throws     \InstagramScraper\Exception\InstagramException
-     * @throws     \InstagramScraper\Exception\InstagramNotFoundException
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
      *
-     * @return     Media[]
+     * @return Media[]
      */
     public function getFeed()
     {
@@ -318,10 +318,10 @@ class Instagram
     /**
      * Gets logged user activity.
      *
-     * @throws     \InstagramScraper\Exception\InstagramException
-     * @throws     \InstagramScraper\Exception\InstagramNotFoundException
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
      *
-     * @return     Activity
+     * @return Activity
      */
     public function getActivity()
     {
@@ -339,6 +339,34 @@ class Instagram
         $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
 
         return Activity::create((array)@$jsonResponse['graphql']['user']['activity_feed']);
+    }
+
+    /**
+     * Set activity read until given unix timestamp
+     * @param int $timestamp
+     * @return bool
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function setActivityRead($timestamp)
+    {
+        $response = Request::post(Endpoints::getActivityMarkCheckedUrl(),
+            $this->generateHeaders($this->userSession),
+            ['timestamp' => $timestamp]);
+
+        if ($response->code === static::HTTP_NOT_FOUND) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+        }
+
+        $jsonResponse = json_decode($response->raw_body, true);
+        if (isset($jsonResponse['status']) && $jsonResponse['status'] == 'ok') {
+            return true;
+        }
+
+        return false;
     }
 
     /**
