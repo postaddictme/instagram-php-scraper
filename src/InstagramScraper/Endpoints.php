@@ -2,6 +2,8 @@
 
 namespace InstagramScraper;
 
+use InstagramScraper\Exception\InstagramNotImplementedException;
+
 class Endpoints
 {
     const BASE_URL = 'https://www.instagram.com';
@@ -12,6 +14,7 @@ class Endpoints
     const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
     const ACCOUNT_ACTIVITY = 'https://www.instagram.com/accounts/activity/?__a=1';
     const ACCOUNT_ACTIVITY_CHECKED = 'https://www.instagram.com/web/activity/mark_checked/';
+    const ACCOUNT_STATS = 'https://i.instagram.com/api/v1/ads/graphql/?vc_policy=insights_policy&surface=account'; // &locale=ru_RU
     const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
     const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
     const MEDIA_JSON_BY_TAG = 'https://www.instagram.com/explore/tags/{tag}/?__a=1&max_id={max_id}';
@@ -129,6 +132,13 @@ class Endpoints
         return $url;
     }
 
+    public static function getFeedJson()
+    {
+        throw new InstagramNotImplementedException();
+
+        return '';
+    }
+
     public static function getActivityUrl()
     {
         return static::ACCOUNT_ACTIVITY;
@@ -137,6 +147,11 @@ class Endpoints
     public static function getActivityMarkCheckedUrl()
     {
         return static::ACCOUNT_ACTIVITY_CHECKED;
+    }
+
+    public static function getAccountStats()
+    {
+        return static::ACCOUNT_STATS;
     }
 
     public static function getFollowUrl($accountId)
