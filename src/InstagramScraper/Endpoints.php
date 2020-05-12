@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace InstagramScraper;
@@ -12,7 +13,7 @@ class Endpoints
     public const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables={variables}';
     public const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
     public const ACCOUNT_ACTIVITY = 'https://www.instagram.com/accounts/activity/?__a=1';
-    const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
+    public const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
     public const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
     public const MEDIA_JSON_BY_TAG = 'https://www.instagram.com/explore/tags/{tag}/?__a=1&max_id={max_id}';
     public const GENERAL_SEARCH = 'https://www.instagram.com/web/search/topsearch/?query={query}&count={count}';
@@ -94,18 +95,21 @@ class Endpoints
     public static function getMediasJsonByLocationIdLink($facebookLocationId, $maxId = '')
     {
         $url = str_replace('{{facebookLocationId}}', urlencode($facebookLocationId), static::MEDIA_JSON_BY_LOCATION_ID);
+
         return str_replace('{{maxId}}', urlencode($maxId), $url);
     }
 
     public static function getMediasJsonByTagLink($tag, $maxId = '')
     {
         $url = str_replace('{tag}', urlencode($tag), static::MEDIA_JSON_BY_TAG);
+
         return str_replace('{max_id}', urlencode($maxId), $url);
     }
 
     public static function getGeneralSearchJsonLink($query, $count = 10)
     {
         $url = str_replace('{query}', urlencode($query), static::GENERAL_SEARCH);
+
         return str_replace('{count}', urlencode($count), $url);
     }
 
@@ -165,6 +169,7 @@ class Endpoints
             $query_string = http_build_query($parameters);
             $url .= '&' . $query_string;
         }
+
         return $url;
     }
 
@@ -191,6 +196,7 @@ class Endpoints
     public static function getDeleteCommentUrl($mediaId, $commentId)
     {
         $url = str_replace('{mediaId}', $mediaId, static::DELETE_COMMENT_URL);
+
         return str_replace('{commentId}', $commentId, $url);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace InstagramScraper\Model;
@@ -77,6 +78,7 @@ class CarouselMedia
     public function setType($type)
     {
         $this->type = $type;
+
         return $this;
     }
 
@@ -96,6 +98,7 @@ class CarouselMedia
     public function setImageLowResolutionUrl($imageLowResolutionUrl)
     {
         $this->imageLowResolutionUrl = $imageLowResolutionUrl;
+
         return $this;
     }
 
@@ -115,6 +118,7 @@ class CarouselMedia
     public function setImageThumbnailUrl($imageThumbnailUrl)
     {
         $this->imageThumbnailUrl = $imageThumbnailUrl;
+
         return $this;
     }
 
@@ -134,6 +138,7 @@ class CarouselMedia
     public function setImageStandardResolutionUrl($imageStandardResolutionUrl)
     {
         $this->imageStandardResolutionUrl = $imageStandardResolutionUrl;
+
         return $this;
     }
 
@@ -153,6 +158,7 @@ class CarouselMedia
     public function setImageHighResolutionUrl($imageHighResolutionUrl)
     {
         $this->imageHighResolutionUrl = $imageHighResolutionUrl;
+
         return $this;
     }
 
@@ -172,6 +178,7 @@ class CarouselMedia
     public function setVideoLowResolutionUrl($videoLowResolutionUrl)
     {
         $this->videoLowResolutionUrl = $videoLowResolutionUrl;
+
         return $this;
     }
 
@@ -191,6 +198,7 @@ class CarouselMedia
     public function setVideoStandardResolutionUrl($videoStandardResolutionUrl)
     {
         $this->videoStandardResolutionUrl = $videoStandardResolutionUrl;
+
         return $this;
     }
 
@@ -210,6 +218,7 @@ class CarouselMedia
     public function setVideoLowBandwidthUrl($videoLowBandwidthUrl)
     {
         $this->videoLowBandwidthUrl = $videoLowBandwidthUrl;
+
         return $this;
     }
 
@@ -229,7 +238,7 @@ class CarouselMedia
     public function setVideoViews($videoViews)
     {
         $this->videoViews = $videoViews;
+
         return $this;
     }
-
 }

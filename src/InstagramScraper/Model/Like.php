@@ -1,8 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
 namespace InstagramScraper\Model;
-
 
 class Like extends AbstractModel
 {
@@ -47,5 +47,4 @@ class Like extends AbstractModel
                 break;
         }
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace InstagramScraper\Model;
@@ -8,10 +9,10 @@ namespace InstagramScraper\Model;
  */
 class UserStories extends AbstractModel
 {
-    /** @var  Account */
+    /** @var Account */
     protected $owner;
 
-    /** @var  Story[] */
+    /** @var Story[] */
     protected $stories;
 
     public function setOwner($owner)

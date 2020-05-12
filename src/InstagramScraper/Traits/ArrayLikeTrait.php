@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * File:    ArrayLikeTrait.php
@@ -10,13 +11,11 @@ declare(strict_types=1);
 
 namespace InstagramScraper\Traits;
 
-
 /**
  *  ArrayAccess implementation
  */
 trait ArrayLikeTrait
 {
-
     /**
      * @param mixed $offset
      *
@@ -24,7 +23,7 @@ trait ArrayLikeTrait
      */
     public function offsetExists($offset)
     {
-        return $this->isMethod($offset, 'get') || \property_exists($this, $offset);
+        return $this->isMethod($offset, 'get') || property_exists($this, $offset);
     }
 
     /**
@@ -36,7 +35,7 @@ trait ArrayLikeTrait
     {
         if ($run = $this->isMethod($offset, 'get')) {
             return $this->run($run);
-        } elseif (\property_exists($this, $offset)) {
+        } elseif (property_exists($this, $offset)) {
             if (isset($this->{$offset})) {
                 return $this->{$offset};
             } elseif (isset($this::$offset)) {
@@ -84,13 +83,14 @@ trait ArrayLikeTrait
      */
     protected function isMethod($method, $case)
     {
-        $uMethod = $case . \ucfirst($method);
-        if (\method_exists($this, $uMethod)) {
+        $uMethod = $case . ucfirst($method);
+        if (method_exists($this, $uMethod)) {
             return $uMethod;
         }
-        if (\method_exists($this, $method)) {
+        if (method_exists($this, $method)) {
             return $method;
         }
+
         return false;
     }
 
@@ -103,12 +103,12 @@ trait ArrayLikeTrait
     {
         if (\is_array($method)) {
             $params = $method;
-            $method = \array_shift($params);
+            $method = array_shift($params);
             if ($params) {
                 return \call_user_func_array([$this, $method], $params);
             }
         }
+
         return \call_user_func([$this, $method]);
     }
-
 }

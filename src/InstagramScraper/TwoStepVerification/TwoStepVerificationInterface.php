@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * Created by PhpStorm.
@@ -9,12 +10,9 @@ declare(strict_types=1);
 
 namespace InstagramScraper\TwoStepVerification;
 
-
 interface TwoStepVerificationInterface
 {
-
     /**
-     * @param array $possible_values
      * @return string
      */
     public function getVerificationType(array $possible_values);

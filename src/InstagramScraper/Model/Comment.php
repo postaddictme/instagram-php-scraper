@@ -1,8 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
 namespace InstagramScraper\Model;
-
 
 class Comment extends AbstractModel
 {
@@ -138,7 +138,7 @@ class Comment extends AbstractModel
                 if (isset($value['count'])) {
                     $this->childCommentsCount = (int) $value['count'];
                 }
-                if (isset($value['edges']) && is_array($value['edges'])) {
+                if (isset($value['edges']) && \is_array($value['edges'])) {
                     foreach ($value['edges'] as $commentData) {
                         $this->childComments[] = static::create($commentData['node']);
                     }
@@ -152,5 +152,4 @@ class Comment extends AbstractModel
                 break;
         }
     }
-
 }

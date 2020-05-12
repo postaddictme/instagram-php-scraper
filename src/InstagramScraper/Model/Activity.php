@@ -1,8 +1,8 @@
 <?php
 
+declare(strict_types=1);
 
 namespace InstagramScraper\Model;
-
 
 class Activity extends AbstractModel
 {
@@ -74,5 +74,4 @@ class Activity extends AbstractModel
                 break;
         }
     }
-
 }

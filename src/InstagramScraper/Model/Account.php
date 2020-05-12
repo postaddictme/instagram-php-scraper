@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace InstagramScraper\Model;
@@ -10,73 +11,85 @@ class Account extends AbstractModel
 {
     /**
      * User id
+     *
      * @var string
      */
     protected $id = 0;
 
     /**
      * Username
+     *
      * @var string
      */
     protected $username = '';
 
     /**
      * Full name
+     *
      * @var string
      */
     protected $fullName = '';
 
     /**
      * Profile picture url
+     *
      * @var string
      */
     protected $profilePicUrl = '';
 
     /**
      * Profile picture url HD
+     *
      * @var string
      */
     protected $profilePicUrlHd = '';
 
     /**
      * Information filled by user
+     *
      * @var string
      */
     protected $biography = '';
 
     /**
      * Url provided by user in profile
+     *
      * @var string
      */
     protected $externalUrl = '';
 
     /**
      * Number of subscriptions
-     * @var integer
+     *
+     * @var int
      */
     protected $followsCount = 0;
 
     /**
      * Number of followers
-     * @var integer
+     *
+     * @var int
      */
     protected $followedByCount = 0;
 
     /**
      * Number of medias published by user
-     * @var integer
+     *
+     * @var int
      */
     protected $mediaCount = 0;
 
     /**
      * true if account is private
-     * @var boolean
+     *
+     * @var bool
      */
     protected $isPrivate = false;
 
     /**
      * true if verified by Instagram as celebrity
-     * @var boolean
+     *
+     * @var bool
      */
     protected $isVerified = false;
 
@@ -192,7 +205,7 @@ class Account extends AbstractModel
     public function getId()
     {
         if (PHP_INT_SIZE > 4) {
-            $this->id = (int)$this->id;
+            $this->id = (int) $this->id;
         }
 
         return $this->id;
@@ -293,7 +306,6 @@ class Account extends AbstractModel
     }
 
     /**
-     * @param Media $media
      * @return Account
      */
     public function addMedia(Media $media)
@@ -462,10 +474,10 @@ class Account extends AbstractModel
                 $this->externalUrl = $value;
                 break;
             case 'edge_follow':
-                $this->followsCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
+                $this->followsCount = !empty($array[$prop]['count']) ? (int) $array[$prop]['count'] : 0;
                 break;
             case 'edge_followed_by':
-                $this->followedByCount = !empty($array[$prop]['count']) ? (int)$array[$prop]['count'] : 0;
+                $this->followedByCount = !empty($array[$prop]['count']) ? (int) $array[$prop]['count'] : 0;
                 break;
             case 'follower_count':
                 $this->followedByCount = empty($array['edge_followed_by']['count']) ? $value : 0;
@@ -474,16 +486,16 @@ class Account extends AbstractModel
                 $this->initMedia($array[$prop]);
                 break;
             case 'is_private':
-                $this->isPrivate = (bool)$value;
+                $this->isPrivate = (bool) $value;
                 break;
             case 'is_verified':
-                $this->isVerified = (bool)$value;
+                $this->isVerified = (bool) $value;
                 break;
             case 'blocked_by_viewer':
-                $this->blockedByViewer = (bool)$value;
+                $this->blockedByViewer = (bool) $value;
                 break;
             case 'country_block':
-                $this->countryBlock = (bool)$value;
+                $this->countryBlock = (bool) $value;
                 break;
             case 'followed_by_viewer':
                 $this->followedByViewer = $value;
@@ -492,22 +504,22 @@ class Account extends AbstractModel
                 $this->followsViewer = $value;
                 break;
             case 'has_channel':
-                $this->hasChannel = (bool)$value;
+                $this->hasChannel = (bool) $value;
                 break;
             case 'has_blocked_viewer':
-                $this->hasBlockedViewer = (bool)$value;
+                $this->hasBlockedViewer = (bool) $value;
                 break;
             case 'highlight_reel_count':
-                $this->highlightReelCount = (int)$value;
+                $this->highlightReelCount = (int) $value;
                 break;
             case 'has_requested_viewer':
-                $this->hasRequestedViewer = (bool)$value;
+                $this->hasRequestedViewer = (bool) $value;
                 break;
             case 'is_business_account':
-                $this->isBusinessAccount = (bool)$value;
+                $this->isBusinessAccount = (bool) $value;
                 break;
             case 'is_joined_recently':
-                $this->isJoinedRecently = (bool)$value;
+                $this->isJoinedRecently = (bool) $value;
                 break;
             case 'business_category_name':
                 $this->businessCategoryName = $value;
@@ -522,7 +534,7 @@ class Account extends AbstractModel
                 $this->businessAddressJson = $value;
                 break;
             case 'requested_by_viewer':
-                $this->requestedByViewer = (bool)$value;
+                $this->requestedByViewer = (bool) $value;
                 break;
             case 'connected_fb_page':
                 $this->connectedFbPage = $value;
@@ -536,7 +548,7 @@ class Account extends AbstractModel
     protected function initMedia($array)
     {
         $this->mediaCount = !empty($array['count']) ? $array['count'] : 0;
-        if (!$this->mediaCount || !isset($array['edges']) || !is_array($array['edges'])) {
+        if (!$this->mediaCount || !isset($array['edges']) || !\is_array($array['edges'])) {
             return;
         }
 

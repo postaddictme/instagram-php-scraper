@@ -1,15 +1,15 @@
 <?php
 
+declare(strict_types=1);
 
 namespace InstagramScraper\Model;
 
-
 class ActivityElement extends AbstractModel
 {
-    const TYPE_LIKE = 1; // GraphLikeAggregatedStory
-    const TYPE_SUBSRIBE = 3; // GraphFollowAggregatedStory
-    const TYPE_MENTIONED = 5; // GraphMentionStory
-    const TYPE_TAGGED = 12; // GraphUserTaggedStory
+    public const TYPE_LIKE = 1; // GraphLikeAggregatedStory
+    public const TYPE_SUBSRIBE = 3; // GraphFollowAggregatedStory
+    public const TYPE_MENTIONED = 5; // GraphMentionStory
+    public const TYPE_TAGGED = 12; // GraphUserTaggedStory
 
     /**
      * @var string
@@ -25,13 +25,6 @@ class ActivityElement extends AbstractModel
      * @var string
      */
     public $typeName;
-
-    private $typeNames = [
-        'GraphLikeAggregatedStory' => 'like',
-        'GraphFollowAggregatedStory' => 'followed',
-        'GraphMentionStory' => 'mentioned',
-        'GraphUserTaggedStory' => 'tagged',
-    ];
 
     /**
      * @var int
@@ -53,15 +46,23 @@ class ActivityElement extends AbstractModel
      */
     public $text;
 
+    private $typeNames = [
+        'GraphLikeAggregatedStory' => 'like',
+        'GraphFollowAggregatedStory' => 'followed',
+        'GraphMentionStory' => 'mentioned',
+        'GraphUserTaggedStory' => 'tagged',
+    ];
+
     /**
      * As usual id is changed on each request, we can construct more stable one
+     *
      * @return string
      */
     public function getIdempotentId()
     {
         return $this->getType()
             . '_' . $this->user->getId()
-            . '_' . (int)$this->getTimestamp()
+            . '_' . (int) $this->getTimestamp()
             . ($this->media ? '_' . $this->media->getId() : '');
     }
 
@@ -126,7 +127,6 @@ class ActivityElement extends AbstractModel
      * @param $prop
      * @param $props
      */
-
     protected function initPropertiesCustom($value, $prop, $props)
     {
         switch ($prop) {
@@ -153,5 +153,4 @@ class ActivityElement extends AbstractModel
                 break;
         }
     }
-
 }

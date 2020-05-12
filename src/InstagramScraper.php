@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 require_once __DIR__ . '/InstagramScraper/Instagram.php';
 require_once __DIR__ . '/InstagramScraper/Endpoints.php';

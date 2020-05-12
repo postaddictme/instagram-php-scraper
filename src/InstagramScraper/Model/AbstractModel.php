@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace InstagramScraper\Model;
@@ -11,7 +12,8 @@ use InstagramScraper\Traits\InitializerTrait;
  */
 abstract class AbstractModel implements \ArrayAccess
 {
-    use InitializerTrait, ArrayLikeTrait;
+    use InitializerTrait;
+    use ArrayLikeTrait;
 
     /**
      * @var array
@@ -23,6 +25,6 @@ abstract class AbstractModel implements \ArrayAccess
      */
     public static function getColumns()
     {
-        return \array_keys(static::$initPropertiesMap);
+        return array_keys(static::$initPropertiesMap);
     }
 }

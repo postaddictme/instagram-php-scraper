@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 /**
  * File:    InitializerTrait.php
@@ -10,10 +11,8 @@ declare(strict_types=1);
 
 namespace InstagramScraper\Traits;
 
-
 trait InitializerTrait
 {
-
     /**
      * @var bool
      */
@@ -57,7 +56,7 @@ trait InitializerTrait
     protected function __construct(array $props = null)
     {
         $this->beforeInit();
-        $this->modified = \time();
+        $this->modified = time();
         if ($this->isAutoConstruct) {
             $this->initAuto();
         } elseif (empty($props)) {
@@ -110,7 +109,7 @@ trait InitializerTrait
         $ret = [];
         $map = static::$initPropertiesMap;
         foreach ($map as $key => $init) {
-            if (\property_exists($this, $key)) {
+            if (property_exists($this, $key)) {
                 //if there is property then it just assign value
                 $ret[$key] = $this->{$key};
             } elseif (isset($this[$key])) {
@@ -138,7 +137,7 @@ trait InitializerTrait
     final protected function initAuto()
     {
         foreach ($this as $prop => $value) {
-            if (isset(static::$initPropertiesMap[$prop]) and $methodOrProp = static::$initPropertiesMap[$prop] and \method_exists($this,
+            if (isset(static::$initPropertiesMap[$prop]) and $methodOrProp = static::$initPropertiesMap[$prop] and method_exists($this,
                     $methodOrProp)
             ) {
                 //if there is method then use it firstly
@@ -161,22 +160,20 @@ trait InitializerTrait
     }
 
     /**
-     * @param array $props
-     *
      * @return $this
      */
     final protected function init(array $props)
     {
         //?reflection?
         foreach ($props as $prop => $value) {
-            if (\method_exists($this, 'initPropertiesCustom')) {
+            if (method_exists($this, 'initPropertiesCustom')) {
                 \call_user_func([$this, 'initPropertiesCustom'], $value, $prop, $props);
             } elseif (isset(static::$initPropertiesMap[$prop])) {
                 $methodOrProp = static::$initPropertiesMap[$prop];
-                if (\method_exists($this, $methodOrProp)) {
+                if (method_exists($this, $methodOrProp)) {
                     //if there is method then use it firstly
                     \call_user_func([$this, $methodOrProp], $value, $prop, $props);
-                } elseif (\property_exists($this, $methodOrProp)) {
+                } elseif (property_exists($this, $methodOrProp)) {
                     //if there is property then it just assign value
                     $this->{$methodOrProp} = $value;
                 } else {
@@ -212,7 +209,7 @@ trait InitializerTrait
      */
     protected function setFake($value = true)
     {
-        $this->isFake = (bool)$value;
+        $this->isFake = (bool) $value;
 
         return $this;
     }
@@ -224,7 +221,7 @@ trait InitializerTrait
      */
     protected function initModified($datetime)
     {
-        $this->modified = \strtotime($datetime);
+        $this->modified = strtotime($datetime);
 
         return $this;
     }
@@ -237,7 +234,7 @@ trait InitializerTrait
      */
     protected function initDatetime($date, $key)
     {
-        return $this->initProperty(\strtotime($date), $key);
+        return $this->initProperty(strtotime($date), $key);
     }
 
     /**
@@ -252,13 +249,13 @@ trait InitializerTrait
         unset($keys[0]); //remove value
         if ((is_countable($keys) ? \count($keys) : 0) > 1) {
             foreach ($keys as $key) {
-                if (\property_exists($this, $key)) { //first found set
+                if (property_exists($this, $key)) { //first found set
                     $this->{$key} = $value;
 
                     return $this;
                 }
             }
-        } elseif (\property_exists($this, $key)) {
+        } elseif (property_exists($this, $key)) {
             $this->{$key} = $value;
         }
 
@@ -266,7 +263,7 @@ trait InitializerTrait
     }
 
     /**
-     * @param mixed $value
+     * @param mixed  $value
      * @param string $key
      *
      * @return $this
@@ -277,25 +274,25 @@ trait InitializerTrait
     }
 
     /**
-     * @param mixed $value
+     * @param mixed  $value
      * @param string $key
      *
      * @return $this
      */
     protected function initInt($value, $key)
     {
-        return $this->initProperty((int)$value, $key);
+        return $this->initProperty((int) $value, $key);
     }
 
     /**
-     * @param mixed $value
+     * @param mixed  $value
      * @param string $key
      *
      * @return $this
      */
     protected function initFloat($value, $key)
     {
-        return $this->initProperty((float)$value, $key);
+        return $this->initProperty((float) $value, $key);
     }
 
     /**
@@ -306,25 +303,24 @@ trait InitializerTrait
      */
     protected function initJsonArray($rawData, $key)
     {
-        $value = \json_decode($rawData, true, 512, JSON_BIGINT_AS_STRING);
+        $value = json_decode($rawData, true, 512, JSON_BIGINT_AS_STRING);
         if (empty($value)) {
-            $value = ('null' === $rawData or '' === $rawData) ? [] : (array)$rawData;
+            $value = ($rawData === 'null' or $rawData === '') ? [] : (array) $rawData;
         } else {
-            $value = (array)$value;
+            $value = (array) $value;
         }
 
         return $this->initProperty($value, $key);
     }
 
     /**
-     * @param mixed $value
+     * @param mixed  $value
      * @param string $key
      *
      * @return $this
      */
     protected function initExplode($value, $key)
     {
-        return $this->initProperty(\explode(',', $value), "is{$key}", $key);
+        return $this->initProperty(explode(',', $value), "is{$key}", $key);
     }
-
 }
