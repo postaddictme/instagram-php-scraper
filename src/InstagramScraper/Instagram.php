@@ -241,10 +241,10 @@ class Instagram
                 $headers['x-instagram-gis'] = $gisToken;
             }
         }
-        
+
         if (empty($headers['x-csrftoken'])) {
             $headers['x-csrftoken'] = md5(uniqid()); // this can be whatever, insta doesn't like an empty value
-        }        
+        }
 
         return $headers;
     }
@@ -745,7 +745,7 @@ class Instagram
 
             $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($variables);
             $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession, $this->generateGisToken($variables)));
-            
+
             if (static::HTTP_OK !== $response->code) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
@@ -774,7 +774,7 @@ class Instagram
                 $comments[] = Comment::create($commentArray['node']);
                 $index++;
             }
-            
+
             if ($count > $numberOfComments) {
                 $count = $numberOfComments;
             }
@@ -1256,7 +1256,7 @@ class Instagram
         return Location::create($jsonResponse['graphql']['location']);
     }
 
-    
+
     /**
      * @param string $accountId Account id of the profile to query
      * @param int $count Total followers to retrieve
@@ -1319,7 +1319,7 @@ class Instagram
             if (count($edgesArray) === 0) {
                 throw new InstagramException('Failed to get followers of account id ' . $accountId . '. The account is private.', static::HTTP_FORBIDDEN);
             }
-           
+
             foreach ($edgesArray as $edge) {
                 $accounts[] = $edge['node'];
                 $index++;
@@ -1342,7 +1342,7 @@ class Instagram
             }
         }
         $toReturn = [
-            'hasNextPage' => $lastPagingInfo['has_next_page'], 
+            'hasNextPage' => $lastPagingInfo['has_next_page'],
             'nextPage' => $lastPagingInfo['end_cursor'],
             'accounts' => $accounts
         ];
@@ -1435,8 +1435,8 @@ class Instagram
             }
         }
         $toReturn = [
-            'hasNextPage' => $lastPagingInfo['has_next_page'], 
-            'nextPage' => $lastPagingInfo['end_cursor'], 
+            'hasNextPage' => $lastPagingInfo['has_next_page'],
+            'nextPage' => $lastPagingInfo['end_cursor'],
             'accounts' => $accounts
          ];
         return $toReturn;
@@ -1545,7 +1545,7 @@ class Instagram
                 'user-agent' => $this->getUserAgent(),
             ];
             $response = Request::post(Endpoints::LOGIN_URL, $headers,
-                ['username' => $this->sessionUsername, 'password' => $this->sessionPassword]);
+                ['username' => $this->sessionUsername, 'enc_password' => '#PWD_INSTAGRAM_BROWSER:0:' . time() . ':' . $this->sessionPassword]);
 
             if ($response->code !== static::HTTP_OK) {
                 if (
