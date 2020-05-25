@@ -1295,15 +1295,14 @@ class Instagram
      * @param string $accountId Account id of the profile to query
      * @param int $count Total followers to retrieve
      * @param int $pageSize Internal page size for pagination
-     * @param bool $delayed Use random delay between requests to mimic browser behaviour
      *
      * @return array
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getFollowers($accountId, $count = 20, $pageSize = 20, $delayed = true)
+    public function getFollowers($accountId, $count = 20, $pageSize = 20)
     {
-        $result = $this->getPaginateFollowers($accountId, $count, $pageSize, $delayed, '');
+        $result = $this->getPaginateFollowers($accountId, $count, $pageSize, '');
         return $result['accounts'];
     }
 
@@ -1311,19 +1310,14 @@ class Instagram
      * @param string $accountId Account id of the profile to query
      * @param int $count Total followers to retrieve
      * @param int $pageSize Internal page size for pagination
-     * @param bool $delayed Use random delay between requests to mimic browser behaviour
      * @param bool $nextPage Use to paginate results (ontop of internal pagination)
      *
      * @return array
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getPaginateFollowers($accountId, $count = 20, $pageSize = 20, $delayed = true, $nextPage = '')
+    public function getPaginateFollowers($accountId, $count = 20, $pageSize = 20, $nextPage = '')
     {
-        if ($delayed) {
-            set_time_limit($this->pagingTimeLimitSec);
-        }
-
         $index = 0;
         $accounts = [];
         $endCursor = $nextPage;
@@ -1369,12 +1363,6 @@ class Instagram
             } else {
                 break;
             }
-
-            if ($delayed) {
-                // Random wait between 1 and 3 sec to mimic browser
-                $microsec = rand($this->pagingDelayMinimumMicrosec, $this->pagingDelayMaximumMicrosec);
-                usleep($microsec);
-            }
         }
         $toReturn = [
             'hasNextPage' => $lastPagingInfo['has_next_page'],
@@ -1388,15 +1376,14 @@ class Instagram
      * @param string $accountId Account id of the profile to query
      * @param int $count Total followed accounts to retrieve
      * @param int $pageSize Internal page size for pagination
-     * @param bool $delayed Use random delay between requests to mimic browser behaviour
      *
      * @return array
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-     public function getFollowing($accountId, $count = 20, $pageSize = 20, $delayed = true )
+     public function getFollowing($accountId, $count = 20, $pageSize = 20)
      {
-        $res = $this->getPaginateFollowing($accountId, $count, $pageSize, $delayed,  '');
+        $res = $this->getPaginateFollowing($accountId, $count, $pageSize, '');
         return $res;
 	 }
 
@@ -1404,19 +1391,14 @@ class Instagram
      * @param string $accountId Account id of the profile to query
      * @param int $count Total followed accounts to retrieve
      * @param int $pageSize Internal page size for pagination
-     * @param bool $delayed Use random delay between requests to mimic browser behaviour
      * @param bool $nextPage Use to paginate results (ontop of internal pagination)
      *
      * @return array
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getPaginateFollowing($accountId, $count = 20, $pageSize = 20, $delayed = true,$nextPage = '')
+    public function getPaginateFollowing($accountId, $count = 20, $pageSize = 20, $nextPage = '')
     {
-        if ($delayed) {
-            set_time_limit($this->pagingTimeLimitSec);
-        }
-
         $index = 0;
         $accounts = [];
         $endCursor = '';
@@ -1462,12 +1444,6 @@ class Instagram
                 $endCursor = $pageInfo['end_cursor'];
             } else {
                 break;
-            }
-
-            if ($delayed) {
-                // Random wait between 1 and 3 sec to mimic browser
-                $microsec = rand($this->pagingDelayMinimumMicrosec, $this->pagingDelayMaximumMicrosec);
-                usleep($microsec);
             }
         }
         $toReturn = [
