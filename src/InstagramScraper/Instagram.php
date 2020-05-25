@@ -38,6 +38,7 @@ class Instagram
     private static $instanceCache = null;
 
     public $pagingTimeLimitSec = self::PAGING_TIME_LIMIT_SEC;
+    public $pagingDelay = true;
     public $pagingDelayMinimumMicrosec = self::PAGING_DELAY_MINIMUM_MICROSEC;
     public $pagingDelayMaximumMicrosec = self::PAGING_DELAY_MAXIMUM_MICROSEC;
     private $sessionUsername;
@@ -173,6 +174,19 @@ class Instagram
     public static function disableProxy()
     {
         Request::proxy('');
+    }
+
+    /**
+     * Sleep pagingDelay
+     */
+    public function sleep()
+    {
+        if (!$this->pagingDelay) return;
+        $usec = rand(
+            $this->pagingDelayMinimumMicrosec,
+            $this->pagingDelayMaximumMicrosec);
+        set_time_limit($this->pagingTimeLimitSec + ceil($usec / 1000000));
+        usleep($usec);
     }
 
     /**
