@@ -28,11 +28,11 @@ class Endpoints
     const INSTAGRAM_QUERY_URL = 'https://www.instagram.com/query/';
     const INSTAGRAM_CDN_URL = 'https://scontent.cdninstagram.com/';
     const ACCOUNT_JSON_PRIVATE_INFO_BY_ID = 'https://i.instagram.com/api/v1/users/{userId}/info/';
+    const ACCOUNT_JSON_PRIVATE_INFO_BY_ID_2 = 'https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"{userId}","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":false,"include_related_profiles":false}';
     const LIKE_URL = 'https://www.instagram.com/web/likes/{mediaId}/like/';
     const UNLIKE_URL = 'https://www.instagram.com/web/likes/{mediaId}/unlike/';
     const ADD_COMMENT_URL = 'https://www.instagram.com/web/comments/{mediaId}/add/';
     const DELETE_COMMENT_URL = 'https://www.instagram.com/web/comments/{mediaId}/delete/{commentId}/';
-
     const ACCOUNT_MEDIAS2 = 'https://www.instagram.com/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
 
     // Look alike??
@@ -72,7 +72,7 @@ class Endpoints
 
     public static function getAccountJsonPrivateInfoLinkByAccountId($id)
     {
-        return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_PRIVATE_INFO_BY_ID);
+        return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_PRIVATE_INFO_BY_ID_2);
     }
 
     public static function getAccountMediasJsonLink($variables)
