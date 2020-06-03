@@ -4,6 +4,7 @@ namespace InstagramScraper\Tests;
 
 use InstagramScraper\Instagram;
 use InstagramScraper\Model\Media;
+use InstagramScraper\Exception\InstagramNotFoundException;
 use Phpfastcache\Config\ConfigurationOption;
 use Phpfastcache\Helper\Psr16Adapter;
 use PHPUnit\Framework\TestCase;
@@ -54,6 +55,7 @@ class InstagramTest extends TestCase
     public function testGetAccountByIdWithInvalidNumericId()
     {
         // PHP_INT_MAX is far larger than the greatest id so far and thus does not represent a valid account.
+        $this->expectException(InstagramNotFoundException::class);
         $this->expectExceptionMessage('Failed to fetch account with given id');
         self::$instagram->getAccountById(PHP_INT_MAX);
     }
@@ -96,14 +98,14 @@ class InstagramTest extends TestCase
 
     public function testGetLocationMediasById()
     {
-        $medias = self::$instagram->getMediasByLocationId(1, 56);
+        $medias = self::$instagram->getMediasByLocationId(212988663, 56);
         $this->assertEquals(56, count($medias));
     }
 
     public function testGetLocationById()
     {
-        $location = self::$instagram->getLocationById(1);
-        $this->assertEquals('Dog Patch Labs', $location->getName());
+        $location = self::$instagram->getLocationById(212988663);
+        $this->assertEquals('New York, New York', $location->getName());
     }
 
     public function testGetMediaByTag()

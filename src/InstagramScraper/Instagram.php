@@ -122,6 +122,7 @@ class Instagram
 
     }
 
+
     /**
      * Set how many media objects should be retrieved in a single request
      * @param int $count
@@ -412,7 +413,7 @@ class Instagram
      */
     public function getAccount($username)
     {
-        $response = Request::get(Endpoints::getAccountPageLink($username), $this->generateHeaders($this->userSession));
+        $response = Request::get(Endpoints::getAccountJsonLink($username), $this->generateHeaders($this->userSession));
 
         if (static::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
@@ -421,16 +422,17 @@ class Instagram
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
 
-        $userArray = self::extractSharedDataFromBody($response->raw_body);
+        $userArr = self::decodeRawBodyToJson($response->raw_body);
 
-        if ($this->isAccountAgeRestricted($userArray, $response->raw_body)) {
+        if ($this->isAccountAgeRestricted($userArr, $response->raw_body)) {
             throw new InstagramAgeRestrictedException('Account with given username is age-restricted.');
         }
 
-        if (!isset($userArray['entry_data']['ProfilePage'][0]['graphql']['user'])) {
+        if (!isset($userArr['graphql']['user'])) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
-        return Account::create($userArray['entry_data']['ProfilePage'][0]['graphql']['user']);
+
+        return Account::create($userArr['graphql']['user']);
     }
 
     private static function extractSharedDataFromBody($body)
@@ -885,6 +887,7 @@ class Instagram
     public function getAccountPrivateInfo($id)
     {
         $response = Request::get(Endpoints::getAccountJsonPrivateInfoLinkByAccountId($id), $this->generateHeaders($this->userSession));
+
         if (static::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Failed to fetch account with given id');
         }
@@ -899,6 +902,10 @@ class Instagram
 
         if ($responseArray['status'] !== 'ok') {
             throw new InstagramException((isset($responseArray['message']) ? $responseArray['message'] : 'Unknown Error'));
+        }
+
+        if(!$responseArray['data']['user']) {
+            throw new InstagramNotFoundException('Failed to fetch account with given id');
         }
 
         return $responseArray['data']['user']['reel']['user'];
