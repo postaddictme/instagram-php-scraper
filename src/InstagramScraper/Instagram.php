@@ -1503,7 +1503,7 @@ class Instagram
 
         $session = static::$instanceCache->get($this->getCacheKey());
         
-        if (!$force || $this->isLoggedIn($session)) {
+        if ($force || $this->isLoggedIn($session)) {
             return $this->generateHeaders($this->userSession = $session);
         }
 
