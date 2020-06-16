@@ -1517,7 +1517,11 @@ class Instagram
                     && $response->body->message == 'checkpoint_required'
                     && !empty($twoStepVerificator)
                 ) {
-                    $response = $this->verifyTwoStep($response, $cookies, $twoStepVerificator);
+                    if ($response->body->message == 'checkpoint_required') {
+                        $response = $this->verifyTwoStep($response, $cookies, $twoStepVerificator);
+                    } elseif ($response->body->two_factor_required) {
+                        $response = $this->customVerifyTwoStep($response, $cookies, $twoStepVerificator);
+                    }
                 } elseif ((is_string($response->code) || is_numeric($response->code)) && is_string($response->body)) {
                     throw new InstagramAuthException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
                 } else {
@@ -1579,6 +1583,45 @@ class Instagram
             return false;
         }
         return true;
+    }
+
+    /**
+     * @param $response
+     * @param $cookies
+     * @param TwoStepVerificationInterface $twoStepVerificator
+     * @return \Unirest\Response
+     * @throws InstagramAuthException
+     */
+    private function customVerifyTwoStep($response, $cookies, $twoStepVerificator)
+    {
+        $new_cookies = $this->parseCookies($response->headers);
+        $twoFactorInfo = $response->body->two_factor_info;
+        $cookies = array_merge($cookies, $new_cookies);
+        $cookie_string = '';
+        foreach ($cookies as $name => $value) {
+            $cookie_string .= $name . '=' . $value . '; ';
+        }
+        $headers = [
+            'cookie' => $cookie_string,
+            'referer' => Endpoints::TWO_FACTOR_REFERRER . '?next=%2F',
+            'x-csrftoken' => $cookies['csrftoken'],
+            'user-agent' => $this->getUserAgent(),
+        ];
+
+        $response = Request::post(Endpoints::TWO_FACTOR_LOGIN_URL . '?next=/', $headers, [
+            'username' => $twoFactorInfo->username,
+            'verificationCode' => (int)$twoStepVerificator->getSecurityCode(),
+            'identifier' => $twoFactorInfo->two_factor_identifier,
+        ]);
+
+        if ($response->code !== static::HTTP_OK) {
+            $response = $this->verifyTwoStep($response, $cookies, $twoStepVerificator->getEmailVerify());
+            if ($response->code !== static::HTTP_OK) {
+                throw new InstagramAuthException('Something went wrong when try two step verification. Please report issue.', $response->code);
+            }
+        }
+
+        return $response;
     }
 
     /**

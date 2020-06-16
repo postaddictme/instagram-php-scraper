@@ -6,6 +6,8 @@ class Endpoints
 {
     const BASE_URL = 'https://www.instagram.com';
     const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
+    const TWO_FACTOR_LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/two_factor/';
+    const TWO_FACTOR_REFERRER = 'https://www.instagram.com/accounts/login/two_factor';
     const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
     const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
     const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables={variables}';
