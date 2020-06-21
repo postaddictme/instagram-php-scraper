@@ -720,7 +720,7 @@ class Instagram
     public function getMediaCommentsById($mediaId, $count = 10, $maxId = null)
     {
         $code = Media::getCodeFromId($mediaId);
-        return static::getMediaCommentsByCode($code, $count, $maxId);
+        return $this->getMediaCommentsByCode($code, $count, $maxId);
     }
 
     /**
@@ -1499,7 +1499,9 @@ class Instagram
             throw new InstagramAuthException("User credentials not provided");
         }
 
-        $twoStepVerificator === true && new ConsoleVerification();
+        if(true === $twoStepVerificator) {
+            $twoStepVerificator = new ConsoleVerification();
+        }
 
         $session = static::$instanceCache->get($this->getCacheKey());
         
