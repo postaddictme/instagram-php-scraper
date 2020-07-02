@@ -10,9 +10,9 @@ use InstagramScraper\Endpoints;
  */
 class Media extends AbstractModel
 {
-    const TYPE_IMAGE = 'image';
-    const TYPE_VIDEO = 'video';
-    const TYPE_SIDECAR = 'sidecar';
+    const TYPE_IMAGE    = 'image';
+    const TYPE_VIDEO    = 'video';
+    const TYPE_SIDECAR  = 'sidecar';
     const TYPE_CAROUSEL = 'carousel';
 
     /**
@@ -96,6 +96,11 @@ class Media extends AbstractModel
     protected $videoStandardResolutionUrl = '';
 
     /**
+     * @var integer
+     */
+    protected $videoDuration = '';
+
+    /**
      * @var string
      */
     protected $videoLowBandwidthUrl = '';
@@ -141,11 +146,6 @@ class Media extends AbstractModel
     protected $comments = [];
 
     /**
-     * @var Comment[]
-     */
-    protected $previewComments = [];
-
-    /**
      * @var bool
      */
     protected $hasMoreComments = false;
@@ -161,21 +161,6 @@ class Media extends AbstractModel
     protected $sidecarMedias = [];
 
     /**
-     * @var string
-     */
-    protected $locationSlug;
-
-    /**
-     * @var string
-     */
-    protected $altText;
-
-    /**
-     * @var string
-     */
-    protected $locationAddressJson;
-
-    /**
      * @param string $code
      *
      * @return int
@@ -183,9 +168,9 @@ class Media extends AbstractModel
     public static function getIdFromCode($code)
     {
         $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-        $id = 0;
+        $id       = 0;
         for ($i = 0; $i < strlen($code); $i++) {
-            $c = $code[$i];
+            $c  = $code[$i];
             $id = $id * 64 + strpos($alphabet, $c);
         }
         return $id;
@@ -209,14 +194,14 @@ class Media extends AbstractModel
      */
     public static function getCodeFromId($id)
     {
-        $parts = explode('_', $id);
-        $id = $parts[0];
+        $parts    = explode('_', $id);
+        $id       = $parts[0];
         $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-        $code = '';
+        $code     = '';
         while ($id > 0) {
             $remainder = $id % 64;
-            $id = ($id - $remainder) / 64;
-            $code = $alphabet[$remainder] . $code;
+            $id        = ($id - $remainder) / 64;
+            $code      = $alphabet{$remainder} . $code;
         };
         return $code;
     }
@@ -293,7 +278,6 @@ class Media extends AbstractModel
         return $this->imageHighResolutionUrl;
     }
 
-
     /**
      * @return array
      */
@@ -301,7 +285,6 @@ class Media extends AbstractModel
     {
         return $this->squareImages;
     }
-
 
     /**
      * @return array
@@ -349,6 +332,14 @@ class Media extends AbstractModel
     public function getVideoStandardResolutionUrl()
     {
         return $this->videoStandardResolutionUrl;
+    }
+
+    /**
+     * @return integer
+     */
+    public function getVideoDuration()
+    {
+        return $this->videoDuration;
     }
 
     /**
@@ -416,14 +407,6 @@ class Media extends AbstractModel
     }
 
     /**
-     * @return Comment[]
-     */
-    public function getPreviewComments()
-    {
-        return $this->previewComments;
-    }
-
-    /**
      * @return bool
      */
     public function hasMoreComments()
@@ -448,35 +431,6 @@ class Media extends AbstractModel
     }
 
     /**
-     * @return string
-     */
-    public function getLocationSlug()
-    {
-        return $this->locationSlug;
-    }
-    /**
-     * @return string
-     */
-    public function getAltText()
-    {
-        return $this->altText;
-    }
-    /**
-     * @return string
-     */
-    public function getLocationAddressJson()
-    {
-        return $this->locationAddressJson;
-    }
-    /**
-     * @return mixed
-     */
-    public function getLocationAddress()
-    {
-        return json_decode($this->locationAddressJson);
-    }
-
-    /**
      * @param $value
      * @param $prop
      */
@@ -490,11 +444,11 @@ class Media extends AbstractModel
                 $this->type = $value;
                 break;
             case 'created_time':
-                $this->createdTime = (int)$value;
+                $this->createdTime = (int) $value;
                 break;
             case 'code':
                 $this->shortCode = $value;
-                $this->link = Endpoints::getMediaPageLink($this->shortCode);
+                $this->link      = Endpoints::getMediaPageLink($this->shortCode);
                 break;
             case 'link':
                 $this->link = $value;
@@ -541,7 +495,7 @@ class Media extends AbstractModel
                 $this->imageThumbnailUrl = $value;
                 break;
             case 'carousel_media':
-                $this->type = self::TYPE_CAROUSEL;
+                $this->type          = self::TYPE_CAROUSEL;
                 $this->carouselMedia = [];
                 foreach ($arr["carousel_media"] as $carouselArray) {
                     self::setCarouselMedia($arr, $carouselArray, $this);
@@ -550,17 +504,17 @@ class Media extends AbstractModel
             case 'caption':
                 $this->caption = $arr[$prop];
                 break;
-            case 'accessibility_caption':
-                $this->altText = $value;
-                break;
             case 'video_views':
                 $this->videoViews = $value;
-                $this->type = static::TYPE_VIDEO;
+                $this->type       = static::TYPE_VIDEO;
                 break;
             case 'videos':
-                $this->videoLowResolutionUrl = $arr[$prop]['low_resolution']['url'];
+                $this->videoLowResolutionUrl      = $arr[$prop]['low_resolution']['url'];
                 $this->videoStandardResolutionUrl = $arr[$prop]['standard_resolution']['url'];
-                $this->videoLowBandwidthUrl = $arr[$prop]['low_bandwidth']['url'];
+                $this->videoLowBandwidthUrl       = $arr[$prop]['low_bandwidth']['url'];
+                break;
+            case 'video_duration':
+                $this->videoDuration = $arr[$prop];
                 break;
             case 'video_resources':
                 foreach ($value as $video) {
@@ -568,23 +522,19 @@ class Media extends AbstractModel
                         $this->videoStandardResolutionUrl = $video['src'];
                     } elseif ($video['profile'] == 'BASELINE') {
                         $this->videoLowResolutionUrl = $video['src'];
-                        $this->videoLowBandwidthUrl = $video['src'];
+                        $this->videoLowBandwidthUrl  = $video['src'];
                     }
                 }
                 break;
             case 'location':
-                if(isset($arr[$prop])) {
-                    $this->locationId = $arr[$prop]['id'] ? $arr[$prop]['id'] : null;
-                    $this->locationName = $arr[$prop]['name'] ? $arr[$prop]['name'] : null;
-                    $this->locationSlug = $arr[$prop]['slug'] ? $arr[$prop]['slug'] : null;
-                    $this->locationAddressJson = isset($arr[$prop]['address_json']) ? $arr[$prop]['address_json'] : null;
-                }
+                $this->locationId   = $arr[$prop]['id'];
+                $this->locationName = $arr[$prop]['name'];
                 break;
             case 'user':
                 $this->owner = Account::create($arr[$prop]);
                 break;
             case 'is_video':
-                if ((bool)$value) {
+                if ((bool) $value) {
                     $this->type = static::TYPE_VIDEO;
                 }
                 break;
@@ -605,20 +555,9 @@ class Media extends AbstractModel
                 break;
             case 'shortcode':
                 $this->shortCode = $value;
-                $this->link = Endpoints::getMediaPageLink($this->shortCode);
-                break;
-            case 'edge_media_preview_comment':
-                if (isset($arr[$prop]['count'])) {
-                    $this->commentsCount = (int) $arr[$prop]['count'];
-                }
-                if (isset($arr[$prop]['edges']) && is_array($arr[$prop]['edges'])) {
-                    foreach ($arr[$prop]['edges'] as $commentData) {
-                        $this->previewComments[] = Comment::create($commentData['node']);
-                    }
-                }
+                $this->link      = Endpoints::getMediaPageLink($this->shortCode);
                 break;
             case 'edge_media_to_comment':
-            case 'edge_media_to_parent_comment':
                 if (isset($arr[$prop]['count'])) {
                     $this->commentsCount = (int) $arr[$prop]['count'];
                 }
@@ -666,7 +605,7 @@ class Media extends AbstractModel
                 $this->owner = Account::create($arr[$prop]);
                 break;
             case 'date':
-                $this->createdTime = (int)$value;
+                $this->createdTime = (int) $value;
                 break;
             case '__typename':
                 if ($value == 'GraphImage') {
@@ -724,13 +663,13 @@ class Media extends AbstractModel
      */
     private static function getImageUrls($imageUrl)
     {
-        $parts = explode('/', parse_url($imageUrl)['path']);
+        $parts     = explode('/', parse_url($imageUrl)['path']);
         $imageName = $parts[sizeof($parts) - 1];
-        $urls = [
+        $urls      = [
             'thumbnail' => Endpoints::INSTAGRAM_CDN_URL . 't/s150x150/' . $imageName,
-            'low' => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
-            'standard' => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
-            'high' => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
+            'low'       => Endpoints::INSTAGRAM_CDN_URL . 't/s320x320/' . $imageName,
+            'standard'  => Endpoints::INSTAGRAM_CDN_URL . 't/s640x640/' . $imageName,
+            'high'      => Endpoints::INSTAGRAM_CDN_URL . 't/' . $imageName,
         ];
         return $urls;
     }
