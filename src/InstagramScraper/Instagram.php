@@ -2,10 +2,13 @@
 
 namespace InstagramScraper;
 
+use Exception;
 use InstagramScraper\Exception\InstagramAuthException;
 use InstagramScraper\Exception\InstagramException;
 use InstagramScraper\Exception\InstagramNotFoundException;
+use InstagramScraper\Exception\InstagramAgeRestrictedException;
 use InstagramScraper\Model\Account;
+use InstagramScraper\Model\Activity;
 use InstagramScraper\Model\Comment;
 use InstagramScraper\Model\Like;
 use InstagramScraper\Model\Location;
@@ -13,10 +16,13 @@ use InstagramScraper\Model\Media;
 use InstagramScraper\Model\Story;
 use InstagramScraper\Model\Tag;
 use InstagramScraper\Model\UserStories;
+use InstagramScraper\TwoStepVerification\ConsoleVerification;
+use InstagramScraper\TwoStepVerification\TwoStepVerificationInterface;
 use InvalidArgumentException;
-use phpFastCache\Cache\ExtendedCacheItemPoolInterface;
-use phpFastCache\CacheManager;
+use Psr\SimpleCache\CacheInterface;
+use stdClass;
 use Unirest\Request;
+use Unirest\Response;
 
 class Instagram
 {
@@ -31,8 +37,8 @@ class Instagram
     const PAGING_DELAY_MINIMUM_MICROSEC = 1000000; // 1 sec min delay to simulate browser
     const PAGING_DELAY_MAXIMUM_MICROSEC = 3000000; // 3 sec max delay to simulate browser
 
-    /** @var ExtendedCacheItemPoolInterface $instanceCache */
-    private static $instanceCache;
+    /** @var CacheInterface $instanceCache */
+    private static $instanceCache = null;
 
     public $pagingTimeLimitSec = self::PAGING_TIME_LIMIT_SEC;
     public $pagingDelayMinimumMicrosec = self::PAGING_DELAY_MINIMUM_MICROSEC;
@@ -41,30 +47,18 @@ class Instagram
     private $sessionPassword;
     private $userSession;
     private $rhxGis = null;
-    private $userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36';
+    private $userAgent = 'Mozilla/5.0 (Linux; Android 8.1.0; motorola one Build/OPKS28.63-18-3; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.80 Mobile Safari/537.36 Instagram 72.0.0.21.98 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 132081645)';
 
     /**
      * @param string $username
      * @param string $password
-     * @param null $sessionFolder
+     * @param CacheInterface $cache
      *
      * @return Instagram
-     * @throws \phpFastCache\Exceptions\phpFastCacheDriverCheckException
      */
-    public static function withCredentials($username, $password, $sessionFolder = null)
+    public static function withCredentials($username, $password, CacheInterface $cache)
     {
-        if (is_null($sessionFolder)) {
-            $sessionFolder = __DIR__ . DIRECTORY_SEPARATOR . 'sessions' . DIRECTORY_SEPARATOR;
-        }
-        if (is_string($sessionFolder)) {
-            CacheManager::setDefaultConfig([
-                'path' => $sessionFolder,
-                'ignoreSymfonyNotice' => true,
-            ]);
-            static::$instanceCache = CacheManager::getInstance('files');
-        } else {
-            static::$instanceCache = $sessionFolder;
-        }
+        static::$instanceCache = $cache;
         $instance = new self();
         $instance->sessionUsername = $username;
         $instance->sessionPassword = $password;
@@ -107,7 +101,7 @@ class Instagram
     }
 
     /**
-     * @param \stdClass|string $rawError
+     * @param stdClass|string $rawError
      *
      * @return string
      */
@@ -135,6 +129,14 @@ class Instagram
     public static function setAccountMediasRequestCount($count)
     {
         Endpoints::setAccountMediasRequestCount($count);
+    }
+
+    /**
+     * Set custom curl opts
+     */
+    public static function curlOpts($opts)
+    {
+        Request::curlOpts($opts);
     }
 
     /**
@@ -183,9 +185,9 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function searchAccountsByUsername($username)
+    public function searchAccountsByUsername($username, $count = 10)
     {
-        $response = Request::get(Endpoints::getGeneralSearchJsonLink($username), $this->generateHeaders($this->userSession));
+        $response = Request::get(Endpoints::getGeneralSearchJsonLink($username, $count), $this->generateHeaders($this->userSession));
 
         if (static::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
@@ -224,11 +226,15 @@ class Instagram
             foreach ($session as $key => $value) {
                 $cookies .= "$key=$value; ";
             }
+
+            $csrf = empty($session['csrftoken']) ? $session['x-csrftoken'] : $session['csrftoken'];
+
             $headers = [
                 'cookie' => $cookies,
                 'referer' => Endpoints::BASE_URL . '/',
-                'x-csrftoken' => $session['csrftoken'],
+                'x-csrftoken' => $csrf,
             ];
+
         }
 
         if ($this->getUserAgent()) {
@@ -237,6 +243,10 @@ class Instagram
             if (!is_null($gisToken)) {
                 $headers['x-instagram-gis'] = $gisToken;
             }
+        }
+
+        if (empty($headers['x-csrftoken'])) {
+            $headers['x-csrftoken'] = md5(uniqid()); // this can be whatever, insta doesn't like an empty value
         }
 
         return $headers;
@@ -262,11 +272,119 @@ class Instagram
     }
 
     /**
+     * @param $rawBody
+     * @return mixed
+     */
+    private function decodeRawBodyToJson($rawBody)
+    {
+        return json_decode($rawBody, true, 512, JSON_BIGINT_AS_STRING);
+    }
+
+    /**
      * @return null
      */
     public function resetUserAgent()
     {
         return $this->userAgent = null;
+    }
+
+    /**
+     * Gets logged user feed.
+     *
+     * @return     Media[]
+     * @throws     InstagramNotFoundException
+     *
+     * @throws     InstagramException
+     */
+    public function getFeed()
+    {
+        $response = Request::get(Endpoints::getFeedJson(),
+            $this->generateHeaders($this->userSession));
+
+        if ($response->code === static::HTTP_NOT_FOUND) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+        }
+
+        $this->parseCookies($response->headers);
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+        $medias = [];
+        $nodes = (array)@$jsonResponse['data']['user']["edge_web_feed_timeline"]['edges'];
+        foreach ($nodes as $mediaArray) {
+            $medias[] = Media::create($mediaArray['node']);
+        }
+        return $medias;
+    }
+
+    /**
+     * We work only on https in this case if we have same cookies on Secure and not - we will choice Secure cookie
+     *
+     * @param array $headers
+     *
+     * @return array
+     */
+    private function parseCookies($headers)
+    {
+        $rawCookies = isset($headers['Set-Cookie']) ? $headers['Set-Cookie'] : (isset($headers['set-cookie']) ? $headers['set-cookie'] : []);
+
+        if (!is_array($rawCookies)) {
+            $rawCookies = [$rawCookies];
+        }
+
+        $not_secure_cookies = [];
+        $secure_cookies = [];
+
+        foreach ($rawCookies as $cookie) {
+            $cookie_array = 'not_secure_cookies';
+            $cookie_parts = explode(';', $cookie);
+            foreach ($cookie_parts as $cookie_part) {
+                if (trim($cookie_part) == 'Secure') {
+                    $cookie_array = 'secure_cookies';
+                    break;
+                }
+            }
+            $value = array_shift($cookie_parts);
+            $parts = explode('=', $value);
+            if (sizeof($parts) >= 2 && !is_null($parts[1])) {
+                ${$cookie_array}[$parts[0]] = $parts[1];
+            }
+        }
+
+        $cookies = $secure_cookies + $not_secure_cookies;
+
+        if (isset($cookies['csrftoken'])) {
+            $this->userSession['csrftoken'] = $cookies['csrftoken'];
+        }
+
+        return $cookies;
+    }
+
+    /**
+     * Gets logged user activity.
+     *
+     * @return     Activity
+     * @throws     InstagramNotFoundException
+     *
+     * @throws     InstagramException
+     */
+    public function getActivity()
+    {
+        $response = Request::get(Endpoints::getActivityUrl(),
+            $this->generateHeaders($this->userSession));
+
+        if ($response->code === static::HTTP_NOT_FOUND) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+        }
+
+        $this->parseCookies($response->headers);
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        return Activity::create((array)@$jsonResponse['graphql']['user']['activity_feed']);
     }
 
     /**
@@ -305,38 +423,31 @@ class Instagram
 
         $userArray = self::extractSharedDataFromBody($response->raw_body);
 
+        if ($this->isAccountAgeRestricted($userArray, $response->raw_body)) {
+            throw new InstagramAgeRestrictedException('Account with given username is age-restricted.');
+        }
+
         if (!isset($userArray['entry_data']['ProfilePage'][0]['graphql']['user'])) {
-            throw new InstagramNotFoundException('Account with this username does not exist');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
         return Account::create($userArray['entry_data']['ProfilePage'][0]['graphql']['user']);
     }
 
-    /**
-     * @return null
-     * @throws InstagramException
-     */
-    private function getRhxGis()
+    private static function extractSharedDataFromBody($body)
     {
-        if ($this->rhxGis === null) {
-            try {
-                $sharedData = $this->getSharedDataFromPage();
-                $this->rhxGis = $sharedData['rhx_gis'];
-            } catch (\Exception $exception) {
-                throw new InstagramException('Could not extract gis from page');
-            }
+        if (preg_match_all('#\_sharedData \= (.*?)\;\<\/script\>#', $body, $out)) {
+            return json_decode($out[1][0], true, 512, JSON_BIGINT_AS_STRING);
         }
-
-        return $this->rhxGis;
+        return null;
     }
 
-    /**
-     * @param $variables
-     * @return string
-     * @throws InstagramException
-     */
-    private function generateGisToken($variables)
+    private function isAccountAgeRestricted($userArray, $body)
     {
-        return md5(implode(':', [$this->getRhxGis(), $variables ]));
+        if ($userArray === null && strpos($body, '<h2>Restricted profile</h2>') !== false) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -346,6 +457,7 @@ class Instagram
      *
      * @return Media[]
      * @throws InstagramException
+     * @throws InstagramNotFoundException
      */
     public function getMediasByUserId($id, $count = 12, $maxId = '')
     {
@@ -354,13 +466,16 @@ class Instagram
         $isMoreAvailable = true;
         while ($index < $count && $isMoreAvailable) {
             $variables = json_encode([
-                'id' => (string) $id,
-                'first' => (string) $count,
-                'after' => (string) $maxId
+                'id' => (string)$id,
+                'first' => (string)$count,
+                'after' => (string)$maxId
             ]);
 
             $response = Request::get(Endpoints::getAccountMediasJsonLink($variables), $this->generateHeaders($this->userSession, $this->generateGisToken($variables)));
 
+            if (static::HTTP_NOT_FOUND === $response->code) {
+                throw new InstagramNotFoundException('Account with given id does not exist.');
+            }
             if (static::HTTP_OK !== $response->code) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
@@ -383,13 +498,21 @@ class Instagram
                 $medias[] = Media::create($mediaArray['node']);
                 $index++;
             }
-            if (empty($nodes) || !isset($nodes)) {
-                return $medias;
-            }
             $maxId = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor'];
             $isMoreAvailable = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['has_next_page'];
         }
         return $medias;
+    }
+
+    /**
+     * @param $variables
+     * @return string
+     * @throws InstagramException
+     */
+    private function generateGisToken($variables)
+    {
+        return null;
+//        return md5(implode(':', [$this->getRhxGis(), $variables]));
     }
 
     /**
@@ -415,7 +538,7 @@ class Instagram
         $userArray = $this->decodeRawBodyToJson($response->raw_body);
 
         if (!isset($userArray['graphql']['user'])) {
-            throw new InstagramNotFoundException('Account with this username does not exist');
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
 
         $nodes = $userArray['graphql']['user']['edge_owner_to_timeline_media']['edges'];
@@ -503,6 +626,26 @@ class Instagram
     public function getPaginateMedias($username, $maxId = '')
     {
         $account = $this->getAccount($username);
+
+        return $this->getPaginateMediasByUserId(
+            $account->getId(),
+            Endpoints::getAccountMediasRequestCount(),
+            $maxId
+        );
+    }
+
+    /**
+     * @param int $id
+     * @param int $count
+     * @param string $maxId
+     *
+     * @return array
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function getPaginateMediasByUserId($id, $count = 12, $maxId = '')
+    {
+        $index = 0;
         $hasNextPage = true;
         $medias = [];
 
@@ -512,42 +655,52 @@ class Instagram
             'hasNextPage' => $hasNextPage,
         ];
 
-        $variables = json_encode([
-            'id' => (string) $account->getId(),
-            'first' => (string) Endpoints::getAccountMediasRequestCount(),
-            'after' => (string) $maxId
-        ]);
+        while ($index < $count && $hasNextPage) {
+            $variables = json_encode([
+                'id' => (string)$id,
+                'first' => (string)$count,
+                'after' => (string)$maxId
+            ]);
 
-        $response = Request::get(
-            Endpoints::getAccountMediasJsonLink($variables),
-            $this->generateHeaders($this->userSession, $this->generateGisToken($variables))
-        );
+            $response = Request::get(
+                Endpoints::getAccountMediasJsonLink($variables),
+                $this->generateHeaders($this->userSession, $this->generateGisToken($variables))
+            );
 
-        if (static::HTTP_OK !== $response->code) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+            if (static::HTTP_NOT_FOUND === $response->code) {
+                throw new InstagramNotFoundException('Account with given id does not exist.');
+            }
+
+            if (static::HTTP_OK !== $response->code) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+            }
+
+            $arr = $this->decodeRawBodyToJson($response->raw_body);
+
+            if (!is_array($arr)) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+            }
+
+            $nodes = $arr['data']['user']['edge_owner_to_timeline_media']['edges'];
+
+            //if (count($arr['items']) === 0) {
+            // I generally use empty. Im not sure why people would use count really - If the array is large then count takes longer/has more overhead.
+            // If you simply need to know whether or not the array is empty then use empty.
+            if (empty($nodes)) {
+                return $toReturn;
+            }
+
+            foreach ($nodes as $mediaArray) {
+                if ($index === $count) {
+                    return $medias;
+                }
+                $medias[] = Media::create($mediaArray['node']);
+                $index++;
+            }
+
+            $maxId = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor'];
+            $hasNextPage = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['has_next_page'];
         }
-
-        $arr = $this->decodeRawBodyToJson($response->raw_body);
-
-        if (!is_array($arr)) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
-        }
-
-        $nodes = $arr['data']['user']['edge_owner_to_timeline_media']['edges'];
-
-        //if (count($arr['items']) === 0) {
-        // I generally use empty. Im not sure why people would use count really - If the array is large then count takes longer/has more overhead.
-        // If you simply need to know whether or not the array is empty then use empty.
-        if (empty($nodes)) {
-            return $toReturn;
-        }
-
-        foreach ($nodes as $mediaArray) {
-            $medias[] = Media::create($mediaArray['node']);
-        }
-
-        $maxId = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['end_cursor'];
-        $hasNextPage = $arr['data']['user']['edge_owner_to_timeline_media']['page_info']['has_next_page'];
 
         $toReturn = [
             'medias' => $medias,
@@ -582,92 +735,59 @@ class Instagram
      */
     public function getMediaCommentsByCode($code, $count = 10, $maxId = null)
     {
-        $remain = $count;
         $comments = [];
         $index = 0;
         $hasPrevious = true;
         while ($hasPrevious && $index < $count) {
-            if ($remain > static::MAX_COMMENTS_PER_REQUEST) {
-                $numberOfCommentsToRetreive = static::MAX_COMMENTS_PER_REQUEST;
-                $remain -= static::MAX_COMMENTS_PER_REQUEST;
-                $index += static::MAX_COMMENTS_PER_REQUEST;
+            if ($count - $index > static::MAX_COMMENTS_PER_REQUEST) {
+                $numberOfCommentsToRetrieve = static::MAX_COMMENTS_PER_REQUEST;
             } else {
-                $numberOfCommentsToRetreive = $remain;
-                $index += $remain;
-                $remain = 0;
+                $numberOfCommentsToRetrieve = $count - $index;
             }
-            if (!isset($maxId)) {
-                $maxId = '';
 
-            }
-		
             $variables = json_encode([
-                'shortcode' => (string) $code,
-                'first' => (string) $numberOfCommentsToRetreive,
-                'after' => (string) $maxId
+                'shortcode' => (string)$code,
+                'first' => (string)$numberOfCommentsToRetrieve,
+                'after' => (string)$maxId
             ]);
 
-            $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($variables);		
+            $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($variables);
             $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession, $this->generateGisToken($variables)));
-            // use a raw constant in the code is not a good idea!!
-            //if ($response->code !== 200) {
+
             if (static::HTTP_OK !== $response->code) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
-            $cookies = static::parseCookies($response->headers['Set-Cookie']);
-            $this->userSession['csrftoken'] = $cookies['csrftoken'];
+            $this->parseCookies($response->headers);
             $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
-            $nodes = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['edges'];
-            foreach ($nodes as $commentArray) {
-                $comments[] = Comment::create($commentArray['node']);
+
+            if (
+                !isset($jsonResponse['data']['shortcode_media']['edge_media_to_comment']['edges'])
+                || !isset($jsonResponse['data']['shortcode_media']['edge_media_to_comment']['count'])
+                || !isset($jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['has_next_page'])
+                || !array_key_exists('end_cursor', $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info'])
+            ) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
+
+            $nodes = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['edges'];
             $hasPrevious = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['has_next_page'];
             $numberOfComments = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['count'];
+            $maxId = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['end_cursor'];
+
+            if (empty($nodes) && $numberOfComments === 0) {
+                break;
+            }
+
+            foreach ($nodes as $commentArray) {
+                $comments[] = Comment::create($commentArray['node']);
+                $index++;
+            }
+
             if ($count > $numberOfComments) {
                 $count = $numberOfComments;
             }
-            if (sizeof($nodes) == 0) {
-                return $comments;
-            }
-            $maxId = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['end_cursor'];
         }
         return $comments;
-    }
-
-    /**
-     * We work only on https in this case if we have same cookies on Secure and not - we will choice Secure cookie
-     *
-     * @param string $rawCookies
-     *
-     * @return array
-     */
-    private static function parseCookies($rawCookies)
-    {
-        if (!is_array($rawCookies)) {
-            $rawCookies = [$rawCookies];
-        }
-
-        $not_secure_cookies = [];
-        $secure_cookies = [];
-
-        foreach ($rawCookies as $cookie) {
-            $cookie_array = 'not_secure_cookies';
-            $cookie_parts = explode(';', $cookie);
-            foreach ($cookie_parts as $cookie_part) {
-                if (trim($cookie_part) == 'Secure') {
-                    $cookie_array = 'secure_cookies';
-                    break;
-                }
-            }
-            $value = array_shift($cookie_parts);
-            $parts = explode('=', $value);
-            if (sizeof($parts) >= 2 && !is_null($parts[1])) {
-                ${$cookie_array}[$parts[0]] = $parts[1];
-            }
-        }
-
-        $cookies = $secure_cookies + $not_secure_cookies;
-        return $cookies;
     }
 
     /**
@@ -703,12 +823,14 @@ class Instagram
             if ($response->code !== static::HTTP_OK) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
             }
-            $cookies = self::parseCookies($response->headers['Set-Cookie']);
-            $this->userSession['csrftoken'] = $cookies['csrftoken'];
+            $this->parseCookies($response->headers);
 
             $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
 
             $nodes = $jsonResponse['data']['shortcode_media']['edge_liked_by']['edges'];
+            if (empty($nodes)) {
+                return [];
+            }
 
             foreach ($nodes as $likesArray) {
                 $likes[] = Like::create($likesArray['node']);
@@ -750,10 +872,21 @@ class Instagram
      */
     public function getUsernameById($id)
     {
-        $response = Request::get(Endpoints::getAccountJsonPrivateInfoLinkByAccountId($id), $this->generateHeaders($this->userSession));
+        $privateInfo = $this->getAccountPrivateInfo($id);
+        return $privateInfo['username'];
+    }
 
+    /**
+     * @param string $id
+     * @return array
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function getAccountPrivateInfo($id)
+    {
+        $response = Request::get(Endpoints::getAccountJsonPrivateInfoLinkByAccountId($id), $this->generateHeaders($this->userSession));
         if (static::HTTP_NOT_FOUND === $response->code) {
-            throw new InstagramNotFoundException('Account with given username does not exist.');
+            throw new InstagramNotFoundException('Failed to fetch account with given id');
         }
 
         if (static::HTTP_OK !== $response->code) {
@@ -768,7 +901,7 @@ class Instagram
             throw new InstagramException((isset($responseArray['message']) ? $responseArray['message'] : 'Unknown Error'));
         }
 
-        return $responseArray['user']['username'];
+        return $responseArray['data']['user']['reel']['user'];
     }
 
     /**
@@ -779,6 +912,7 @@ class Instagram
      *
      * @return Media[]
      * @throws InstagramException
+     * @throws InstagramNotFoundException
      */
     public function getMediasByTag($tag, $count = 12, $maxId = '', $minTimestamp = null)
     {
@@ -789,12 +923,14 @@ class Instagram
         while ($index < $count && $hasNextPage) {
             $response = Request::get(Endpoints::getMediasJsonByTagLink($tag, $maxId),
                 $this->generateHeaders($this->userSession));
+            if ($response->code === static::HTTP_NOT_FOUND) {
+                throw new InstagramNotFoundException('This tag does not exists or it has been hidden by Instagram');
+            }
             if ($response->code !== static::HTTP_OK) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
 
-            $cookies = static::parseCookies($response->headers['Set-Cookie']);
-            $this->userSession['csrftoken'] = $cookies['csrftoken'];
+            $this->parseCookies($response->headers);
 
             $arr = $this->decodeRawBodyToJson($response->raw_body);
 
@@ -836,10 +972,11 @@ class Instagram
      *
      * @return array
      * @throws InstagramException
+     * @throws InstagramNotFoundException
      */
     public function getPaginateMediasByTag($tag, $maxId = '')
     {
-        $hasNextPage = true;
+        $hasNextPage = false;
         $medias = [];
 
         $toReturn = [
@@ -851,12 +988,15 @@ class Instagram
         $response = Request::get(Endpoints::getMediasJsonByTagLink($tag, $maxId),
             $this->generateHeaders($this->userSession));
 
+        if ($response->code === static::HTTP_NOT_FOUND) {
+            throw new InstagramNotFoundException('This tag does not exists or it has been hidden by Instagram');
+        }
+
         if ($response->code !== static::HTTP_OK) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
 
-        $cookies = static::parseCookies($response->headers['Set-Cookie']);
-        $this->userSession['csrftoken'] = $cookies['csrftoken'];
+        $this->parseCookies($response->headers);
 
         $arr = $this->decodeRawBodyToJson($response->raw_body);
 
@@ -893,6 +1033,72 @@ class Instagram
     }
 
     /**
+     * @param string $facebookLocationId
+     * @param string $maxId
+     *
+     * @return array
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function getPaginateMediasByLocationId($facebookLocationId, $maxId = '')
+    {
+        $hasNextPage = true;
+        $medias = [];
+
+        $toReturn = [
+            'medias' => $medias,
+            'maxId' => $maxId,
+            'hasNextPage' => $hasNextPage,
+        ];
+
+        $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId, $maxId),
+            $this->generateHeaders($this->userSession));
+
+        if ($response->code === static::HTTP_NOT_FOUND) {
+            throw new InstagramNotFoundException('Location with this id doesn\'t exist');
+        }
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $this->parseCookies($response->headers);
+
+        $arr = $this->decodeRawBodyToJson($response->raw_body);
+
+        if (!is_array($arr)) {
+            throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
+        }
+
+        if (empty($arr['graphql']['location']['edge_location_to_media']['count'])) {
+            return $toReturn;
+        }
+
+        $nodes = $arr['graphql']['location']['edge_location_to_media']['edges'];
+
+        if (empty($nodes)) {
+            return $toReturn;
+        }
+
+        foreach ($nodes as $mediaArray) {
+            $medias[] = Media::create($mediaArray['node']);
+        }
+
+        $maxId = $arr['graphql']['location']['edge_location_to_media']['page_info']['end_cursor'];
+        $hasNextPage = $arr['graphql']['location']['edge_location_to_media']['page_info']['has_next_page'];
+        $count = $arr['graphql']['location']['edge_location_to_media']['count'];
+
+        $toReturn = [
+            'medias' => $medias,
+            'count' => $count,
+            'maxId' => $maxId,
+            'hasNextPage' => $hasNextPage,
+        ];
+
+        return $toReturn;
+    }
+
+    /**
      * @param $tagName
      *
      * @return Media[]
@@ -911,8 +1117,7 @@ class Instagram
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
         }
 
-        $cookies = static::parseCookies($response->headers['Set-Cookie']);
-        $this->userSession['csrftoken'] = $cookies['csrftoken'];
+        $this->parseCookies($response->headers);
         $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
         $medias = [];
         $nodes = (array)@$jsonResponse['graphql']['hashtag']['edge_hashtag_to_top_posts']['edges'];
@@ -939,8 +1144,7 @@ class Instagram
         if ($response->code !== static::HTTP_OK) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
-        $cookies = static::parseCookies($response->headers['Set-Cookie']);
-        $this->userSession['csrftoken'] = $cookies['csrftoken'];
+        $this->parseCookies($response->headers);
         $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
         $nodes = $jsonResponse['location']['top_posts']['nodes'];
         $medias = [];
@@ -957,8 +1161,9 @@ class Instagram
      *
      * @return Media[]
      * @throws InstagramException
+     * @throws InstagramNotFoundException
      */
-    public function getMediasByLocationId($facebookLocationId, $quantity = 12, $offset = '')
+    public function getMediasByLocationId($facebookLocationId, $quantity = 24, $offset = '')
     {
         $index = 0;
         $medias = [];
@@ -966,25 +1171,27 @@ class Instagram
         while ($index < $quantity && $hasNext) {
             $response = Request::get(Endpoints::getMediasJsonByLocationIdLink($facebookLocationId, $offset),
                 $this->generateHeaders($this->userSession));
+            if ($response->code === static::HTTP_NOT_FOUND) {
+                throw new InstagramNotFoundException('Location with this id doesn\'t exist');
+            }
             if ($response->code !== static::HTTP_OK) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
-            $cookies = static::parseCookies($response->headers['Set-Cookie']);
-            $this->userSession['csrftoken'] = $cookies['csrftoken'];
+            $this->parseCookies($response->headers);
             $arr = $this->decodeRawBodyToJson($response->raw_body);
-            $nodes = $arr['location']['media']['nodes'];
+            $nodes = $arr['graphql']['location']['edge_location_to_media']['edges'];
             foreach ($nodes as $mediaArray) {
                 if ($index === $quantity) {
                     return $medias;
                 }
-                $medias[] = Media::create($mediaArray);
+                $medias[] = Media::create($mediaArray['node']);
                 $index++;
             }
             if (empty($nodes)) {
                 return $medias;
             }
-            $hasNext = $arr['location']['media']['page_info']['has_next_page'];
-            $offset = $arr['location']['media']['page_info']['end_cursor'];
+            $hasNext = $arr['graphql']['location']['edge_location_to_media']['page_info']['has_next_page'];
+            $offset = $arr['graphql']['location']['edge_location_to_media']['page_info']['end_cursor'];
         }
         return $medias;
     }
@@ -1008,10 +1215,9 @@ class Instagram
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
 
-        $cookies = static::parseCookies($response->headers['Set-Cookie']);
-        $this->userSession['csrftoken'] = $cookies['csrftoken'];
+        $this->parseCookies($response->headers);
         $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
-        return Location::create($jsonResponse['location']);
+        return Location::create($jsonResponse['graphql']['location']);
     }
 
     /**
@@ -1022,8 +1228,26 @@ class Instagram
      *
      * @return array
      * @throws InstagramException
+     * @throws InstagramNotFoundException
      */
     public function getFollowers($accountId, $count = 20, $pageSize = 20, $delayed = true)
+    {
+        $result = $this->getPaginateFollowers($accountId, $count, $pageSize, $delayed, '');
+        return $result['accounts'];
+    }
+
+    /**
+     * @param string $accountId Account id of the profile to query
+     * @param int $count Total followers to retrieve
+     * @param int $pageSize Internal page size for pagination
+     * @param bool $delayed Use random delay between requests to mimic browser behaviour
+     * @param bool $nextPage Use to paginate results (ontop of internal pagination)
+     *
+     * @return array
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function getPaginateFollowers($accountId, $count = 20, $pageSize = 20, $delayed = true, $nextPage = '')
     {
         if ($delayed) {
             set_time_limit($this->pagingTimeLimitSec);
@@ -1031,7 +1255,8 @@ class Instagram
 
         $index = 0;
         $accounts = [];
-        $endCursor = '';
+        $endCursor = $nextPage;
+        $lastPagingInfo = [];
 
         if ($count < $pageSize) {
             throw new InstagramException('Count must be greater than or equal to page size.');
@@ -1040,6 +1265,9 @@ class Instagram
         while (true) {
             $response = Request::get(Endpoints::getFollowersJsonLink($accountId, $pageSize, $endCursor),
                 $this->generateHeaders($this->userSession));
+            if ($response->code === static::HTTP_NOT_FOUND) {
+                throw new InstagramNotFoundException('Account with this id doesn\'t exist');
+            }
             if ($response->code !== static::HTTP_OK) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
@@ -1062,8 +1290,8 @@ class Instagram
                     break 2;
                 }
             }
-
             $pageInfo = $jsonResponse['data']['user']['edge_followed_by']['page_info'];
+            $lastPagingInfo = $pageInfo;
             if ($pageInfo['has_next_page']) {
                 $endCursor = $pageInfo['end_cursor'];
             } else {
@@ -1076,7 +1304,12 @@ class Instagram
                 usleep($microsec);
             }
         }
-        return $accounts;
+        $toReturn = [
+            'hasNextPage' => $lastPagingInfo['has_next_page'],
+            'nextPage' => $lastPagingInfo['end_cursor'],
+            'accounts' => $accounts
+        ];
+        return $toReturn;
     }
 
     /**
@@ -1087,8 +1320,26 @@ class Instagram
      *
      * @return array
      * @throws InstagramException
+     * @throws InstagramNotFoundException
      */
     public function getFollowing($accountId, $count = 20, $pageSize = 20, $delayed = true)
+    {
+        $res = $this->getPaginateFollowing($accountId, $count, $pageSize, $delayed, '');
+        return $res;
+    }
+
+    /**
+     * @param string $accountId Account id of the profile to query
+     * @param int $count Total followed accounts to retrieve
+     * @param int $pageSize Internal page size for pagination
+     * @param bool $delayed Use random delay between requests to mimic browser behaviour
+     * @param bool $nextPage Use to paginate results (ontop of internal pagination)
+     *
+     * @return array
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function getPaginateFollowing($accountId, $count = 20, $pageSize = 20, $delayed = true, $nextPage = '')
     {
         if ($delayed) {
             set_time_limit($this->pagingTimeLimitSec);
@@ -1097,6 +1348,7 @@ class Instagram
         $index = 0;
         $accounts = [];
         $endCursor = '';
+        $lastPagingInfo = [];
 
         if ($count < $pageSize) {
             throw new InstagramException('Count must be greater than or equal to page size.');
@@ -1105,7 +1357,9 @@ class Instagram
         while (true) {
             $response = Request::get(Endpoints::getFollowingJsonLink($accountId, $pageSize, $endCursor),
                 $this->generateHeaders($this->userSession));
-
+            if ($response->code === static::HTTP_NOT_FOUND) {
+                throw new InstagramNotFoundException('Account with this id doesn\'t exist');
+            }
             if ($response->code !== static::HTTP_OK) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
@@ -1130,6 +1384,7 @@ class Instagram
             }
 
             $pageInfo = $jsonResponse['data']['user']['edge_follow']['page_info'];
+            $lastPagingInfo = $pageInfo;
             if ($pageInfo['has_next_page']) {
                 $endCursor = $pageInfo['end_cursor'];
             } else {
@@ -1142,7 +1397,12 @@ class Instagram
                 usleep($microsec);
             }
         }
-        return $accounts;
+        $toReturn = [
+            'hasNextPage' => $lastPagingInfo['has_next_page'],
+            'nextPage' => $lastPagingInfo['end_cursor'],
+            'accounts' => $accounts
+        ];
+        return $toReturn;
     }
 
     /**
@@ -1201,44 +1461,63 @@ class Instagram
 
     /**
      * @param bool $force
-     * @param bool $support_two_step_verification
+     * @param bool|TwoStepVerificationInterface $twoStepVerificator
      *
      * $support_two_step_verification true works only in cli mode - just run login in cli mode - save cookie to file and use in any mode
      *
-     * @throws InstagramAuthException
+     * @return array
      * @throws InstagramException
      *
-     * @return array
+     * @throws InstagramAuthException
      */
-    public function login($force = false, $support_two_step_verification = false)
+    public function login($force = false, $twoStepVerificator = null)
     {
         if ($this->sessionUsername == null || $this->sessionPassword == null) {
             throw new InstagramAuthException("User credentials not provided");
         }
 
-        $cachedString = static::$instanceCache->getItem($this->sessionUsername);
-        $session = $cachedString->get();
+        if ($twoStepVerificator === true) {
+            $twoStepVerificator = new ConsoleVerification();
+        }
+
+        $session = static::$instanceCache->get($this->getCacheKey());
         if ($force || !$this->isLoggedIn($session)) {
             $response = Request::get(Endpoints::BASE_URL);
             if ($response->code !== static::HTTP_OK) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
             preg_match('/"csrf_token":"(.*?)"/', $response->body, $match);
-            if(isset($match[1])) {
-                $csrfToken = $match[1];
+            $csrfToken = isset($match[1]) ? $match[1] : '';
+            $cookies = $this->parseCookies($response->headers);
+
+            $mid = array_key_exists('mid', $cookies) ? $cookies['mid'] : '';
+
+            $cookieString = 'ig_cb=1';
+            if ($csrfToken !== '') {
+                $cookieString .= '; csrftoken=' . $csrfToken;
             }
-            $cookies = static::parseCookies($response->headers['Set-Cookie']);
-            $mid = $cookies['mid'];
-            $headers = ['cookie' => "csrftoken=$csrfToken; mid=$mid;",
+            if ($mid !== '') {
+                $cookieString .= '; mid=' . $mid;
+            }
+
+            $headers = [
+                'cookie' => $cookieString,
                 'referer' => Endpoints::BASE_URL . '/',
                 'x-csrftoken' => $csrfToken,
+                'X-CSRFToken' => $csrfToken,
+                'user-agent' => $this->getUserAgent(),
             ];
             $response = Request::post(Endpoints::LOGIN_URL, $headers,
-                ['username' => $this->sessionUsername, 'password' => $this->sessionPassword]);
+                ['username' => $this->sessionUsername, 'enc_password' => '#PWD_INSTAGRAM_BROWSER:0:' . time() . ':' . $this->sessionPassword]);
 
             if ($response->code !== static::HTTP_OK) {
-                if ($response->code === static::HTTP_BAD_REQUEST && isset($response->body->message) && $response->body->message == 'checkpoint_required' && $support_two_step_verification) {
-                    $response = $this->verifyTwoStep($response, $cookies);
+                if (
+                    $response->code === static::HTTP_BAD_REQUEST
+                    && isset($response->body->message)
+                    && $response->body->message == 'checkpoint_required'
+                    && !empty($twoStepVerificator)
+                ) {
+                    $response = $this->verifyTwoStep($response, $cookies, $twoStepVerificator);
                 } elseif ((is_string($response->code) || is_numeric($response->code)) && is_string($response->body)) {
                     throw new InstagramAuthException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
                 } else {
@@ -1252,10 +1531,10 @@ class Instagram
                 }
             }
 
-            $cookies = static::parseCookies($response->headers['Set-Cookie']);
+            $cookies = $this->parseCookies($response->headers);
+
             $cookies['mid'] = $mid;
-            $cachedString->set($cookies);
-            static::$instanceCache->save($cachedString);
+            static::$instanceCache->set($this->getCacheKey(), $cookies);
             $this->userSession = $cookies;
         } else {
             $this->userSession = $session;
@@ -1265,26 +1544,37 @@ class Instagram
     }
 
     /**
+     * @return string
+     */
+    private function getCacheKey()
+    {
+        return md5($this->sessionUsername);
+    }
+
+    /**
      * @param $session
      *
      * @return bool
      */
     public function isLoggedIn($session)
     {
-        if (is_null($session) || !isset($session['sessionid'])) {
+        if ($session === null || !isset($session['sessionid'])) {
             return false;
         }
         $sessionId = $session['sessionid'];
         $csrfToken = $session['csrftoken'];
-        $headers = ['cookie' => "csrftoken=$csrfToken; sessionid=$sessionId;",
+        $headers = [
+            'cookie' => "ig_cb=1; csrftoken=$csrfToken; sessionid=$sessionId;",
             'referer' => Endpoints::BASE_URL . '/',
             'x-csrftoken' => $csrfToken,
+            'X-CSRFToken' => $csrfToken,
+            'user-agent' => $this->getUserAgent(),
         ];
         $response = Request::get(Endpoints::BASE_URL, $headers);
         if ($response->code !== static::HTTP_OK) {
             return false;
         }
-        $cookies = static::parseCookies($response->headers['Set-Cookie']);
+        $cookies = $this->parseCookies($response->headers);
         if (!isset($cookies['ds_user_id'])) {
             return false;
         }
@@ -1294,21 +1584,23 @@ class Instagram
     /**
      * @param $response
      * @param $cookies
-     * @return \Unirest\Response
+     * @param TwoStepVerificationInterface $twoStepVerificator
+     * @return Response
      * @throws InstagramAuthException
      */
-    private function verifyTwoStep($response, $cookies)
+    private function verifyTwoStep($response, $cookies, $twoStepVerificator)
     {
-        $new_cookies = static::parseCookies($response->headers['Set-Cookie']);
+        $new_cookies = $this->parseCookies($response->headers);
         $cookies = array_merge($cookies, $new_cookies);
         $cookie_string = '';
         foreach ($cookies as $name => $value) {
-            $cookie_string .= $name . "=" . $value . "; ";
+            $cookie_string .= $name . '=' . $value . '; ';
         }
         $headers = [
             'cookie' => $cookie_string,
             'referer' => Endpoints::LOGIN_URL,
-            'x-csrftoken' => $cookies['csrftoken']
+            'x-csrftoken' => $cookies['csrftoken'],
+            'user-agent' => $this->getUserAgent(),
         ];
 
         $url = Endpoints::BASE_URL . $response->body->checkpoint_url;
@@ -1328,42 +1620,17 @@ class Instagram
             }
 
             if (!empty($choices)) {
-                if (count($choices) > 1) {
-                    $possible_values = [];
-                    print "Select where to send security code\n";
-                    foreach ($choices as $choice) {
-                        print $choice['label'] . " - " . $choice['value'] . "\n";
-                        $possible_values[$choice['value']] = true;
-                    }
-
-                    $selected_choice = null;
-                    while (empty($possible_values[$selected_choice])) {
-                        if ($selected_choice) {
-                            print "Wrong choice. Try again\n";
-                        }
-                        print "Your choice: ";
-                        $selected_choice = trim(fgets(STDIN));
-                    }
-                } else {
-                    print "Message with security code sent to: " . $choices[0]['label'] . "\n";
-                    $selected_choice = $choices[0]['value'];
-                }
+                $selected_choice = $twoStepVerificator->getVerificationType($choices);
                 $response = Request::post($url, $headers, ['choice' => $selected_choice]);
             }
         }
 
-        if (!preg_match('/name="security_code"/', $response->raw_body, $matches)) {
+        if (!preg_match('/"input_name":"security_code"/', $response->raw_body, $matches)) {
             throw new InstagramAuthException('Something went wrong when try two step verification. Please report issue.', $response->code);
         }
 
-        $security_code = null;
-        while (strlen($security_code) != 6 && !is_int($security_code)) {
-            if ($security_code) {
-                print "Wrong security code\n";
-            }
-            print "Enter security code: ";
-            $security_code = trim(fgets(STDIN));
-        }
+        $security_code = $twoStepVerificator->getSecurityCode();
+
         $post_data = [
             'csrfmiddlewaretoken' => $cookies['csrftoken'],
             'verify' => 'Verify Account',
@@ -1384,16 +1651,121 @@ class Instagram
      */
     public function saveSession()
     {
-        $cachedString = static::$instanceCache->getItem($this->sessionUsername);
-        $cachedString->set($this->userSession);
+        static::$instanceCache->set($this->getCacheKey(), $this->userSession);
     }
 
-    private static function extractSharedDataFromBody($body)
+    /**
+     * @param int|string|Media $mediaId
+     *
+     * @return void
+     * @throws InstagramException
+     */
+    public function like($mediaId)
     {
-        if (preg_match_all('#\_sharedData \= (.*?)\;\<\/script\>#', $body, $out)) {
-            return json_decode($out[1][0], true, 512, JSON_BIGINT_AS_STRING);
+        $mediaId = $mediaId instanceof Media ? $mediaId->getId() : $mediaId;
+        $response = Request::post(Endpoints::getLikeUrl($mediaId), $this->generateHeaders($this->userSession));
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
         }
-        return null;
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if ($jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+    }
+
+    /**
+     * @param int|string|Media $mediaId
+     *
+     * @return void
+     * @throws InstagramException
+     */
+    public function unlike($mediaId)
+    {
+        $mediaId = $mediaId instanceof Media ? $mediaId->getId() : $mediaId;
+        $response = Request::post(Endpoints::getUnlikeUrl($mediaId), $this->generateHeaders($this->userSession));
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if ($jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+    }
+
+    /**
+     * @param int|string|Media $mediaId
+     * @param int|string $text
+     * @param int|string|Comment|null $repliedToCommentId
+     *
+     * @return Comment
+     * @throws InstagramException
+     */
+    public function addComment($mediaId, $text, $repliedToCommentId = null)
+    {
+        $mediaId = $mediaId instanceof Media ? $mediaId->getId() : $mediaId;
+        $repliedToCommentId = $repliedToCommentId instanceof Comment ? $repliedToCommentId->getId() : $repliedToCommentId;
+
+        $body = ['comment_text' => $text, 'replied_to_comment_id' => $repliedToCommentId];
+        $response = Request::post(Endpoints::getAddCommentUrl($mediaId), $this->generateHeaders($this->userSession), $body);
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if ($jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        return Comment::create($jsonResponse);
+    }
+
+    /**
+     * @param string|Media $mediaId
+     * @param int|string|Comment $commentId
+     * @return void
+     * @throws InstagramException
+     */
+    public function deleteComment($mediaId, $commentId)
+    {
+        $mediaId = $mediaId instanceof Media ? $mediaId->getId() : $mediaId;
+        $commentId = $commentId instanceof Comment ? $commentId->getId() : $commentId;
+        $response = Request::post(Endpoints::getDeleteCommentUrl($mediaId, $commentId), $this->generateHeaders($this->userSession));
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if ($jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+    }
+
+    /**
+     * @return null
+     * @throws InstagramException
+     */
+    private function getRhxGis()
+    {
+        if ($this->rhxGis === null) {
+            try {
+                $sharedData = $this->getSharedDataFromPage();
+                $this->rhxGis = $sharedData['rhx_gis'];
+            } catch (Exception $exception) {
+                throw new InstagramException('Could not extract gis from page');
+            }
+        }
+
+        return $this->rhxGis;
     }
 
     /**
@@ -1414,14 +1786,5 @@ class Instagram
         }
 
         return self::extractSharedDataFromBody($response->raw_body);
-    }
-
-    /**
-     * @param $rawBody
-     * @return mixed
-     */
-    private function decodeRawBodyToJson($rawBody)
-    {
-        return json_decode($rawBody, true, 512, JSON_BIGINT_AS_STRING);
     }
 }

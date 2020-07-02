@@ -1,25 +1,34 @@
 <?php
 
-require '../vendor/autoload.php';
+namespace InstagramScraper\Tests;
 
 use InstagramScraper\Instagram;
 use InstagramScraper\Model\Media;
-use phpFastCache\CacheManager;
+use Phpfastcache\Config\ConfigurationOption;
+use Phpfastcache\Helper\Psr16Adapter;
 use PHPUnit\Framework\TestCase;
-
 
 class InstagramTest extends TestCase
 {
+    /**
+     * @var Instagram
+     */
     private static $instagram;
 
     public static function setUpBeforeClass()
     {
         $sessionFolder = __DIR__ . DIRECTORY_SEPARATOR . 'sessions' . DIRECTORY_SEPARATOR;
-        CacheManager::setDefaultConfig([
+        $defaultDriver = 'Files';
+        $options = new ConfigurationOption([
             'path' => $sessionFolder
         ]);
-        $instanceCache = CacheManager::getInstance('files');
-        self::$instagram = Instagram::withCredentials('raiym', 'youneverknow', $instanceCache);
+        $instanceCache = new Psr16Adapter($defaultDriver, $options);
+
+        self::$instagram = Instagram::withCredentials($_ENV['LOGIN'], $_ENV['PASSWORD'], $instanceCache);
+
+        if (isset($_ENV['USER_AGENT'])) {
+            self::$instagram->setUserAgent($_ENV['USER_AGENT']);
+        }
         self::$instagram->login();
 
     }
@@ -45,7 +54,7 @@ class InstagramTest extends TestCase
     public function testGetAccountByIdWithInvalidNumericId()
     {
         // PHP_INT_MAX is far larger than the greatest id so far and thus does not represent a valid account.
-        $this->expectException(\InstagramScraper\Exception\InstagramException::class);
+        $this->expectExceptionMessage('Failed to fetch account with given id');
         self::$instagram->getAccountById(PHP_INT_MAX);
     }
 
@@ -87,8 +96,8 @@ class InstagramTest extends TestCase
 
     public function testGetLocationMediasById()
     {
-        $medias = self::$instagram->getMediasByLocationId(1);
-        $this->assertEquals(12, count($medias));
+        $medias = self::$instagram->getMediasByLocationId(1, 56);
+        $this->assertEquals(56, count($medias));
     }
 
     public function testGetLocationById()
@@ -123,9 +132,9 @@ class InstagramTest extends TestCase
     {
         $comments = self::$instagram->getMediaCommentsByCode('BR5Njq1gKmB', 40);
         //TODO: check why returns less comments
-        $this->assertEquals(33, sizeof($comments));
+        $this->assertLessThanOrEqual(40, sizeof($comments));
     }
-    
+
     /**
      * @group getUsernameById
      */
@@ -134,7 +143,7 @@ class InstagramTest extends TestCase
         $username = self::$instagram->getUsernameById(3);
         $this->assertEquals('kevin', $username);
     }
-    
+
     /**
      * @group getMediasByIserId
      */
@@ -142,9 +151,47 @@ class InstagramTest extends TestCase
     {
         $instagram = new Instagram();
         $nonPrivateAccountMedias = $instagram->getMediasByUserId(3);
-        $this->assertEquals(20, count($nonPrivateAccountMedias));
+        $this->assertEquals(12, count($nonPrivateAccountMedias));
     }
 
+    public function testLikeMediaById()
+    {
+        // https://www.instagram.com/p/BcVEzBTgqKh/
+        self::$instagram->like('1663256735663694497');
+        $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
+    }
+
+    public function testUnlikeMediaById()
+    {
+        // https://www.instagram.com/p/BcVEzBTgqKh/
+        self::$instagram->unlike('1663256735663694497');
+        $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
+    }
+
+    public function testAddAndDeleteComment()
+    {
+        // https://www.instagram.com/p/BcVEzBTgqKh/
+        $comment1 = self::$instagram->addComment('1663256735663694497', 'Cool!');
+        $this->assertInstanceOf('InstagramScraper\Model\Comment', $comment1);
+
+        $comment2 = self::$instagram->addComment('1663256735663694497', '+1', $comment1);
+        $this->assertInstanceOf('InstagramScraper\Model\Comment', $comment2);
+
+        self::$instagram->deleteComment('1663256735663694497', $comment2);
+        $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
+
+        self::$instagram->deleteComment('1663256735663694497', $comment1);
+        $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
+    }
+
+    /**
+     * @group getPaginateMediasByLocationId
+     */
+    public function testGetPaginateMediasByLocationId()
+    {
+        $medias = self::$instagram->getPaginateMediasByLocationId('201176299974017');
+        echo json_encode($medias);
+    }
     // TODO: Add test getMediaById
     // TODO: Add test getLocationById
 }

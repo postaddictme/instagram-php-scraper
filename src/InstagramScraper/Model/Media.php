@@ -146,6 +146,11 @@ class Media extends AbstractModel
     protected $comments = [];
 
     /**
+     * @var Comment[]
+     */
+    protected $previewComments = [];
+
+    /**
      * @var bool
      */
     protected $hasMoreComments = false;
@@ -159,6 +164,21 @@ class Media extends AbstractModel
      * @var Media[]|array
      */
     protected $sidecarMedias = [];
+
+    /**
+     * @var string
+     */
+    protected $locationSlug;
+
+    /**
+     * @var string
+     */
+    protected $altText;
+
+    /**
+     * @var string
+     */
+    protected $locationAddressJson;
 
     /**
      * @param string $code
@@ -200,8 +220,8 @@ class Media extends AbstractModel
         $code     = '';
         while ($id > 0) {
             $remainder = $id % 64;
-            $id        = ($id - $remainder) / 64;
-            $code      = $alphabet{$remainder} . $code;
+            $id = ($id - $remainder) / 64;
+            $code = $alphabet[$remainder] . $code;
         };
         return $code;
     }
@@ -407,6 +427,14 @@ class Media extends AbstractModel
     }
 
     /**
+     * @return Comment[]
+     */
+    public function getPreviewComments()
+    {
+        return $this->previewComments;
+    }
+
+    /**
      * @return bool
      */
     public function hasMoreComments()
@@ -428,6 +456,35 @@ class Media extends AbstractModel
     public function getSidecarMedias()
     {
         return $this->sidecarMedias;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocationSlug()
+    {
+        return $this->locationSlug;
+    }
+    /**
+     * @return string
+     */
+    public function getAltText()
+    {
+        return $this->altText;
+    }
+    /**
+     * @return string
+     */
+    public function getLocationAddressJson()
+    {
+        return $this->locationAddressJson;
+    }
+    /**
+     * @return mixed
+     */
+    public function getLocationAddress()
+    {
+        return json_decode($this->locationAddressJson);
     }
 
     /**
@@ -504,6 +561,9 @@ class Media extends AbstractModel
             case 'caption':
                 $this->caption = $arr[$prop];
                 break;
+            case 'accessibility_caption':
+                $this->altText = $value;
+                break;
             case 'video_views':
                 $this->videoViews = $value;
                 $this->type       = static::TYPE_VIDEO;
@@ -527,8 +587,13 @@ class Media extends AbstractModel
                 }
                 break;
             case 'location':
-                $this->locationId   = $arr[$prop]['id'];
-                $this->locationName = $arr[$prop]['name'];
+                if(isset($arr[$prop])) {
+                    $this->locationId = $arr[$prop]['id'] ? $arr[$prop]['id'] : null;
+                    $this->locationName = $arr[$prop]['name'] ? $arr[$prop]['name'] : null;
+                    $this->locationSlug = $arr[$prop]['slug'] ? $arr[$prop]['slug'] : null;
+                    $this->locationAddressJson = isset($arr[$prop]['address_json']) ? $arr[$prop]['address_json'] : null;
+                }
+
                 break;
             case 'user':
                 $this->owner = Account::create($arr[$prop]);
@@ -557,7 +622,18 @@ class Media extends AbstractModel
                 $this->shortCode = $value;
                 $this->link      = Endpoints::getMediaPageLink($this->shortCode);
                 break;
+            case 'edge_media_preview_comment':
+                if (isset($arr[$prop]['count'])) {
+                    $this->commentsCount = (int) $arr[$prop]['count'];
+                }
+                if (isset($arr[$prop]['edges']) && is_array($arr[$prop]['edges'])) {
+                    foreach ($arr[$prop]['edges'] as $commentData) {
+                        $this->previewComments[] = Comment::create($commentData['node']);
+                    }
+                }
+                break;
             case 'edge_media_to_comment':
+            case 'edge_media_to_parent_comment':
                 if (isset($arr[$prop]['count'])) {
                     $this->commentsCount = (int) $arr[$prop]['count'];
                 }
