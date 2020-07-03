@@ -633,16 +633,6 @@ class Media extends AbstractModel
                     }
                 }
                 break;
-            case 'edge_media_preview_comment':
-                if (isset($arr[$prop]['count'])) {
-                    $this->commentsCount = (int) $arr[$prop]['count'];
-                }
-                if (isset($arr[$prop]['edges']) && is_array($arr[$prop]['edges'])) {
-                    foreach ($arr[$prop]['edges'] as $commentData) {
-                        $this->previewComments[] = Comment::create($commentData['node']);
-                    }
-                }
-                break;
             case 'edge_media_to_comment':
             case 'edge_media_to_parent_comment':
                 if (isset($arr[$prop]['count'])) {
