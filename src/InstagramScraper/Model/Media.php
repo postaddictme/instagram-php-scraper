@@ -96,6 +96,11 @@ class Media extends AbstractModel
     protected $videoStandardResolutionUrl = '';
 
     /**
+     * @var integer
+     */
+    protected $videoDuration = '';
+
+    /**
      * @var string
      */
     protected $videoLowBandwidthUrl = '';
@@ -352,6 +357,14 @@ class Media extends AbstractModel
     }
 
     /**
+     * @return integer
+     */
+    public function getVideoDuration()
+    {
+        return $this->videoDuration;
+    }
+
+    /**
      * @return string
      */
     public function getVideoLowBandwidthUrl()
@@ -561,6 +574,9 @@ class Media extends AbstractModel
                 $this->videoLowResolutionUrl = $arr[$prop]['low_resolution']['url'];
                 $this->videoStandardResolutionUrl = $arr[$prop]['standard_resolution']['url'];
                 $this->videoLowBandwidthUrl = $arr[$prop]['low_bandwidth']['url'];
+                break;
+            case 'video_duration':
+                $this->videoDuration = $arr[$prop];
                 break;
             case 'video_resources':
                 foreach ($value as $video) {
