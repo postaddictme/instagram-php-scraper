@@ -897,6 +897,10 @@ class Instagram
             throw new InstagramException('Response does not JSON');
         }
 
+        if ($responseArray['data']['user'] === null){
+            throw new InstagramNotFoundException('Failed to fetch account with given id');
+        }
+
         if ($responseArray['status'] !== 'ok') {
             throw new InstagramException((isset($responseArray['message']) ? $responseArray['message'] : 'Unknown Error'));
         }
