@@ -48,6 +48,7 @@ class Instagram
     private $userSession;
     private $rhxGis = null;
     private $userAgent = 'Mozilla/5.0 (Linux; Android 8.1.0; motorola one Build/OPKS28.63-18-3; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.80 Mobile Safari/537.36 Instagram 72.0.0.21.98 Android (27/8.1.0; 320dpi; 720x1362; motorola; motorola one; deen_sprout; qcom; pt_BR; 132081645)';
+    private $customCookies = null;
 
     /**
      * @param string $username
@@ -318,6 +319,28 @@ class Instagram
         return $medias;
     }
 
+
+    /**
+     *
+     * @return array
+     */
+    public function getCustomCookies()
+    {
+        return $this->customCookies;
+    }
+
+    /**
+     * @param $cookies
+     *
+     * @return array
+     */
+    public function setCustomCookies($cookies)
+    {
+        return $this->customCookies = $cookies;
+    }
+
+
+
     /**
      * We work only on https in this case if we have same cookies on Secure and not - we will choice Secure cookie
      *
@@ -327,6 +350,10 @@ class Instagram
      */
     private function parseCookies($headers)
     {
+        if($this->customCookies){
+            return $this->getCustomCookies();
+        }
+
         $rawCookies = isset($headers['Set-Cookie']) ? $headers['Set-Cookie'] : (isset($headers['set-cookie']) ? $headers['set-cookie'] : []);
 
         if (!is_array($rawCookies)) {
