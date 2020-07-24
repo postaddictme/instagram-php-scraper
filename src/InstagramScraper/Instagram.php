@@ -16,6 +16,7 @@ use InstagramScraper\Model\Media;
 use InstagramScraper\Model\Story;
 use InstagramScraper\Model\Tag;
 use InstagramScraper\Model\UserStories;
+use InstagramScraper\Model\Highlight;
 use InstagramScraper\TwoStepVerification\ConsoleVerification;
 use InstagramScraper\TwoStepVerification\TwoStepVerificationInterface;
 use InvalidArgumentException;
@@ -1817,5 +1818,41 @@ class Instagram
         }
 
         return self::extractSharedDataFromBody($response->raw_body);
+    }
+
+    /**
+     * @param string $userId
+     *
+     * @return Highlight[]
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function getHighlights($userId)
+    {
+        $response = Request::get(Endpoints::getHighlightUrl($userId),
+            $this->generateHeaders($this->userSession));
+
+        if ($response->code === static::HTTP_NOT_FOUND) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if (!isset($jsonResponse['status']) || $jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+
+        if (empty($jsonResponse['data']['user']['edge_highlight_reels']['edges'])) {
+            return [];
+        }
+
+        $highlights = [];
+        foreach ($jsonResponse['data']['user']['edge_highlight_reels']['edges'] as $highlight_reel) {
+            $highlights[] = Highlight::create($highlight_reel['node']);
+        }
+        return $highlights;
     }
 }
