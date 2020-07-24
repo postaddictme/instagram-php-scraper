@@ -685,9 +685,9 @@ class Media extends AbstractModel
                 $this->createdTime = (int)$value;
                 break;
             case '__typename':
-                if ($value == 'GraphImage') {
+                if ($value == 'GraphImage' || $value == 'GraphStoryImage') {
                     $this->type = static::TYPE_IMAGE;
-                } else if ($value == 'GraphVideo') {
+                } else if ($value == 'GraphVideo' || $value == 'GraphStoryVideo') {
                     $this->type = static::TYPE_VIDEO;
                 } else if ($value == 'GraphSidecar') {
                     $this->type = static::TYPE_SIDECAR;
