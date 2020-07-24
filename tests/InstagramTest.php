@@ -193,6 +193,17 @@ class InstagramTest extends TestCase
         $medias = self::$instagram->getPaginateMediasByLocationId('201176299974017');
         echo json_encode($medias);
     }
+
+    /**
+     * @group getHighlights
+     */
+    public function testGetHighlights()
+    {
+        $userId = self::$instagram->getAccount('instagram')->getId();
+        $highlights = self::$instagram->getHighlights($userId);
+        $this->assertGreaterThan(0, sizeof($highlights));
+    }
+
     // TODO: Add test getMediaById
     // TODO: Add test getLocationById
 }
