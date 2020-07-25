@@ -34,6 +34,7 @@ class Endpoints
     const ADD_COMMENT_URL = 'https://www.instagram.com/web/comments/{mediaId}/add/';
     const DELETE_COMMENT_URL = 'https://www.instagram.com/web/comments/{mediaId}/delete/{commentId}/';
     const ACCOUNT_MEDIAS2 = 'https://www.instagram.com/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
+    const HIGHLIGHT_URL = 'https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"{userId}","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":true,"include_live_status":false}';
 
     // Look alike??
     const URL_SIMILAR = 'https://www.instagram.com/graphql/query/?query_id=17845312237175864&id=4663052';
@@ -209,5 +210,10 @@ class Endpoints
         $url = str_replace('{mediaId}', $mediaId, static::DELETE_COMMENT_URL);
         $url = str_replace('{commentId}', $commentId, $url);
         return $url;
+    }
+
+    public static function getHighlightUrl($id)
+    {
+        return str_replace('{userId}', urlencode($id), static::HIGHLIGHT_URL);
     }
 }
