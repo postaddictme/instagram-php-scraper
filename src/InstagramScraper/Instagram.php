@@ -909,6 +909,20 @@ class Instagram
     }
 
     /**
+     * @param $mediaId
+     * @param int $count
+     * @param null $maxId
+     *
+     * @return Likes[]
+     * @throws InstagramException
+     */
+    public function getMediaLikesById($mediaId, $count = 10, $maxId = null)
+    {
+        $code = Media::getCodeFromId($mediaId);
+        return static::getMediaLikesByCode($code, $count, $maxId);
+    }
+
+    /**
      * @param      $code
      * @param int $count
      * @param null $maxId
@@ -966,6 +980,93 @@ class Instagram
         }
 
         return $likes;
+    }
+
+    /**
+     * @param $mediaId
+     * @param int $count
+     * @param null $maxId
+     *
+     * @return Likes[]
+     * @throws InstagramException
+     */
+    public function getPaginateMediaLikesById($mediaId, $count = 10, $maxId = null)
+    {
+        $code = Media::getCodeFromId($mediaId);
+        return static::getPaginateMediaLikesByCode($code, $count, $maxId);
+    }
+
+    /**
+     * @param      $code
+     * @param int $count
+     * @param null $maxId
+     *
+     * @return array
+     * @throws InstagramException
+     */
+    public function getPaginateMediaLikesByCode($code, $count = 10, $maxId = null)
+    {
+        $remain = $count;
+        $likes = [];
+        $index = 0;
+        $hasNextPage = true;
+
+        $toReturn = [
+            'likes' => $likes,
+            'maxId' => $maxId,
+            'hasNextPage' => $hasNextPage,
+        ];
+
+        while ($hasNextPage && $index < $count) {
+            if ($remain > self::MAX_LIKES_PER_REQUEST) {
+                $numberOfLikesToRetreive = self::MAX_LIKES_PER_REQUEST;
+                $remain -= self::MAX_LIKES_PER_REQUEST;
+                $index += self::MAX_LIKES_PER_REQUEST;
+            } else {
+                $numberOfLikesToRetreive = $remain;
+                $index += $remain;
+                $remain = 0;
+            }
+            if (!isset($maxId)) {
+                $maxId = '';
+
+            }
+            $commentsUrl = Endpoints::getLastLikesByCode($code, $numberOfLikesToRetreive, $maxId);
+            $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession));
+            if ($response->code !== static::HTTP_OK) {
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
+            }
+            $this->parseCookies($response->headers);
+
+            $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+            $nodes = $jsonResponse['data']['shortcode_media']['edge_liked_by']['edges'];
+            if (empty($nodes)) {
+                return [];
+            }
+
+            foreach ($nodes as $likesArray) {
+                $likes[] = Like::create($likesArray['node']);
+            }
+
+            $hasNextPage = $jsonResponse['data']['shortcode_media']['edge_liked_by']['page_info']['has_next_page'];
+            $numberOfLikes = $jsonResponse['data']['shortcode_media']['edge_liked_by']['count'];
+            if ($count > $numberOfLikes) {
+                $count = $numberOfLikes;
+            }
+            if (sizeof($nodes) == 0) {
+                return $likes;
+            }
+            $maxId = $jsonResponse['data']['shortcode_media']['edge_liked_by']['page_info']['end_cursor'];
+        }
+
+        $toReturn = [
+            'likes' => $likes,
+            'maxId' => $maxId,
+            'hasNextPage' => $hasNextPage,
+        ];
+
+        return $toReturn;
     }
 
     /**
