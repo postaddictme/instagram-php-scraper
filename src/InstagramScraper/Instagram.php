@@ -1351,6 +1351,51 @@ class Instagram
     }
 
     /**
+     * @param $accountId
+     * @param int $pageSize
+     * @param string $nextPage
+     *
+     * @return array
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function getPaginateAllFollowers($accountId, $pageSize = 20, $nextPage = '')
+    {
+        $response = Request::get(Endpoints::getFollowersJsonLink($accountId, $pageSize, $nextPage),
+            $this->generateHeaders($this->userSession));
+        if ($response->code === static::HTTP_NOT_FOUND) {
+            throw new InstagramNotFoundException('Account with this id doesn\'t exist');
+        }
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if ($jsonResponse['data']['user']['edge_followed_by']['count'] === 0) {
+            return [];
+        }
+
+        $edgesArray = $jsonResponse['data']['user']['edge_followed_by']['edges'];
+        if (count($edgesArray) === 0) {
+            throw new InstagramException('Failed to get followers of account id ' . $accountId . '. The account is private.', static::HTTP_FORBIDDEN);
+        }
+
+        $accounts = [];
+        foreach ($edgesArray as $edge) {
+            $accounts[] = $edge['node'];
+        }
+
+        $pageInfo = $jsonResponse['data']['user']['edge_followed_by']['page_info'];
+
+        return [
+            'hasNextPage' => $pageInfo['has_next_page'],
+            'nextPage' => $pageInfo['end_cursor'],
+            'accounts' => $accounts
+        ];
+    }
+
+    /**
      * @param string $accountId Account id of the profile to query
      * @param int $count Total followed accounts to retrieve
      * @param int $pageSize Internal page size for pagination
