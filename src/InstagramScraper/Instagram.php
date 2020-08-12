@@ -1372,7 +1372,8 @@ class Instagram
 
         $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
 
-        if ($jsonResponse['data']['user']['edge_followed_by']['count'] === 0) {
+        $count = $jsonResponse['data']['user']['edge_followed_by']['count'];
+        if ($count === 0) {
             return [];
         }
 
@@ -1389,6 +1390,7 @@ class Instagram
         $pageInfo = $jsonResponse['data']['user']['edge_followed_by']['page_info'];
 
         return [
+            'count' => $count,
             'hasNextPage' => $pageInfo['has_next_page'],
             'nextPage' => $pageInfo['end_cursor'],
             'accounts' => $accounts
