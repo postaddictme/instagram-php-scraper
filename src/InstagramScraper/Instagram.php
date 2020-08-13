@@ -1335,6 +1335,15 @@ class Instagram
                 throw new InstagramException('Failed to get followers of account id ' . $accountId . '. The account is private.', static::HTTP_FORBIDDEN);
             }
 
+            $pageInfo = $jsonResponse['data']['user']['edge_followed_by']['page_info'];
+            $lastPagingInfo = $pageInfo;
+            if ($pageInfo['has_next_page']) {
+                $endCursor = $pageInfo['end_cursor'];
+                $hasNextPage = true;
+            } else {
+                $hasNextPage = false;
+            }
+
             foreach ($edgesArray as $edge) {
                 $accounts[] = $edge['node'];
                 $index++;
@@ -1342,11 +1351,8 @@ class Instagram
                     break 2;
                 }
             }
-            $pageInfo = $jsonResponse['data']['user']['edge_followed_by']['page_info'];
-            $lastPagingInfo = $pageInfo;
-            if ($pageInfo['has_next_page']) {
-                $endCursor = $pageInfo['end_cursor'];
-            } else {
+
+            if (!$hasNextPage) {
                 break;
             }
 
@@ -1427,6 +1433,15 @@ class Instagram
                 throw new InstagramException('Failed to get followers of account id ' . $accountId . '. The account is private.', static::HTTP_FORBIDDEN);
             }
 
+            $pageInfo = $jsonResponse['data']['user']['edge_follow']['page_info'];
+            $lastPagingInfo = $pageInfo;
+            if ($pageInfo['has_next_page']) {
+                $endCursor = $pageInfo['end_cursor'];
+                $hasNextPage = true;
+            } else {
+                $hasNextPage = false;
+            }
+
             foreach ($edgesArray as $edge) {
                 $accounts[] = $edge['node'];
                 $index++;
@@ -1435,11 +1450,7 @@ class Instagram
                 }
             }
 
-            $pageInfo = $jsonResponse['data']['user']['edge_follow']['page_info'];
-            $lastPagingInfo = $pageInfo;
-            if ($pageInfo['has_next_page']) {
-                $endCursor = $pageInfo['end_cursor'];
-            } else {
+            if (!$hasNextPage) {
                 break;
             }
 
