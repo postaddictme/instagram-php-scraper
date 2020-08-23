@@ -32,7 +32,7 @@ class Instagram
     const HTTP_FORBIDDEN = 403;
     const HTTP_BAD_REQUEST = 400;
 
-    const MAX_COMMENTS_PER_REQUEST = 300;
+    const MAX_COMMENTS_PER_REQUEST = 50;
     const MAX_LIKES_PER_REQUEST = 300;
     const PAGING_TIME_LIMIT_SEC = 1800; // 30 mins time limit on operations that require multiple requests
     const PAGING_DELAY_MINIMUM_MICROSEC = 1000000; // 1 sec min delay to simulate browser
@@ -869,7 +869,7 @@ class Instagram
             $commentsUrl = Endpoints::getLastLikesByCode($code, $numberOfLikesToRetreive, $maxId);
             $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession));
             if ($response->code !== static::HTTP_OK) {
-                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body->message . ' Something went wrong. Please report issue.', $response->code);
             }
             $this->parseCookies($response->headers);
 
