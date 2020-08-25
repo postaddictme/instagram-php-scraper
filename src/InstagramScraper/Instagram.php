@@ -1769,6 +1769,8 @@ class Instagram
 
         if (preg_match('/"challengeType":"RecaptchaChallengeForm"/', $response->raw_body, $matches)) {
             throw new InstagramChallengeRecaptchaException('Instagram asked to enter the captcha.', $response->code);
+        } elseif (preg_match('/"challengeType":"SubmitPhoneNumberForm"/', $response->raw_body, $matches)) {
+            throw new InstagramChallengeSubmitPhoneNumberException('Instagram asked to enter a phone number.', $response->code);
         }
 
         if (! preg_match('/"input_name":"security_code"/', $response->raw_body, $matches)) {
