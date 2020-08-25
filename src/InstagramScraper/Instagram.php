@@ -1773,7 +1773,9 @@ class Instagram
             throw new InstagramChallengeSubmitPhoneNumberException('Instagram asked to enter a phone number.', $response->code);
         }
 
-        if (! preg_match('/"input_name":"security_code"/', $response->raw_body, $matches)) {
+        if (! preg_match('/"input_name":"security_code"/', $response->raw_body, $matches)
+            && ! preg_match('/"challengeType":"SelectVerificationMethodForm"/', $response->raw_body, $matches)
+        ) {
             throw new InstagramAuthException('Something went wrong when try two step verification. Please report issue.', $response->code);
         } elseif (! $twoStepVerificator instanceof TwoStepVerificationInterface) {
             throw new InstagramAuthException('$twoStepVerificator must be an instance of TwoStepVerificationInterface.', $response->code);
