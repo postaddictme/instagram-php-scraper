@@ -302,7 +302,7 @@ class Instagram
      */
     public function getFeed()
     {
-        $response = Request::get(Endpoints::getFeedJson(),
+        $response = Request::get(Endpoints::USER_FEED,
             $this->generateHeaders($this->userSession));
 
         if ($response->code === static::HTTP_NOT_FOUND) {
