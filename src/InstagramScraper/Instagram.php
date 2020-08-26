@@ -1625,9 +1625,11 @@ class Instagram
      * $support_two_step_verification true works only in cli mode - just run login in cli mode - save cookie to file and use in any mode
      *
      * @return array
-     * @throws InstagramException
-     *
      * @throws InstagramAuthException
+     * @throws InstagramChallengeRecaptchaException
+     * @throws InstagramChallengeSubmitPhoneNumberException
+     * @throws InstagramException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function login($force = false, $twoStepVerificator = null)
     {
