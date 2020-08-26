@@ -4,6 +4,8 @@ namespace InstagramScraper;
 
 use Exception;
 use InstagramScraper\Exception\InstagramAuthException;
+use InstagramScraper\Exception\InstagramChallengeRecaptchaException;
+use InstagramScraper\Exception\InstagramChallengeSubmitPhoneNumberException;
 use InstagramScraper\Exception\InstagramException;
 use InstagramScraper\Exception\InstagramNotFoundException;
 use InstagramScraper\Exception\InstagramAgeRestrictedException;
@@ -1623,9 +1625,11 @@ class Instagram
      * $support_two_step_verification true works only in cli mode - just run login in cli mode - save cookie to file and use in any mode
      *
      * @return array
-     * @throws InstagramException
-     *
      * @throws InstagramAuthException
+     * @throws InstagramChallengeRecaptchaException
+     * @throws InstagramChallengeSubmitPhoneNumberException
+     * @throws InstagramException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function login($force = false, $twoStepVerificator = null)
     {
@@ -1672,7 +1676,6 @@ class Instagram
                     $response->code === static::HTTP_BAD_REQUEST
                     && isset($response->body->message)
                     && $response->body->message == 'checkpoint_required'
-                    && !empty($twoStepVerificator)
                 ) {
                     $response = $this->verifyTwoStep($response, $cookies, $twoStepVerificator);
                 } elseif ((is_string($response->code) || is_numeric($response->code)) && is_string($response->body)) {
@@ -1741,11 +1744,14 @@ class Instagram
     /**
      * @param $response
      * @param $cookies
-     * @param TwoStepVerificationInterface $twoStepVerificator
+     * @param TwoStepVerificationInterface|null $twoStepVerificator
+     *
      * @return Response
      * @throws InstagramAuthException
+     * @throws InstagramChallengeRecaptchaException
+     * @throws InstagramChallengeSubmitPhoneNumberException
      */
-    private function verifyTwoStep($response, $cookies, $twoStepVerificator)
+    private function verifyTwoStep($response, $cookies, TwoStepVerificationInterface $twoStepVerificator = null)
     {
         $new_cookies = $this->parseCookies($response->headers);
         $cookies = array_merge($cookies, $new_cookies);
@@ -1762,6 +1768,18 @@ class Instagram
 
         $url = Endpoints::BASE_URL . $response->body->checkpoint_url;
         $response = Request::get($url, $headers);
+
+        if (preg_match('/"challengeType":"RecaptchaChallengeForm"/', $response->raw_body, $matches)) {
+            throw new InstagramChallengeRecaptchaException('Instagram asked to enter the captcha.', $response->code);
+        } elseif (preg_match('/"challengeType":"SubmitPhoneNumberForm"/', $response->raw_body, $matches)) {
+            throw new InstagramChallengeSubmitPhoneNumberException('Instagram asked to enter a phone number.', $response->code);
+        }
+
+        // for 2FA case
+        if (! $twoStepVerificator instanceof TwoStepVerificationInterface) {
+            throw new InstagramAuthException('$twoStepVerificator must be an instance of TwoStepVerificationInterface.', $response->code);
+        }
+
         if (preg_match('/window._sharedData\s\=\s(.*?)\;<\/script>/', $response->raw_body, $matches)) {
             $data = json_decode($matches[1], true, 512, JSON_BIGINT_AS_STRING);
             if (!empty($data['entry_data']['Challenge'][0]['extraData']['content'][3]['fields'][0]['values'])) {
