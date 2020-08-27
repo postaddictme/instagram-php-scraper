@@ -1,4 +1,6 @@
 <?php
+use Phpfastcache\Helper\Psr16Adapter;
+
 require __DIR__ . '/../vendor/autoload.php';
 
 $instagram = \InstagramScraper\Instagram::withCredentials('username', 'password', new Psr16Adapter('Files'));
