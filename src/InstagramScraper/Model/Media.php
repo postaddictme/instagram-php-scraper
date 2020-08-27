@@ -136,6 +136,11 @@ class Media extends AbstractModel
     protected $locationName = '';
 
     /**
+     * @var bool
+     */
+    protected $commentsDisabled = false;
+
+    /**
      * @var string
      */
     protected $commentsCount = 0;
@@ -413,6 +418,14 @@ class Media extends AbstractModel
     }
 
     /**
+     * @return bool
+     */
+    public function getCommentsDisabled()
+    {
+        return $this->commentsDisabled;
+    }
+
+    /**
      * @return string
      */
     public function getCommentsCount()
@@ -511,6 +524,9 @@ class Media extends AbstractModel
                 break;
             case 'link':
                 $this->link = $value;
+                break;
+            case 'comments_disabled':
+                $this->commentsDisabled = $value;
                 break;
             case 'comments':
                 $this->commentsCount = $arr[$prop]['count'];
