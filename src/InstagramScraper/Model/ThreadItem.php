@@ -34,7 +34,7 @@ class ThreadItem extends AbstractModel
     protected $userId;
 
     /**
-     * @var object
+     * @var ReelShare
      */
     protected $reelShare;
 
@@ -63,14 +63,6 @@ class ThreadItem extends AbstractModel
     }
 
     /**
-     * @return object
-     */
-    public function getReelShare()
-    {
-        return $this->reelShare;
-    }
-
-    /**
      * @return int
      */
     public function getTime()
@@ -84,6 +76,14 @@ class ThreadItem extends AbstractModel
     public function getUserId()
     {
         return $this->userId;
+    }
+
+    /**
+     * @return ReelShare
+     */
+    public function getReelShare()
+    {
+        return $this->reelShare;
     }
 
     /**

@@ -123,19 +123,19 @@ class Thread extends AbstractModel
     }
 
     /**
-     * @return ThreadItem[]
-     */
-    public function getItems()
-    {
-        return $this->items;
-    }
-
-    /**
      * @return boolean
      */
     public function getReadState()
     {
         return $this->readState;
+    }
+
+    /**
+     * @return ThreadItem[]
+     */
+    public function getItems()
+    {
+        return $this->items;
     }
 
     /**

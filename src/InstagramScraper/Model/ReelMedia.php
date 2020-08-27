@@ -76,11 +76,11 @@ class ReelMedia extends AbstractModel
     }
 
     /**
-     * @return Account[]
+     * @return string
      */
-    public function getMentions()
+    public function getImage()
     {
-        return $this->mentions;
+        return $this->image;
     }
 
     /**
@@ -92,11 +92,11 @@ class ReelMedia extends AbstractModel
     }
 
     /**
-     * @return string
+     * @return Account[]
      */
-    public function getImage()
+    public function getMentions()
     {
-        return $this->image;
+        return $this->mentions;
     }
 
     /**
