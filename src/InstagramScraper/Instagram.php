@@ -816,7 +816,7 @@ class Instagram
                 || !isset($jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['has_next_page'])
                 || !array_key_exists('end_cursor', $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info'])
             ) {
-                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+                return ['error' => 'Response code is ' . $response->code . '. Body: ' . $response->body->message . ' Something went wrong. Please report issue.', 'maxId'=>$maxId];
             }
 
             $nodes = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['edges'];
@@ -837,7 +837,7 @@ class Instagram
                 $count = $numberOfComments;
             }
         }
-        return $comments;
+        return ['comments' => $comments, 'maxId'=>$maxId];
     }
 
     /**
@@ -871,7 +871,7 @@ class Instagram
             $commentsUrl = Endpoints::getLastLikesByCode($code, $numberOfLikesToRetreive, $maxId);
             $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession));
             if ($response->code !== static::HTTP_OK) {
-                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
+                return ['error' => 'Response code is ' . $response->code . '. Body: ' . $response->body->message  . ' Something went wrong. Please report issue.', 'maxId'=> $maxId];
             }
             $this->parseCookies($response->headers);
 
@@ -879,7 +879,7 @@ class Instagram
 
             $nodes = $jsonResponse['data']['shortcode_media']['edge_liked_by']['edges'];
             if (empty($nodes)) {
-                return [];
+                return ['likes' => [], 'maxId'=> $maxId];
             }
 
             foreach ($nodes as $likesArray) {
@@ -891,13 +891,14 @@ class Instagram
             if ($count > $numberOfLikes) {
                 $count = $numberOfLikes;
             }
-            if (sizeof($nodes) == 0) {
-                return $likes;
-            }
+
             $maxId = $jsonResponse['data']['shortcode_media']['edge_liked_by']['page_info']['end_cursor'];
+            if (sizeof($nodes) == 0) {
+                return ['likes' => $likes, 'maxId'=> $maxId];
+            }
         }
 
-        return $likes;
+        return ['likes' => $likes, 'maxId'=> $maxId];
     }
 
     /**
