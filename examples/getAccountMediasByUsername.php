@@ -1,4 +1,6 @@
 <?php
+use Phpfastcache\Helper\Psr16Adapter;
+
 require __DIR__ . '/../vendor/autoload.php';
 
 // If account is public you can query Instagram without auth
@@ -28,6 +30,6 @@ echo "Profile pic url: {$account->getProfilePicUrl()}\n";
 
 
 // If account private you should be subscribed and after auth it will be available
-$instagram = \InstagramScraper\Instagram::withCredentials('username', 'password', 'path/to/cache/folder');
+$instagram = \InstagramScraper\Instagram::withCredentials('username', 'password', new Psr16Adapter('Files'));
 $instagram->login();
 $medias = $instagram->getMedias('private_account', 100);
