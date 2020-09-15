@@ -1,10 +1,10 @@
 <?php
-
+use Phpfastcache\Helper\Psr16Adapter;
 use InstagramScraper\Exception\InstagramException;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$instagram = \InstagramScraper\Instagram::withCredentials('username', 'password', '/path/to/cache/folder');
+$instagram = \InstagramScraper\Instagram::withCredentials('username', 'password', new Psr16Adapter('Files'));
 $instagram->login();
 
 try {
