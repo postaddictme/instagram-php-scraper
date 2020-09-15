@@ -25,21 +25,14 @@ class Endpoints
     const FOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/follow/';
     const UNFOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/unfollow/';
     const USER_FEED = 'https://www.instagram.com/graphql/query/?query_id=17861995474116400&fetch_media_item_count=12&fetch_media_item_cursor=&fetch_comment_count=4&fetch_like=10';
-    const USER_FEED2 = 'https://www.instagram.com/?__a=1';
-    const INSTAGRAM_QUERY_URL = 'https://www.instagram.com/query/';
     const INSTAGRAM_CDN_URL = 'https://scontent.cdninstagram.com/';
-    const ACCOUNT_JSON_PRIVATE_INFO_BY_ID = 'https://i.instagram.com/api/v1/users/{userId}/info/';
-    const ACCOUNT_JSON_PRIVATE_INFO_BY_ID_2 = 'https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"{userId}","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":false,"include_related_profiles":false}';
+    const ACCOUNT_JSON_PRIVATE_INFO_BY_ID = 'https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"{userId}","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":false,"include_related_profiles":false}';
     const LIKE_URL = 'https://www.instagram.com/web/likes/{mediaId}/like/';
     const UNLIKE_URL = 'https://www.instagram.com/web/likes/{mediaId}/unlike/';
     const ADD_COMMENT_URL = 'https://www.instagram.com/web/comments/{mediaId}/add/';
     const DELETE_COMMENT_URL = 'https://www.instagram.com/web/comments/{mediaId}/delete/{commentId}/';
-    const ACCOUNT_MEDIAS2 = 'https://www.instagram.com/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
     const HIGHLIGHT_URL = 'https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"{userId}","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":true,"include_live_status":false}';
     const THREADS_URL = 'https://www.instagram.com/direct_v2/web/inbox/?persistentBadging=true&folder=&limit={limit}&thread_message_limit={messageLimit}&cursor={cursor}';
-
-    // Look alike??
-    const URL_SIMILAR = 'https://www.instagram.com/graphql/query/?query_id=17845312237175864&id=4663052';
 
     const GRAPH_QL_QUERY_URL = 'https://www.instagram.com/graphql/query/?query_id={{queryId}}';
 
@@ -75,7 +68,7 @@ class Endpoints
 
     public static function getAccountJsonPrivateInfoLinkByAccountId($id)
     {
-        return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_PRIVATE_INFO_BY_ID_2);
+        return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_PRIVATE_INFO_BY_ID);
     }
 
     public static function getAccountMediasJsonLink($variables)
@@ -188,8 +181,7 @@ class Endpoints
 
     public static function getStoriesLink($variables)
     {
-        $url = self::getGraphQlUrl(InstagramQueryId::STORIES, ['variables' => json_encode($variables)]);
-        return $url;
+        return self::getGraphQlUrl(InstagramQueryId::STORIES, ['variables' => json_encode($variables)]);
     }
 
     public static function getLikeUrl($mediaId)
