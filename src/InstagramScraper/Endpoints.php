@@ -9,6 +9,7 @@ class Endpoints
     const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
     const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
     const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
+    const ACCOUNT_INFO = 'https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={variables}';
     const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables={variables}';
     const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
     const ACCOUNT_ACTIVITY = 'https://www.instagram.com/accounts/activity/?__a=1';
@@ -70,6 +71,11 @@ class Endpoints
     public static function getAccountJsonPrivateInfoLinkByAccountId($id)
     {
         return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_PRIVATE_INFO_BY_ID);
+    }
+
+    public static function getAccountInfoLink($variables)
+    {
+        return str_replace('{variables}', urlencode($variables), static::ACCOUNT_INFO);
     }
 
     public static function getMediaInfoLink($variables)

@@ -923,6 +923,42 @@ class Instagram
     }
 
     /**
+     * @param string $user_id
+     *
+     * @return Account
+     * @throws InstagramException
+     * @throws InvalidArgumentException
+     * @throws InstagramNotFoundException
+     */
+    public function getBasicAccountInfoById(string $user_id)
+    {
+        $variables = json_encode([
+            'user_id' => $user_id,
+            'include_chaining' => false,
+            'include_reel' => true,
+            'include_suggested_users' => false,
+            'include_logged_out_extras' => false,
+            'include_related_profiles' => false,
+        ]);
+
+        $response = $this->makeRequest(Method::GET,
+            Endpoints::getAccountInfoLink($variables)
+        );
+
+        if (static::HTTP_OK !== $response->code) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if (!isset($jsonResponse['data']['user']['reel']['user'])) {
+            throw new InstagramException('Media with this code does not exist');
+        }
+
+        return Account::create($jsonResponse['data']['user']['reel']['user']);
+    }
+
+    /**
      * @param string $id
      * @return string
      * @throws InstagramException
