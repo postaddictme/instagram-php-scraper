@@ -2,7 +2,6 @@
 
 namespace InstagramScraper;
 
-use Exception;
 use InstagramScraper\Exception\InstagramAuthException;
 use InstagramScraper\Exception\InstagramChallengeRecaptchaException;
 use InstagramScraper\Exception\InstagramChallengeSubmitPhoneNumberException;
@@ -23,7 +22,7 @@ use InstagramScraper\Model\Highlight;
 use InstagramScraper\TwoStepVerification\ConsoleVerification;
 use InstagramScraper\TwoStepVerification\TwoStepVerificationInterface;
 use InvalidArgumentException;
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use stdClass;
 use Unirest\Method;
@@ -48,7 +47,7 @@ class Instagram
     /** @var CacheInterface $instanceCache */
     private static $instanceCache = null;
 
-    /** @var Logger $logger */
+    /** @var LoggerInterface $logger */
     private static $logger = null;
 
     public $pagingTimeLimitSec = self::PAGING_TIME_LIMIT_SEC;
@@ -65,7 +64,7 @@ class Instagram
      * @param string $username
      * @param string $password
      * @param CacheInterface $cache
-     * @param Logger|null $logger
+     * @param LoggerInterface|null $logger
      *
      * @return Instagram
      */
