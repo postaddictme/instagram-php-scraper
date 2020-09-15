@@ -2,6 +2,7 @@
 
 namespace InstagramScraper\Model;
 
+use ArrayAccess;
 use InstagramScraper\Traits\ArrayLikeTrait;
 use InstagramScraper\Traits\InitializerTrait;
 
@@ -9,7 +10,7 @@ use InstagramScraper\Traits\InitializerTrait;
  * Class AbstractModel
  * @package InstagramScraper\Model
  */
-abstract class AbstractModel implements \ArrayAccess
+abstract class AbstractModel implements ArrayAccess
 {
     use InitializerTrait, ArrayLikeTrait;
 
@@ -23,6 +24,6 @@ abstract class AbstractModel implements \ArrayAccess
      */
     public static function getColumns()
     {
-        return \array_keys(static::$initPropertiesMap);
+        return array_keys(static::$initPropertiesMap);
     }
 }

@@ -15,7 +15,7 @@
     }
   ],
   "require": {
-    "php": ">=5.4.0",
+    "php": "^7.3",
     "mashape/unirest-php": "3.0.*",
     "ext-curl": "*",
     "ext-json": "*",
@@ -23,7 +23,7 @@
     "psr/log": "~1.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "5.5.*",
+    "phpunit/phpunit": "^8.0",
     "phpfastcache/phpfastcache": "^7.1",
     "monolog/monolog": "^2.0"
   },

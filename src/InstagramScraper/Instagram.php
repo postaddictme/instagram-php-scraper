@@ -68,7 +68,7 @@ class Instagram
      *
      * @return Instagram
      */
-    public static function withCredentials($username, $password, $cache, $logger = null)
+    public static function withCredentials(string $username, string $password, $cache, $logger = null)
     {
         static::$instanceCache = $cache;
         static::$logger = $logger;
@@ -88,7 +88,6 @@ class Instagram
      */
     public static function searchTagsByTagName($tag)
     {
-        // TODO: Add tests and auth
         $response = Request::get(Endpoints::getGeneralSearchJsonLink($tag));
 
         if (static::HTTP_NOT_FOUND === $response->code) {
@@ -140,15 +139,16 @@ class Instagram
      * Set how many media objects should be retrieved in a single request
      * @param int $count
      */
-    public static function setAccountMediasRequestCount($count)
+    public static function setAccountMediasRequestCount(int $count)
     {
         Endpoints::setAccountMediasRequestCount($count);
     }
 
     /**
      * Set custom curl opts
+     * @param array $opts
      */
-    public static function curlOpts($opts)
+    public static function curlOpts(array $opts)
     {
         Request::curlOpts($opts);
     }
@@ -194,12 +194,12 @@ class Instagram
 
     /**
      * @param string $username
-     *
+     * @param int $count
      * @return Account[]
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function searchAccountsByUsername($username, $count = 10)
+    public function searchAccountsByUsername(string $username, int $count = 10)
     {
         $response = $this->makeRequest(Method::GET, Endpoints::getGeneralSearchJsonLink($username, $count));
 
@@ -273,20 +273,20 @@ class Instagram
     }
 
     /**
-     * @param $userAgent
-     *
-     * @return string
+     * @param string $userAgent
+     * @return $this
      */
-    public function setUserAgent($userAgent)
+    public function setUserAgent(string $userAgent)
     {
-        return $this->userAgent = $userAgent;
+        $this->userAgent = $userAgent;
+        return $this;
     }
 
     /**
-     * @param $rawBody
+     * @param string $rawBody
      * @return mixed
      */
-    private function decodeRawBodyToJson($rawBody)
+    private function decodeRawBodyToJson(string $rawBody)
     {
         return json_decode($rawBody, true, 512, JSON_BIGINT_AS_STRING);
     }
@@ -348,8 +348,6 @@ class Instagram
         return $this->customCookies = $cookies;
     }
 
-
-
     /**
      * We work only on https in this case if we have same cookies on Secure and not - we will choice Secure cookie
      *
@@ -357,7 +355,7 @@ class Instagram
      *
      * @return array
      */
-    private function parseCookies($headers)
+    private function parseCookies(array $headers)
     {
         if($this->customCookies){
             return $this->getCustomCookies();
@@ -431,7 +429,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getMedias($username, $count = 20, $maxId = '')
+    public function getMedias(string $username, int $count = 20, string $maxId = '')
     {
 
         $account = $this->getAccount($username);
@@ -445,7 +443,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getAccount($username)
+    public function getAccount(string $username)
     {
         $response = $this->makeRequest(Method::GET, Endpoints::getAccountPageLink($username));
 
@@ -506,7 +504,7 @@ class Instagram
     }
 
     /**
-     * @param int $id
+     * @param string $id
      * @param int $count
      * @param string $maxId
      *
@@ -514,7 +512,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getMediasByUserId($id, $count = 12, $maxId = '')
+    public function getMediasByUserId(string $id, int $count = 12, string $maxId = '')
     {
         $index = 0;
         $medias = [];
@@ -566,7 +564,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getMediasFromFeed($username, $count = 20)
+    public function getMediasFromFeed(string $username, int $count = 20)
     {
         $medias = [];
         $index = 0;
@@ -603,13 +601,13 @@ class Instagram
     }
 
     /**
-     * @param $mediaId
+     * @param string $mediaId
      *
      * @return Media
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getMediaById($mediaId)
+    public function getMediaById(string $mediaId)
     {
         $mediaLink = Media::getLinkFromId($mediaId);
         return $this->getMediaByUrl($mediaLink);
@@ -622,7 +620,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getMediaByUrl($mediaUrl)
+    public function getMediaByUrl(string $mediaUrl)
     {
         if (filter_var($mediaUrl, FILTER_VALIDATE_URL) === false) {
             throw new InvalidArgumentException('Malformed media url');
@@ -645,18 +643,38 @@ class Instagram
     }
 
     /**
-     * @param string $mediaCode (for example BHaRdodBouH)
+     * @param string $shortcode (for example BHaRdodBouH)
      *
      * @return Media
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
 
-    public function getMediaByCode($mediaCode)
+    public function getMediaByCode(string $shortcode)
     {
-        $url = Endpoints::getMediaPageLink($mediaCode);
-        return $this->getMediaByUrl($url);
+        $variables = json_encode([
+            'shortcode' => $shortcode,
+            'child_comment_count' => 3,
+            'fetch_comment_count' => 40,
+            'parent_comment_count' => 24,
+            'has_threaded_comments' => true,
+        ]);
 
+        $response = $this->makeRequest(Method::GET,
+            Endpoints::getMediaInfoLink($variables)
+        );
+
+        if (static::HTTP_OK !== $response->code) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if (!isset($jsonResponse['data']['shortcode_media'])) {
+            throw new InstagramException('Media with this code does not exist');
+        }
+
+        return Media::create($jsonResponse['data']['shortcode_media']);
     }
 
     /**
@@ -667,7 +685,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getPaginateMedias($username, $maxId = '')
+    public function getPaginateMedias(string $username, string $maxId = '')
     {
         $account = $this->getAccount($username);
 
@@ -687,7 +705,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getPaginateMediasByUserId($id, $count = 12, $maxId = '')
+    public function getPaginateMediasByUserId($id, int $count = 12, string $maxId = '')
     {
         $index = 0;
         $hasNextPage = true;
@@ -757,26 +775,26 @@ class Instagram
     /**
      * @param $mediaId
      * @param int $count
-     * @param null $maxId
+     * @param string $maxId
      *
      * @return Comment[]
      * @throws InstagramException
      */
-    public function getMediaCommentsById($mediaId, $count = 10, $maxId = null)
+    public function getMediaCommentsById($mediaId, int $count = 10, string $maxId = '')
     {
         $code = Media::getCodeFromId($mediaId);
         return static::getMediaCommentsByCode($code, $count, $maxId);
     }
 
     /**
-     * @param      $code
+     * @param string $code
      * @param int $count
-     * @param null $maxId
+     * @param string $maxId
      *
      * @return Comment[]
      * @throws InstagramException
      */
-    public function getMediaCommentsByCode($code, $count = 10, $maxId = null)
+    public function getMediaCommentsByCode(string $code, int $count = 10, string $maxId = '')
     {
         $comments = [];
         $index = 0;
@@ -791,7 +809,7 @@ class Instagram
             $variables = json_encode([
                 'shortcode' => (string)$code,
                 'first' => (string)$numberOfCommentsToRetrieve,
-                'after' => (string)$maxId
+                'after' => $maxId
             ]);
 
             $commentsUrl = Endpoints::getCommentsBeforeCommentIdByCode($variables);
@@ -834,14 +852,14 @@ class Instagram
     }
 
     /**
-     * @param      $code
+     * @param string $code
      * @param int $count
-     * @param null $maxId
+     * @param string $maxId
      *
      * @return array
      * @throws InstagramException
      */
-    public function getMediaLikesByCode($code, $count = 10, $maxId = null)
+    public function getMediaLikesByCode(string $code, int $count = 10, string $maxId = '')
     {
         $remain = $count;
         $likes = [];
@@ -857,10 +875,7 @@ class Instagram
                 $index += $remain;
                 $remain = 0;
             }
-            if (!isset($maxId)) {
-                $maxId = '';
 
-            }
             $commentsUrl = Endpoints::getLastLikesByCode($code, $numberOfLikesToRetreive, $maxId);
             $response = $this->makeRequest(Method::GET, $commentsUrl);
             if ($response->code !== static::HTTP_OK) {
@@ -901,7 +916,7 @@ class Instagram
      * @throws InvalidArgumentException
      * @throws InstagramNotFoundException
      */
-    public function getAccountById($id)
+    public function getAccountById(string $id)
     {
         $username = $this->getUsernameById($id);
         return $this->getAccount($username);
@@ -913,7 +928,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getUsernameById($id)
+    public function getUsernameById(string $id)
     {
         $privateInfo = $this->getAccountPrivateInfo($id);
         return $privateInfo['username'];
@@ -925,7 +940,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getAccountPrivateInfo($id)
+    public function getAccountPrivateInfo(string $id)
     {
         $response = $this->makeRequest(Method::GET, Endpoints::getAccountJsonPrivateInfoLinkByAccountId($id));
         if (static::HTTP_NOT_FOUND === $response->code) {
@@ -955,13 +970,13 @@ class Instagram
      * @param string $tag
      * @param int $count
      * @param string $maxId
-     * @param string $minTimestamp
+     * @param null $minTimestamp
      *
      * @return Media[]
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getMediasByTag($tag, $count = 12, $maxId = '', $minTimestamp = null)
+    public function getMediasByTag(string $tag, int $count = 12, string $maxId = '', $minTimestamp = null)
     {
         $index = 0;
         $medias = [];
@@ -1020,7 +1035,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getPaginateMediasByTag($tag, $maxId = '')
+    public function getPaginateMediasByTag(string $tag, string $maxId = '')
     {
         $hasNextPage = false;
         $medias = [];
@@ -1085,7 +1100,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getPaginateMediasByLocationId($facebookLocationId, $maxId = '')
+    public function getPaginateMediasByLocationId(string $facebookLocationId, string $maxId = '')
     {
         $hasNextPage = true;
         $medias = [];
@@ -1143,13 +1158,13 @@ class Instagram
     }
 
     /**
-     * @param $tagName
+     * @param string $tagName
      *
      * @return Media[]
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getCurrentTopMediasByTagName($tagName)
+    public function getCurrentTopMediasByTagName(string $tagName)
     {
         $response = $this->makeRequest(Method::GET, Endpoints::getMediasJsonByTagLink($tagName, ''));
 
@@ -1205,7 +1220,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getMediasByLocationId($facebookLocationId, $quantity = 24, $offset = '')
+    public function getMediasByLocationId(string $facebookLocationId, int $quantity = 24, string $offset = '')
     {
         $index = 0;
         $medias = [];
@@ -1244,7 +1259,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getLocationById($facebookLocationId)
+    public function getLocationById(string $facebookLocationId)
     {
         $response = $this->makeRequest(Method::GET, Endpoints::getMediasJsonByLocationIdLink($facebookLocationId));
 
@@ -1270,9 +1285,9 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getFollowers($accountId, $count = 20, $pageSize = 20, $delayed = true)
+    public function getFollowers(string $accountId, int $count = 20, int $pageSize = 20, bool $delayed = true)
     {
-        $result = $this->getPaginateFollowers($accountId, $count, $pageSize, $delayed, '');
+        $result = $this->getPaginateFollowers($accountId, $count, $pageSize, '', $delayed);
         return $result['accounts'];
     }
 
@@ -1280,14 +1295,14 @@ class Instagram
      * @param string $accountId Account id of the profile to query
      * @param int $count Total followers to retrieve
      * @param int $pageSize Internal page size for pagination
+     * @param string $nextPage Use to paginate results (ontop of internal pagination)
      * @param bool $delayed Use random delay between requests to mimic browser behaviour
-     * @param bool $nextPage Use to paginate results (ontop of internal pagination)
      *
      * @return array
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getPaginateFollowers($accountId, $count = 20, $pageSize = 20, $delayed = true, $nextPage = '')
+    public function getPaginateFollowers(string $accountId, int $count = 20, int $pageSize = 20, string $nextPage = '', bool $delayed = true)
     {
         if ($delayed) {
             set_time_limit($this->pagingTimeLimitSec);
@@ -1296,7 +1311,6 @@ class Instagram
         $index = 0;
         $accounts = [];
         $endCursor = $nextPage;
-        $lastPagingInfo = [];
 
         if ($count < $pageSize) {
             throw new InstagramException('Count must be greater than or equal to page size.');
@@ -1349,16 +1363,16 @@ class Instagram
                 usleep($microsec);
             }
         }
-        $toReturn = [
+
+        return [
             'hasNextPage' => $lastPagingInfo['has_next_page'],
             'nextPage' => $lastPagingInfo['end_cursor'],
             'accounts' => $accounts
         ];
-        return $toReturn;
     }
 
     /**
-     * @param $accountId
+     * @param string $accountId
      * @param int $pageSize
      * @param string $nextPage
      *
@@ -1366,7 +1380,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getPaginateAllFollowers($accountId, $pageSize = 20, $nextPage = '')
+    public function getPaginateAllFollowers(string $accountId, int $pageSize = 20, string $nextPage = '')
     {
         $response = $this->makeRequest(Method::GET, Endpoints::getFollowersJsonLink($accountId, $pageSize, $nextPage));
         if ($response->code === static::HTTP_NOT_FOUND) {
@@ -1413,24 +1427,22 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getFollowing($accountId, $count = 20, $pageSize = 20, $delayed = true)
+    public function getFollowing(string $accountId, int $count = 20, int $pageSize = 20, $delayed = true)
     {
-        $res = $this->getPaginateFollowing($accountId, $count, $pageSize, $delayed, '');
-        return $res;
+        return $this->getPaginateFollowing($accountId, $count, $pageSize, '', $delayed);
     }
 
     /**
      * @param string $accountId Account id of the profile to query
      * @param int $count Total followed accounts to retrieve
      * @param int $pageSize Internal page size for pagination
+     * @param string $nextPage Use to paginate results (ontop of internal pagination)
      * @param bool $delayed Use random delay between requests to mimic browser behaviour
-     * @param bool $nextPage Use to paginate results (ontop of internal pagination)
-     *
      * @return array
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getPaginateFollowing($accountId, $count = 20, $pageSize = 20, $delayed = true, $nextPage = '')
+    public function getPaginateFollowing(string $accountId, int $count = 20, int $pageSize = 20, string $nextPage = '', bool $delayed = true)
     {
         if ($delayed) {
             set_time_limit($this->pagingTimeLimitSec);
@@ -1438,15 +1450,13 @@ class Instagram
 
         $index = 0;
         $accounts = [];
-        $endCursor = '';
-        $lastPagingInfo = [];
 
         if ($count < $pageSize) {
             throw new InstagramException('Count must be greater than or equal to page size.');
         }
 
         while (true) {
-            $response = $this->makeRequest(Method::GET, Endpoints::getFollowingJsonLink($accountId, $pageSize, $endCursor));
+            $response = $this->makeRequest(Method::GET, Endpoints::getFollowingJsonLink($accountId, $pageSize, $nextPage));
             if ($response->code === static::HTTP_NOT_FOUND) {
                 throw new InstagramNotFoundException('Account with this id doesn\'t exist');
             }
@@ -1468,7 +1478,6 @@ class Instagram
             $pageInfo = $jsonResponse['data']['user']['edge_follow']['page_info'];
             $lastPagingInfo = $pageInfo;
             if ($pageInfo['has_next_page']) {
-                $endCursor = $pageInfo['end_cursor'];
                 $hasNextPage = true;
             } else {
                 $hasNextPage = false;
@@ -1492,16 +1501,16 @@ class Instagram
                 usleep($microsec);
             }
         }
-        $toReturn = [
+
+        return [
             'hasNextPage' => $lastPagingInfo['has_next_page'],
             'nextPage' => $lastPagingInfo['end_cursor'],
             'accounts' => $accounts
         ];
-        return $toReturn;
     }
 
     /**
-     * @param $accountId
+     * @param string $accountId
      * @param int $pageSize
      * @param string $nextPage
      *
@@ -1509,7 +1518,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getPaginateAllFollowing($accountId, $pageSize = 20, $nextPage = '')
+    public function getPaginateAllFollowing(string $accountId, int $pageSize = 20, string $nextPage = '')
     {
         $response = $this->makeRequest(Method::GET, Endpoints::getFollowingJsonLink($accountId, $pageSize, $nextPage));
         if ($response->code === static::HTTP_NOT_FOUND) {
@@ -1547,7 +1556,7 @@ class Instagram
     }
 
     /**
-     * @param array $reel_ids - array of instagram user ids
+     * @param array|null $reel_ids - array of instagram user ids
      * @return array
      * @throws InstagramException
      */
@@ -1600,7 +1609,7 @@ class Instagram
 
     /**
      * @param bool $force
-     * @param bool|TwoStepVerificationInterface $twoStepVerificator
+     * @param bool|TwoStepVerificationInterface|null $twoStepVerificator
      *
      * $support_two_step_verification true works only in cli mode - just run login in cli mode - save cookie to file and use in any mode
      *
@@ -1670,7 +1679,7 @@ class Instagram
      * @param null $parameters
      * @return Response
      */
-    protected function makeRequest($method, $url, $parameters = null) {
+    protected function makeRequest($method, string $url, $parameters = null) {
 
         $headers = $this->generateHeaders();
 
@@ -1699,6 +1708,7 @@ class Instagram
 
     /**
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function isLoggedIn()
     {
@@ -1916,7 +1926,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    private function getSharedDataFromPage($url = Endpoints::BASE_URL)
+    private function getSharedDataFromPage(string $url = Endpoints::BASE_URL)
     {
         $response = $this->makeRequest(Method::GET, rtrim($url, '/') . '/');
         if (static::HTTP_NOT_FOUND === $response->code) {
@@ -1937,7 +1947,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getHighlights($userId)
+    public function getHighlights(string $userId)
     {
         $response = $this->makeRequest(Method::GET, Endpoints::getHighlightUrl($userId));
 
@@ -1973,7 +1983,7 @@ class Instagram
      * @return array
      * @throws InstagramException
      */
-    public function getPaginateThreads($limit = 10, $messageLimit = 10, $cursor = null)
+    public function getPaginateThreads(int $limit = 10, int $messageLimit = 10, $cursor = null)
     {
         $response = $this->makeRequest(Method::GET,
             Endpoints::getThreadsUrl($limit, $messageLimit, $cursor)
@@ -2014,7 +2024,7 @@ class Instagram
      * @return Thread[]
      * @throws InstagramException
      */
-    public function getThreads($count = 10, $limit = 10, $messageLimit = 10)
+    public function getThreads(int $count = 10, int $limit = 10, int $messageLimit = 10)
     {
         $threads = [];
         $cursor = null;

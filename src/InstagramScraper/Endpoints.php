@@ -13,6 +13,7 @@ class Endpoints
     const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
     const ACCOUNT_ACTIVITY = 'https://www.instagram.com/accounts/activity/?__a=1';
     const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
+    const MEDIA_INFO = 'https://www.instagram.com/graphql/query/?query_hash=5789ea2c88978c55ccd762cb99e7b8bf&variables={variables}';
     const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
     const MEDIA_JSON_BY_TAG = 'https://www.instagram.com/explore/tags/{tag}/?__a=1&max_id={max_id}';
     const GENERAL_SEARCH = 'https://www.instagram.com/web/search/topsearch/?query={query}&count={count}';
@@ -41,7 +42,7 @@ class Endpoints
     /**
      * @param int $count
      */
-    public static function setAccountMediasRequestCount($count)
+    public static function setAccountMediasRequestCount(int $count)
     {
         static::$requestMediaCount = $count;
     }
@@ -69,6 +70,11 @@ class Endpoints
     public static function getAccountJsonPrivateInfoLinkByAccountId($id)
     {
         return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_PRIVATE_INFO_BY_ID);
+    }
+
+    public static function getMediaInfoLink($variables)
+    {
+        return str_replace('{variables}', urlencode($variables), static::MEDIA_INFO);
     }
 
     public static function getAccountMediasJsonLink($variables)
