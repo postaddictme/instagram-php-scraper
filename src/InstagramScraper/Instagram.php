@@ -609,8 +609,8 @@ class Instagram
      */
     public function getMediaById(string $mediaId)
     {
-        $mediaLink = Media::getLinkFromId($mediaId);
-        return $this->getMediaByUrl($mediaLink);
+        $shortCode = Media::getCodeFromId($mediaId);
+        return $this->getMediaByCode($shortCode);
     }
 
     /**
