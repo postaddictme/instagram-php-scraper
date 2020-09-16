@@ -671,7 +671,7 @@ class Instagram
         $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
 
         if (!isset($jsonResponse['data']['shortcode_media'])) {
-            throw new InstagramException('Media with this code does not exist');
+            throw new InstagramNotFoundException('Media with this code does not exist');
         }
 
         return Media::create($jsonResponse['data']['shortcode_media']);
@@ -952,7 +952,7 @@ class Instagram
         $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
 
         if (!isset($jsonResponse['data']['user']['reel']['user'])) {
-            throw new InstagramException('Media with this code does not exist');
+            throw new InstagramNotFoundException('Account with this id does not exist');
         }
 
         return Account::create($jsonResponse['data']['user']['reel']['user']);
