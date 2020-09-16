@@ -805,7 +805,7 @@ class Instagram
             $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession, $this->generateGisToken($variables)));
 
             if (static::HTTP_OK !== $response->code) {
-                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . json_encode($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
             $this->parseCookies($response->headers);
             $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
