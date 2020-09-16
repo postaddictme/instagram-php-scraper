@@ -816,7 +816,7 @@ class Instagram
                 || !isset($jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info']['has_next_page'])
                 || !array_key_exists('end_cursor', $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['page_info'])
             ) {
-                return ['error' => 'Response code is ' . $response->code . '. Body: ' . $response->body->message . ' Something went wrong. Please report issue.', 'maxId'=>$maxId];
+                return ['error' => 'Response code is ' . $response->code . '. Body: ' . json_encode($response->body) . ' Something went wrong. Please report issue.', 'maxId'=>$maxId];
             }
 
             $nodes = $jsonResponse['data']['shortcode_media']['edge_media_to_comment']['edges'];
@@ -871,7 +871,7 @@ class Instagram
             $commentsUrl = Endpoints::getLastLikesByCode($code, $numberOfLikesToRetreive, $maxId);
             $response = Request::get($commentsUrl, $this->generateHeaders($this->userSession));
             if ($response->code !== static::HTTP_OK) {
-                return ['error' => 'Response code is ' . $response->code . '. Body: ' . $response->body->message  . ' Something went wrong. Please report issue.', 'maxId'=> $maxId];
+                return ['error' => 'Response code is ' . $response->code . '. Body: ' . json_encode($response->body)  . ' Something went wrong. Please report issue.', 'maxId'=> $maxId];
             }
             $this->parseCookies($response->headers);
 
