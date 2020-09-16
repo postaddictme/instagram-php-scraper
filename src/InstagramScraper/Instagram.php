@@ -17,6 +17,7 @@ use InstagramScraper\Model\Location;
 use InstagramScraper\Model\Media;
 use InstagramScraper\Model\Story;
 use InstagramScraper\Model\Tag;
+use InstagramScraper\Model\Thread;
 use InstagramScraper\Model\UserStories;
 use InstagramScraper\Model\Highlight;
 use InstagramScraper\TwoStepVerification\ConsoleVerification;
@@ -40,6 +41,8 @@ class Instagram
     const PAGING_DELAY_MINIMUM_MICROSEC = 1000000; // 1 sec min delay to simulate browser
     const PAGING_DELAY_MAXIMUM_MICROSEC = 3000000; // 3 sec max delay to simulate browser
 
+    const X_IG_APP_ID = '936619743392459';
+
     /** @var CacheInterface $instanceCache */
     private static $instanceCache = null;
 
@@ -60,7 +63,7 @@ class Instagram
      *
      * @return Instagram
      */
-    public static function withCredentials($username, $password, CacheInterface $cache)
+    public static function withCredentials($username, $password, $cache)
     {
         static::$instanceCache = $cache;
         $instance = new self();
@@ -1997,5 +2000,78 @@ class Instagram
             $highlights[] = Highlight::create($highlight_reel['node']);
         }
         return $highlights;
+    }
+
+    /**
+     * @param int $limit
+     * @param int $messageLimit
+     * @param string|null $cursor
+     *
+     * @return array
+     * @throws InstagramException
+     */
+    public function getPaginateThreads($limit = 10, $messageLimit = 10, $cursor = null)
+    {
+        $response = Request::get(
+            Endpoints::getThreadsUrl($limit, $messageLimit, $cursor),
+            array_merge(
+                ['x-ig-app-id' => self::X_IG_APP_ID],
+                $this->generateHeaders($this->userSession)
+            )
+        );
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if (!isset($jsonResponse['status']) || $jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+
+        if (!isset($jsonResponse['inbox']['threads']) || empty($jsonResponse['inbox']['threads'])) {
+            return [];
+        }
+
+        $threads = [];
+
+        foreach ($jsonResponse['inbox']['threads'] as $jsonThread) {
+            $threads[] = Thread::create($jsonThread);
+        }
+
+        return [
+            'hasOlder' => (bool) $jsonResponse['inbox']['has_older'],
+            'oldestCursor' => isset($jsonResponse['inbox']['oldest_cursor']) ? $jsonResponse['inbox']['oldest_cursor'] : null,
+            'threads' => $threads,
+        ];
+    }
+
+    /**
+     * @param int $count
+     * @param int $limit
+     * @param int $messageLimit
+     *
+     * @return Thread[]
+     * @throws InstagramException
+     */
+    public function getThreads($count = 10, $limit = 10, $messageLimit = 10)
+    {
+        $threads = [];
+        $cursor = null;
+
+        while (count($threads) < $count) {
+            $result = $this->getPaginateThreads($limit, $messageLimit, $cursor);
+
+            $threads = array_merge($threads, $result['threads']);
+
+            if (!$result['hasOlder'] || !$result['oldestCursor']) {
+                break;
+            }
+
+            $cursor = $result['oldestCursor'];
+        }
+
+        return $threads;
     }
 }

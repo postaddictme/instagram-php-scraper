@@ -1,9 +1,11 @@
 <?php
+use Phpfastcache\Helper\Psr16Adapter;
+
 // If account is public you can query Instagram without auth
 $instagram = new \InstagramScraper\Instagram();
 
 // If account is private and you subscribed to it, first login
-$instagram = \InstagramScraper\Instagram::withCredentials('username', 'password', '/path/to/cache/folder');
+$instagram = \InstagramScraper\Instagram::withCredentials('username', 'password', new Psr16Adapter('Files'));
 $instagram->login();
 
 $media = $instagram->getMediaByCode('BHaRdodBouH');
