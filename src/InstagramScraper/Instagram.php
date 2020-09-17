@@ -879,7 +879,7 @@ class Instagram
             $commentsUrl = Endpoints::getLastLikesByCode($code, $numberOfLikesToRetreive, $maxId);
             $response = $this->makeRequest(Method::GET, $commentsUrl);
             if ($response->code !== static::HTTP_OK) {
-                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
+                throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
             $this->parseCookies($response->headers);
 
@@ -1645,18 +1645,13 @@ class Instagram
 
     /**
      * @param bool $force
-     * @param bool|TwoStepVerificationInterface|null $twoStepVerificator
-     *
-     * $support_two_step_verification true works only in cli mode - just run login in cli mode - save cookie to file and use in any mode
-     *
+     **
      * @return array
      * @throws InstagramAuthException
-     * @throws InstagramChallengeRecaptchaException
-     * @throws InstagramChallengeSubmitPhoneNumberException
      * @throws InstagramException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function login($force = false, $twoStepVerificator = null)
+    public function login($force = false)
     {
         if ($this->sessionUsername == null || $this->sessionPassword == null) {
             throw new InstagramAuthException("User credentials not provided");
@@ -1678,20 +1673,16 @@ class Instagram
 
             if ($response->code !== static::HTTP_OK) {
 
-                if ($twoStepVerificator === true) {
-                    $twoStepVerificator = new ConsoleVerification();
-                }
-
                 if (
                     $response->code === static::HTTP_BAD_REQUEST
                     && isset($response->body->message)
                     && $response->body->message == 'checkpoint_required'
                 ) {
-                    $response = $this->verifyTwoStep($response, $twoStepVerificator);
-                } elseif ((is_string($response->code) || is_numeric($response->code)) && is_string($response->body)) {
-                    throw new InstagramAuthException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
+                    throw new InstagramChallengeRecaptchaException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+                } elseif ((is_string($response->code) || is_numeric($response->code)) && is_string($response->raw_body)) {
+                    throw new InstagramAuthException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
                 } else {
-                    throw new InstagramAuthException('Something went wrong. Please report issue.', $response->code);
+                    throw new InstagramAuthException('Something went wrong. Please report issue.', static::getErrorBody($response->body));
                 }
             }
 
@@ -1784,72 +1775,6 @@ class Instagram
         }
 
         return Account::create($userArray['config']['viewer']);
-    }
-
-    /**
-     * @param $response
-     * @param TwoStepVerificationInterface|null $twoStepVerificator
-     *
-     * @return Response
-     * @throws InstagramAuthException
-     * @throws InstagramChallengeRecaptchaException
-     * @throws InstagramChallengeSubmitPhoneNumberException
-     */
-    private function verifyTwoStep($response, TwoStepVerificationInterface $twoStepVerificator = null)
-    {
-        $url = Endpoints::BASE_URL . $response->body->checkpoint_url;
-        $response = $this->makeRequest(Method::GET, $url);
-
-        if (preg_match('/"challengeType":"RecaptchaChallengeForm"/', $response->raw_body, $matches)) {
-            throw new InstagramChallengeRecaptchaException('Instagram asked to enter the captcha.', $response->code);
-        } elseif (preg_match('/"challengeType":"SubmitPhoneNumberForm"/', $response->raw_body, $matches)) {
-            throw new InstagramChallengeSubmitPhoneNumberException('Instagram asked to enter a phone number.', $response->code);
-        }
-
-        // for 2FA case
-        if (! $twoStepVerificator instanceof TwoStepVerificationInterface) {
-            throw new InstagramAuthException('$twoStepVerificator must be an instance of TwoStepVerificationInterface.', $response->code);
-        }
-
-        if (preg_match('/window._sharedData\s\=\s(.*?)\;<\/script>/', $response->raw_body, $matches)) {
-            $data = json_decode($matches[1], true, 512, JSON_BIGINT_AS_STRING);
-            if (!empty($data['entry_data']['Challenge'][0]['extraData']['content'][3]['fields'][0]['values'])) {
-                $choices = $data['entry_data']['Challenge'][0]['extraData']['content'][3]['fields'][0]['values'];
-            } elseif (!empty($data['entry_data']['Challenge'][0]['fields'])) {
-                $fields = $data['entry_data']['Challenge'][0]['fields'];
-                if (!empty($fields['email'])) {
-                    $choices[] = ['label' => 'Email: ' . $fields['email'], 'value' => 1];
-                }
-                if (!empty($fields['phone_number'])) {
-                    $choices[] = ['label' => 'Phone: ' . $fields['phone_number'], 'value' => 0];
-                }
-            }
-
-            if (!empty($choices)) {
-                $selected_choice = $twoStepVerificator->getVerificationType($choices);
-                $response = $this->makeRequest(Method::POST, $url, ['choice' => $selected_choice]);
-            }
-        }
-
-        if (!preg_match('/"input_name":"security_code"/', $response->raw_body, $matches)) {
-            throw new InstagramAuthException('Something went wrong when try two step verification. Please report issue.', $response->code);
-        }
-
-        $security_code = $twoStepVerificator->getSecurityCode();
-
-        $post_data = [
-            'csrfmiddlewaretoken' => $this->userSession['csrftoken'],
-            'verify' => 'Verify Account',
-            'security_code' => $security_code,
-        ];
-
-        $response = $this->makeRequest(Method::POST, $url, $post_data);
-
-        if ($response->code !== static::HTTP_OK) {
-            throw new InstagramAuthException('Something went wrong when try two step verification and enter security code. Please report issue.', $response->code);
-        }
-
-        return $response;
     }
 
     /**
