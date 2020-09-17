@@ -1753,7 +1753,7 @@ class Instagram
 
         $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
 
-        if ($jsonResponse['config']['viewerId'] > 0) {
+        if (isset($jsonResponse['config']['viewerId']) && $jsonResponse['config']['viewerId'] > 0) {
             return true;
         }
 
