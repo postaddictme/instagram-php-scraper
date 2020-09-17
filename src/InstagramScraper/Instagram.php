@@ -1674,24 +1674,20 @@ class Instagram
             $response = Request::post(Endpoints::LOGIN_URL, $headers,
                 ['username' => $this->sessionUsername, 'enc_password' => '#PWD_INSTAGRAM_BROWSER:0:' . time() . ':' . $this->sessionPassword]);
 
+            if (isset($response->body->message) && $response->body->message == 'checkpoint_required') {
+                $response = $this->verifyTwoStep($response, $cookies, $twoStepVerificator);
+            }
+
             if ($response->code !== static::HTTP_OK) {
-                if (
-                    $response->code === static::HTTP_BAD_REQUEST
-                    && isset($response->body->message)
-                    && $response->body->message == 'checkpoint_required'
-                ) {
-                    $response = $this->verifyTwoStep($response, $cookies, $twoStepVerificator);
-                } elseif ((is_string($response->code) || is_numeric($response->code)) && is_string($response->body)) {
+                if ((is_string($response->code) || is_numeric($response->code)) && is_string($response->body)) {
                     throw new InstagramAuthException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
                 } else {
                     throw new InstagramAuthException('Something went wrong. Please report issue.', $response->code);
                 }
             }
 
-            if (is_object($response->body)) {
-                if (!$response->body->authenticated) {
-                    throw new InstagramAuthException('User credentials are wrong.');
-                }
+            if (is_object($response->body) && !$response->body->authenticated) {
+                throw new InstagramAuthException('User credentials are wrong.');
             }
 
             $cookies = $this->parseCookies($response->headers);
