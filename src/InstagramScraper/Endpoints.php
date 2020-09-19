@@ -7,7 +7,6 @@ class Endpoints
     const BASE_URL = 'https://www.instagram.com';
     const SHARED_DATA_URL = 'https://www.instagram.com/data/shared_data/';
     const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
-    const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
     const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
     const ACCOUNT_INFO = 'https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={variables}';
     const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables={variables}';
@@ -51,11 +50,6 @@ class Endpoints
     public static function getAccountMediasRequestCount()
     {
         return static::$requestMediaCount;
-    }
-
-    public static function getAccountPageLink($username)
-    {
-        return str_replace('{username}', urlencode($username), static::ACCOUNT_PAGE);
     }
 
     public static function getAccountJsonLink($username)
