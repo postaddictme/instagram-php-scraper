@@ -1577,15 +1577,14 @@ class Instagram
                     throw new InstagramChallengeRecaptchaException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
                 } elseif ((is_string($response->code) || is_numeric($response->code)) && is_string($response->raw_body)) {
                     throw new InstagramAuthException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+
                 } else {
                     throw new InstagramAuthException('Something went wrong. Please report issue.', static::getErrorBody($response->body));
                 }
             }
 
-            if (is_object($response->body)) {
-                if (!$response->body->authenticated) {
-                    throw new InstagramAuthException('User credentials are wrong.');
-                }
+            if (is_object($response->body) && !$response->body->authenticated) {
+                throw new InstagramAuthException('User credentials are wrong.');
             }
 
             $this->saveSession();
