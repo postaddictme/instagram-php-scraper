@@ -27,6 +27,7 @@ use Psr\SimpleCache\CacheInterface;
 use stdClass;
 use Unirest\Request;
 use Unirest\Response;
+use Phpfastcache\Helper\Psr16Adapter;
 
 class Instagram
 {
@@ -63,9 +64,11 @@ class Instagram
      *
      * @return Instagram
      */
-    public static function withCredentials($username, $password, $cache)
+    public static function withCredentials($username, $password)
     {
-        static::$instanceCache = $cache;
+        if(static::$instanceCache == null){
+            static::$instanceCache = new Psr16Adapter('Files');
+        }
         $instance = new self();
         $instance->sessionUsername = $username;
         $instance->sessionPassword = $password;
