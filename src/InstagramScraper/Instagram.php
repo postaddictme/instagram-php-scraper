@@ -60,14 +60,20 @@ class Instagram
     /**
      * @param string $username
      * @param string $password
-     * @param CacheInterface $cache
+     * @param null $path
      *
      * @return Instagram
      */
-    public static function withCredentials($username, $password)
+    public static function withCredentials($username, $password, $path = null)
     {
         if(static::$instanceCache == null){
-            static::$instanceCache = new Psr16Adapter('Files');
+            if (!is_null($path) && is_string($path)) {
+                static::$instanceCache = new Psr16Adapter('Files', new \Phpfastcache\Config\ConfigurationOption([
+                    'path' => $path
+                ]));
+            }else{
+                static::$instanceCache = new Psr16Adapter('Files');
+            }
         }
         $instance = new self();
         $instance->sessionUsername = $username;
