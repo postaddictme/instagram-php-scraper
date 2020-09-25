@@ -6,7 +6,6 @@ use InstagramScraper\Exception\InstagramAuthException;
 use InstagramScraper\Exception\InstagramChallengeRecaptchaException;
 use InstagramScraper\Exception\InstagramException;
 use InstagramScraper\Exception\InstagramNotFoundException;
-use InstagramScraper\Exception\InstagramAgeRestrictedException;
 use InstagramScraper\Model\Account;
 use InstagramScraper\Model\Activity;
 use InstagramScraper\Model\Comment;
@@ -50,6 +49,12 @@ class Instagram
     public $pagingTimeLimitSec = self::PAGING_TIME_LIMIT_SEC;
     public $pagingDelayMinimumMicrosec = self::PAGING_DELAY_MINIMUM_MICROSEC;
     public $pagingDelayMaximumMicrosec = self::PAGING_DELAY_MAXIMUM_MICROSEC;
+
+    /** @var int|null */
+    private $encryptionKeyID;
+
+    /** @var string|null */
+    private $encryptionPublicKey;
 
     /**
      * @var string|null
@@ -1564,8 +1569,18 @@ class Instagram
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
 
+            $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+            if (isset($jsonResponse['encryption']['key_id'])) {
+                $this->encryptionKeyID = (int) $jsonResponse['encryption']['key_id'];
+            }
+
+            if (isset($jsonResponse['encryption']['public_key'])) {
+                $this->encryptionPublicKey = (string) $jsonResponse['encryption']['public_key'];
+            }
+
             $response = $this->makeRequest(Method::POST, Endpoints::LOGIN_URL,
-                ['username' => $this->username, 'enc_password' => '#PWD_INSTAGRAM_BROWSER:0:' . time() . ':' . $this->password]);
+                ['username' => $this->username, 'enc_password' => $this->encryptPassword($this->password)]);
 
             if ($response->code !== static::HTTP_OK) {
 
@@ -1591,6 +1606,23 @@ class Instagram
         }
 
         return $this->generateHeaders();
+    }
+
+    /**
+     * @param string $password
+     * @return string
+     */
+    private function encryptPassword(string $password)
+    {
+        $key = openssl_random_pseudo_bytes(32);
+        $iv = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+        $time = time();
+
+        $sealedBox = sodium_crypto_box_seal($key, hex2bin($this->encryptionPublicKey));
+        $encrypted = openssl_encrypt($password, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag, strval($time));
+        $payload = base64_encode("\x01" | pack('n', $this->encryptionKeyID) . pack('s', strlen($sealedBox)) . $sealedBox . $tag . $encrypted);
+
+        return sprintf('#PWD_INSTAGRAM_BROWSER:10:%s:%s', $time, $payload);
     }
 
     /**
