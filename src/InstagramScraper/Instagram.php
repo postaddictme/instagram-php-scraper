@@ -6,6 +6,7 @@ use InstagramScraper\Exception\InstagramAuthException;
 use InstagramScraper\Exception\InstagramChallengeRecaptchaException;
 use InstagramScraper\Exception\InstagramException;
 use InstagramScraper\Exception\InstagramNotFoundException;
+use InstagramScraper\Exception\InstagramRateLimitException;
 use InstagramScraper\Model\Account;
 use InstagramScraper\Model\Activity;
 use InstagramScraper\Model\Comment;
@@ -1630,7 +1631,7 @@ class Instagram
      * @param string $url
      * @param null $parameters
      * @return Response
-     * @throws Exception
+     * @throws Exception|InstagramRateLimitException
      */
     protected function makeRequest($method, string $url, $parameters = null) {
 
@@ -1650,6 +1651,10 @@ class Instagram
 
         $response = Request::send($method, $url, $parameters, $headers);
         $this->parseHeaders($response->headers);
+
+        if ($response->code == 429) {
+            throw new InstagramRateLimitException('Throttled by Instagram because of too many API requests.');
+        }
 
         return $response;
     }
