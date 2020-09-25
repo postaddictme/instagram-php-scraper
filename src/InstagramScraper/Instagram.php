@@ -1671,8 +1671,10 @@ class Instagram
                 'X-CSRFToken' => $csrfToken,
                 'user-agent' => $this->getUserAgent(),
             ];
+            
+            $enc_password = '#PWD_INSTAGRAM_BROWSER:0:' . time() . ':' . $this->sessionPassword';
             $response = Request::post(Endpoints::LOGIN_URL, $headers,
-                ['username' => $this->sessionUsername, 'enc_password' => '#PWD_INSTAGRAM_BROWSER:0:' . time() . ':' . $this->sessionPassword]);
+                ['username' => $this->sessionUsername, 'enc_password' => $enc_password);
 
             if (isset($response->body->message) && $response->body->message == 'checkpoint_required') {
                 $response = $this->verifyTwoStep($response, $cookies, $twoStepVerificator);
