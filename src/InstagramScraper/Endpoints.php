@@ -8,6 +8,7 @@ class Endpoints
     const SHARED_DATA_URL = 'https://www.instagram.com/data/shared_data/';
     const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
     const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
+    const ACCOUNT_INFO_BY_ID = 'https://i.instagram.com/api/v1/users/{userId}/info/';
     const ACCOUNT_INFO = 'https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={variables}';
     const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables={variables}';
     const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
@@ -17,7 +18,6 @@ class Endpoints
     const MEDIA_JSON_BY_LOCATION_ID = 'https://www.instagram.com/explore/locations/{{facebookLocationId}}/?__a=1&max_id={{maxId}}';
     const MEDIA_JSON_BY_TAG = 'https://www.instagram.com/explore/tags/{tag}/?__a=1&max_id={max_id}';
     const GENERAL_SEARCH = 'https://www.instagram.com/web/search/topsearch/?query={query}&count={count}';
-    const ACCOUNT_JSON_INFO_BY_ID = 'ig_user({userId}){id,username,external_url,full_name,profile_pic_url,biography,followed_by{count},follows{count},media{count},is_private,is_verified}';
     const COMMENTS_BEFORE_COMMENT_ID_BY_CODE = 'https://www.instagram.com/graphql/query/?query_hash=33ba35852cb50da46f5b5e889df7d159&variables={variables}';
     const LAST_LIKES_BY_CODE = 'ig_shortcode({{code}}){likes{nodes{id,user{id,profile_pic_url,username,follows{count},followed_by{count},biography,full_name,media{count},is_private,external_url,is_verified}},page_info}}';
     const LIKES_BY_SHORTCODE = 'https://www.instagram.com/graphql/query/?query_id=17864450716183058&variables={"shortcode":"{{shortcode}}","first":{{count}},"after":"{{likeId}}"}';
@@ -56,10 +56,11 @@ class Endpoints
         return str_replace('{username}', urlencode($username), static::ACCOUNT_JSON_INFO);
     }
 
-    public static function getAccountJsonInfoLinkByAccountId($id)
+    public static function getAccountInfoLinkByAccountId($id)
     {
-        return str_replace('{userId}', urlencode($id), static::ACCOUNT_JSON_INFO_BY_ID);
+        return str_replace('{userId}', urlencode($id), static::ACCOUNT_INFO_BY_ID);
     }
+
 
     public static function getAccountInfoLink($variables)
     {

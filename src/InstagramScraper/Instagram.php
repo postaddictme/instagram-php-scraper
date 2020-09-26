@@ -220,9 +220,7 @@ class Instagram
                 $cookies .= "$key=$value; ";
             }
 
-            $headers = [
-                'cookie' => $cookies,
-            ];
+            $headers['cookie'] = $cookies;
 
             if (isset($this->session['www-claim'])) {
                 $headers['x-ig-www-claim'] = $this->session['www-claim'];
@@ -237,6 +235,7 @@ class Instagram
             $headers['user-agent'] = $this->getUserAgent();
         }
 
+        print_R($headers);
         return $headers;
     }
 
@@ -334,10 +333,14 @@ class Instagram
             }
         }
 
-        $this->cookies = $secure_cookies + $not_secure_cookies;
+        $this->cookies = $this->cookies + $secure_cookies + $not_secure_cookies;
 
         if (isset($this->cookies['csrftoken'])) {
             $this->session['csrf-token'] = $this->cookies['csrftoken'];
+        }
+
+        if (isset($this->cookies['sessionid'])) {
+            $this->session['session_id'] = $headers['sessionid'];
         }
 
         if (isset($headers['x-ig-set-www-claim'])) {
@@ -614,7 +617,7 @@ class Instagram
     }
 
     /**
-     * @param int $id
+     * @param string $id
      * @param int $count
      * @param string $maxId
      *
@@ -622,7 +625,7 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public function getPaginateMediasByUserId($id, int $count = 12, string $maxId = '')
+    public function getPaginateMediasByUserId(string $id, int $count = 12, string $maxId = '')
     {
         $index = 0;
         $hasNextPage = true;
@@ -834,8 +837,21 @@ class Instagram
      */
     public function getAccountById(string $id)
     {
-        $username = $this->getUsernameById($id);
-        return $this->getAccountInfo($username);
+        $response = $this->makeRequest(Method::GET,
+            Endpoints::getAccountInfoLinkByAccountId($id)
+        );
+
+        if (static::HTTP_OK !== $response->code) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if (!isset($jsonResponse['user'])) {
+            throw new InstagramNotFoundException('Account with this id does not exist');
+        }
+
+        return Account::create($jsonResponse['user']);
     }
 
     /**
