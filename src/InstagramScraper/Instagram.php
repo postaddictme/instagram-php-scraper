@@ -339,7 +339,7 @@ class Instagram
         }
 
         if (isset($this->cookies['sessionid'])) {
-            $this->session['session_id'] = $headers['sessionid'];
+            $this->session['session_id'] = $this->cookies['sessionid'];
         }
 
         if (isset($headers['x-ig-set-www-claim'])) {
