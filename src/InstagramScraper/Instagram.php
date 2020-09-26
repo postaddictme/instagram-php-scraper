@@ -235,7 +235,6 @@ class Instagram
             $headers['user-agent'] = $this->getUserAgent();
         }
 
-        print_R($headers);
         return $headers;
     }
 
