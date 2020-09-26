@@ -393,8 +393,13 @@ class Instagram
         if (static::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
+
         if (static::HTTP_OK !== $response->code) {
             throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        if (!($responseArray = json_decode($response->raw_body, true))) {
+            throw new InstagramException('Response content type is not valid JSON');
         }
 
         $userArray = $this->decodeRawBodyToJson($response->raw_body);
@@ -877,41 +882,10 @@ class Instagram
      */
     public function getUsernameById(string $id)
     {
-        $privateInfo = $this->getAccountPrivateInfo($id);
+        $privateInfo = $this->getBasicAccountInfoById($id);
         return $privateInfo['username'];
     }
 
-    /**
-     * @param string $id
-     * @return array
-     * @throws InstagramException
-     * @throws InstagramNotFoundException
-     */
-    public function getAccountPrivateInfo(string $id)
-    {
-        $response = $this->makeRequest(Method::GET, Endpoints::getAccountJsonPrivateInfoLinkByAccountId($id));
-        if (static::HTTP_NOT_FOUND === $response->code) {
-            throw new InstagramNotFoundException('Failed to fetch account with given id');
-        }
-
-        if (static::HTTP_OK !== $response->code) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
-        }
-
-        if (!($responseArray = json_decode($response->raw_body, true))) {
-            throw new InstagramException('Response does not JSON');
-        }
-
-        if ($responseArray['data']['user'] === null){
-            throw new InstagramNotFoundException('Failed to fetch account with given id');
-        }
-
-        if ($responseArray['status'] !== 'ok') {
-            throw new InstagramException((isset($responseArray['message']) ? $responseArray['message'] : 'Unknown Error'));
-        }
-
-        return $responseArray['data']['user']['reel']['user'];
-    }
 
     /**
      * @param string $tag
@@ -1632,6 +1606,7 @@ class Instagram
      * @param null $parameters
      * @return Response
      * @throws Exception|InstagramRateLimitException
+     * @throws InstagramException
      */
     protected function makeRequest($method, string $url, $parameters = null) {
 
