@@ -1457,7 +1457,7 @@ class Instagram
 
         $index = 0;
         $accounts = [];
-        $endCursor = '';
+        $endCursor = $nextPage;
         $lastPagingInfo = [];
 
         if ($count < $pageSize) {
