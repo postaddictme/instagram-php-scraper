@@ -2,6 +2,7 @@
 
 namespace InstagramScraper\Tests;
 
+use GuzzleHttp\Client;
 use InstagramScraper\Instagram;
 use InstagramScraper\Model\Media;
 use Phpfastcache\Config\ConfigurationOption;
@@ -24,7 +25,7 @@ class InstagramTest extends TestCase
         ]);
         $instanceCache = new Psr16Adapter($defaultDriver, $options);
 
-        self::$instagram = Instagram::withCredentials($_ENV['LOGIN'], $_ENV['PASSWORD'], $instanceCache);
+        self::$instagram = Instagram::withCredentials(new Client(), $_ENV['LOGIN'], $_ENV['PASSWORD'], $instanceCache);
 
         if (isset($_ENV['USER_AGENT'])) {
             self::$instagram->setUserAgent($_ENV['USER_AGENT']);
@@ -150,7 +151,7 @@ class InstagramTest extends TestCase
      */
     public function testGetMediasByUserId()
     {
-        $instagram = new Instagram();
+        $instagram = new Instagram(new Client());
         $nonPrivateAccountMedias = $instagram->getMediasByUserId(3);
         $this->assertEquals(12, count($nonPrivateAccountMedias));
     }
