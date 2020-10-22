@@ -2,9 +2,9 @@
 
 namespace InstagramScraper\Http;
 
-use Nyholm\Psr7\Factory\HttplugFactory;
-use Nyholm\Psr7\Request as Psr7Request;
-use Nyholm\Psr7\Uri;
+use GuzzleHttp\Psr7\Request as Psr7Request;
+use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Psr7\Utils;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 
@@ -42,7 +42,7 @@ class Request
         if ($body !== null) {
             $body = http_build_query($body);
             $headers['Content-Type'] = 'application/x-www-form-urlencoded';
-            $body = (new HttplugFactory)->createStream($body);
+            $body = Utils::streamFor($body);
         }
         $request = new Psr7Request($method, $uri, $headers, $body);
 
