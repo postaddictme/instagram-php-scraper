@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-$instagram = new \InstagramScraper\Instagram();
+$instagram = new \InstagramScraper\Instagram(new \GuzzleHttp\Client());
 $response = $instagram->getPaginateMedias('kevin');
 
 foreach ($response['medias'] as $media) {
