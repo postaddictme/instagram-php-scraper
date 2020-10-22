@@ -4,7 +4,7 @@ require __DIR__ . '/../../../../vendor/autoload.php';
 use InstagramScraper\Instagram;
 use Phpfastcache\Helper\Psr16Adapter;
 
-$instagram  = Instagram::withCredentials('login', 'password', new Psr16Adapter('Files'));
+$instagram  = Instagram::withCredentials(new \GuzzleHttp\Client(), 'login', 'password', new Psr16Adapter('Files'));
 $instagram->login();
 $instagram->saveSession();
 

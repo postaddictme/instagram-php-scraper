@@ -3,7 +3,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 // If account is public you can query Instagram without auth
 
-$instagram = new \InstagramScraper\Instagram();
+$instagram = new \InstagramScraper\Instagram(new \GuzzleHttp\Client());
 
 // For getting information about account you don't need to auth:
 
