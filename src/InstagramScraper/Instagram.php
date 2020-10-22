@@ -9,6 +9,7 @@ use InstagramScraper\Exception\InstagramChallengeSubmitPhoneNumberException;
 use InstagramScraper\Exception\InstagramException;
 use InstagramScraper\Exception\InstagramNotFoundException;
 use InstagramScraper\Exception\InstagramAgeRestrictedException;
+use InstagramScraper\Http\Response;
 use InstagramScraper\Model\Account;
 use InstagramScraper\Model\Activity;
 use InstagramScraper\Model\Comment;
@@ -23,10 +24,10 @@ use InstagramScraper\Model\Highlight;
 use InstagramScraper\TwoStepVerification\ConsoleVerification;
 use InstagramScraper\TwoStepVerification\TwoStepVerificationInterface;
 use InvalidArgumentException;
+use InstagramScraper\Http\Request;
+use Psr\Http\Client\ClientInterface;
 use Psr\SimpleCache\CacheInterface;
 use stdClass;
-use Unirest\Request;
-use Unirest\Response;
 
 class Instagram
 {
@@ -57,16 +58,34 @@ class Instagram
     private $customCookies = null;
 
     /**
+     * Instagram constructor.
+     * @param ClientInterface $client
+     */
+    public function __construct(ClientInterface $client)
+    {
+        Request::setHttpClient($client);
+    }
+
+    /**
+     * @param ClientInterface $httpClient
+     */
+    public static function setHttpClient(ClientInterface $httpClient): void
+    {
+        Request::setHttpClient($httpClient);
+    }
+
+    /**
+     * @param ClientInterface $client
      * @param string $username
      * @param string $password
      * @param CacheInterface $cache
      *
      * @return Instagram
      */
-    public static function withCredentials($username, $password, $cache)
+    public static function withCredentials(ClientInterface $client, $username, $password, $cache)
     {
         static::$instanceCache = $cache;
-        $instance = new self();
+        $instance = new self($client);
         $instance->sessionUsername = $username;
         $instance->sessionPassword = $password;
         return $instance;
@@ -136,53 +155,6 @@ class Instagram
     public static function setAccountMediasRequestCount($count)
     {
         Endpoints::setAccountMediasRequestCount($count);
-    }
-
-    /**
-     * Set custom curl opts
-     */
-    public static function curlOpts($opts)
-    {
-        Request::curlOpts($opts);
-    }
-
-    /**
-     * @param array $config
-     */
-    public static function setProxy(array $config)
-    {
-        $defaultConfig = [
-            'port' => false,
-            'tunnel' => false,
-            'address' => false,
-            'type' => CURLPROXY_HTTP,
-            'timeout' => false,
-            'auth' => [
-                'user' => '',
-                'pass' => '',
-                'method' => CURLAUTH_BASIC
-            ],
-        ];
-
-        $config = array_replace($defaultConfig, $config);
-
-        Request::proxy($config['address'], $config['port'], $config['type'], $config['tunnel']);
-
-        if (isset($config['auth'])) {
-            Request::proxyAuth($config['auth']['user'], $config['auth']['pass'], $config['auth']['method']);
-        }
-
-        if (isset($config['timeout'])) {
-            Request::timeout((int)$config['timeout']);
-        }
-    }
-
-    /**
-     * Disable proxy for all requests
-     */
-    public static function disableProxy()
-    {
-        Request::proxy('');
     }
 
     /**

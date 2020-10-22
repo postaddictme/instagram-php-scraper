@@ -16,10 +16,10 @@ function printMediaInfo(\InstagramScraper\Model\Media $media, $padding = '') {
 }
 
 // If account is public you can query Instagram without auth
-$instagram = new \InstagramScraper\Instagram();
+$instagram = new \InstagramScraper\Instagram(new \GuzzleHttp\Client());
 
 // If account is private and you subscribed to it firstly login
-$instagram = \InstagramScraper\Instagram::withCredentials('username', 'password', new Psr16Adapter('Files'));
+$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'username', 'password', new Psr16Adapter('Files'));
 $instagram->login();
 
 $media = $instagram->getMediaByUrl('https://www.instagram.com/p/BQ0lhTeAYo5');
