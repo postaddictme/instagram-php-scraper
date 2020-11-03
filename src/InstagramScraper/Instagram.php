@@ -2042,4 +2042,63 @@ class Instagram
 
         return $threads;
     }
+
+
+
+    /**
+     * @param string|AccountId $accountId
+     * @throws InstagramException
+     */
+    public function followAccountByAccountId($accountId){
+        $followURL = EndPoints::getFollowUrl($accountId);
+
+        $response  = Request::post($followURL, $this->generateHeaders($this->userSession));
+        if (static::HTTP_NOT_FOUND === $response->code) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if (static::HTTP_OK !== $response->code) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $followedAccount = self::extractSharedDataFromBody($response->raw_body);
+        if ($this->isAccountAgeRestricted($followedAccount, $response->raw_body)) {
+            throw new InstagramAgeRestrictedException('Account with given username is age-restricted.');
+        } 
+        
+        if (!isset($followedAccount['entry_data']['ProfilePage'][0]['graphql']['user'])) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $followedAccountDetails = Account::create($followedAccount['entry_data']['ProfilePage'][0]['graphql']['user']);
+        if(!$followedAccountDetails || ($followedAccountDetails->isFollowedByViewer() == false)){
+            throw new InstagramException('Response code is ' . $response->code . '. Body: Something went wrong, failed to follow the given account. Please report issue.', $response->code);
+        }
+
+        return $followedAccountDetails;
+    }
+
+
+    /**
+     * @param string|AccountId $accountId
+     * @throws InstagramException
+     */
+    public function UnFollowAccountByAccountId($accountId){
+        $unFollowURL = EndPoints::getUnFollowUrl($accountId);
+        $response  = Request::post($unFollowURL, $this->generateHeaders($this->userSession));
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+        if ($jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+        $accountDetails =  $this->getAccountById($accountId);
+        if(!$accountDetails || ($accountDetails->isFollowedByViewer() !== false)){
+            throw new InstagramException('Response code is ' . $response->code . '. Body: Something went wrong, failed to follow the given account. Please report issue.', $response->code);
+        }
+        return $accountDetails;
+    }
+
+
+
 }
