@@ -812,7 +812,7 @@ class Instagram
                 $count = $numberOfComments;
             }
         }
-        return $comments;
+        return ['comments'=>$comments,'max_id'=>$maxId];
     }
 
     /**
