@@ -14,4 +14,4 @@ $instagram->follow($account->getId());
 
 sleep(10);
 
-$instagram->follow($account->getId());
+$instagram->unfollow($account->getId());
