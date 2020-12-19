@@ -141,6 +141,12 @@ class Endpoints
         return $url;
     }
 
+    public static function getUnfollowUrl($accountId)
+    {
+        $url = str_replace('{{accountId}}', urlencode($accountId), static::UNFOLLOW_URL);
+        return $url;
+    }
+
     public static function getFollowersJsonLink($accountId, $count, $after = '')
     {
         $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOWERS_URL);
