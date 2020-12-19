@@ -1675,6 +1675,25 @@ class Instagram
     }
 
     /**
+     * @param $sessionId
+     *
+     * @return array
+     * @throws InstagramAuthException
+     */
+    public function loginWithSessionId($sessionId)
+    {
+        $session = ['sessionid' => $sessionId, 'csrftoken' => md5( rand( 1, 5000 ) )];
+
+        if (!$this->isLoggedIn($session)) {
+            throw new InstagramAuthException('Login with session went wrong. Please report issue.');
+        } else {
+            $this->userSession = $session;
+        }
+
+        return $this->generateHeaders($this->userSession);
+    }
+
+    /**
      * @return string
      */
     private function getCacheKey()
