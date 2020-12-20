@@ -1548,7 +1548,7 @@ class Instagram
     {
         $variables = ['precomposed_overlay' => false, 'reel_ids' => []];
         if (empty($reel_ids)) {
-            $response = Request::get(Endpoints::getUserStoriesLink(),
+            $response = Request::get(Endpoints::getUserStoriesLink($variables),
                 $this->generateHeaders($this->userSession));
 
             if ($response->code !== static::HTTP_OK) {
