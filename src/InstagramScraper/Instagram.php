@@ -1814,9 +1814,9 @@ class Instagram
     /**
      *
      */
-    public function saveSession()
+    public function saveSession($ttl=null)
     {
-        static::$instanceCache->set($this->getCacheKey(), $this->userSession);
+        static::$instanceCache->set($this->getCacheKey(), $this->userSession, $ttl);
     }
 
     /**
