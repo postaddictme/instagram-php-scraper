@@ -175,9 +175,9 @@ class Endpoints
         return $url;
     }
 
-    public static function getUserStoriesLink()
+    public static function getUserStoriesLink($variables=[])
     {
-        $url = self::getGraphQlUrl(InstagramQueryId::USER_STORIES, ['variables' => json_encode([])]);
+        $url = self::getGraphQlUrl(InstagramQueryId::USER_STORIES, ['variables' => json_encode($variables)]);
         return $url;
     }
 
