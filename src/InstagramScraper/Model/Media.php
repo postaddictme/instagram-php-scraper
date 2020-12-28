@@ -126,6 +126,11 @@ class Media extends AbstractModel
     protected $likesCount = 0;
 
     /**
+     * @var boolean
+     */
+    protected $hasLiked = null;
+
+    /**
      * @var
      */
     protected $locationId;
@@ -402,6 +407,14 @@ class Media extends AbstractModel
     }
 
     /**
+     * @return boolean
+     */
+    public function getHasLiked()
+    {
+      return $this->hasLiked;
+    }
+
+    /**
      * @return mixed
      */
     public function getLocationId()
@@ -671,6 +684,9 @@ class Media extends AbstractModel
                 break;
             case 'edge_liked_by':
                 $this->likesCount = $arr[$prop]['count'];
+                break;
+            case 'viewer_has_liked':
+                $this->hasLiked = $arr[$prop];
                 break;
             case 'edge_media_to_caption':
                 if (is_array($arr[$prop]['edges']) && !empty($arr[$prop]['edges'])) {
