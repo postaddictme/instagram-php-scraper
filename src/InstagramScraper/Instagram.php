@@ -751,14 +751,42 @@ class Instagram
     }
 
     /**
-     * @param      $code
+     * @param $mediaId
      * @param int $count
      * @param null $maxId
      *
      * @return Comment[]
      * @throws InstagramException
      */
-    public function getMediaCommentsByCode($code, $count = 10, $maxId = null)
+    public function getPaginateMediaCommentsById($mediaId, $count = 10, $maxId = null)
+    {
+        $code = Media::getCodeFromId($mediaId);
+        return static::getMediaCommentsByCode($code, $count, $maxId, true);
+    }
+
+    /**
+      * @param $mediaId
+      * @param int $count
+      * @param null $maxId
+      *
+      * @return Comment[]
+      * @throws InstagramException
+      */
+     public function getPaginateMediaCommentsByCode($code, $count = 10, $maxId = null)
+     {
+         return static::getMediaCommentsByCode($code, $count, $maxId, true);
+     }
+
+     /**
+      * @param      $code
+      * @param int  $count
+      * @param null $maxId
+      * @param bool $paginateInd (=false)
+      *
+      * @return Comment[]
+      * @throws InstagramException
+      */
+    public function getMediaCommentsByCode($code, $count = 10, $maxId = null, $paginateInd = false)
     {
         $comments = [];
         $index = 0;
@@ -812,7 +840,17 @@ class Instagram
                 $count = $numberOfComments;
             }
         }
-        return $comments;
+        if ($paginateInd)
+        {
+          $ret = new \stdClass();
+          $ret->hasPrevious      = $hasPrevious;
+          $ret->commentsCount    = $numberOfComments;
+          $ret->maxId            = $maxId;
+          $ret->comments         = $comments;
+
+          return $ret;
+        }
+        else return $comments;
     }
 
     /**
