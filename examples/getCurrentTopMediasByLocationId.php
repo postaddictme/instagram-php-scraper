@@ -24,3 +24,7 @@ echo "Id: {$account->getId()}\n";
 echo "Username: {$account->getUsername()}\n";
 echo "Full name: {$account->getFullName()}\n";
 echo "Profile pic url: {$account->getProfilePicUrl()}\n";
+
+echo "<br>";
+echo "Location Name: {$media->getLocationName()}\n";
+echo "Location Slug: {$media->getLocationSlug()}\n";
