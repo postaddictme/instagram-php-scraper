@@ -1147,8 +1147,14 @@ class Instagram
             return $toReturn;
         }
 
+        $slug = $arr['graphql']['location']['slug'];
+        $name = $arr['graphql']['location']['name'];
+        $rvd_i = 0;
         foreach ($nodes as $mediaArray) {
-            $medias[] = Media::create($mediaArray['node']);
+            $medias[$rvd_i] = Media::create($mediaArray['node']);
+            $medias[$rvd_i] -> setLocationName($name);
+            $medias[$rvd_i] -> setLocationSlug($slug);
+            $rvd_i++;
         }
 
         $maxId = $arr['graphql']['location']['edge_location_to_media']['page_info']['end_cursor'];
@@ -1213,12 +1219,20 @@ class Instagram
         }
         $this->parseCookies($response->headers);
         $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
-        $nodes = $jsonResponse['location']['top_posts']['nodes'];
+        $nodes = $jsonResponse['graphql']['location']['edge_location_to_top_posts']['edges'];
         $medias = [];
+
+        $slug = $jsonResponse['graphql']['location']['slug'];
+        $name = $jsonResponse['graphql']['location']['name'];
+        $rvd_i=0;
         foreach ($nodes as $mediaArray) {
-            $medias[] = Media::create($mediaArray);
-        }
-        return $medias;
+            $medias[$rvd_i] = Media::create($mediaArray['node']);
+            $medias[$rvd_i] -> setLocationName($name);
+            $medias[$rvd_i] -> setLocationSlug($slug);
+            $rvd_i++;
+          }
+
+      return $medias;
     }
 
     /**
@@ -1247,11 +1261,17 @@ class Instagram
             $this->parseCookies($response->headers);
             $arr = $this->decodeRawBodyToJson($response->raw_body);
             $nodes = $arr['graphql']['location']['edge_location_to_media']['edges'];
+
+            $slug = $arr['graphql']['location']['slug'];
+            $name = $arr['graphql']['location']['name'];
+            
             foreach ($nodes as $mediaArray) {
                 if ($index === $quantity) {
                     return $medias;
                 }
                 $medias[] = Media::create($mediaArray['node']);
+                $medias[$index] -> setLocationName($name);
+                $medias[$index] -> setLocationSlug($slug);
                 $index++;
             }
             if (empty($nodes)) {
