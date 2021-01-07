@@ -1,7 +1,9 @@
 <?php
+use Phpfastcache\Helper\Psr16Adapter;
+
 require __DIR__ . '/../vendor/autoload.php';
 
-$instagram = \InstagramScraper\Instagram::withCredentials('username', 'password', '/path/to/cache/folder');
+$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'username', 'password', new Psr16Adapter('Files'));
 $instagram->login();
 
 $medias = $instagram->getMediasByTag('youneverknow', 20);

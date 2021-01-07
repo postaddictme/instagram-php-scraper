@@ -76,7 +76,8 @@ class EmailVerification implements TwoStepVerificationInterface
 
     private function getMaskedEmail()
     {
-        $mail = explode('@', $this->email);
+        $mail = strtolower($this->email);
+        $mail = explode('@', $mail);
         $mail[0] = $mail[0][0]
             . \str_repeat('*', min(strlen($mail[0]) - 2,7))
             . $mail[0][strlen($mail[0]) - 1];

@@ -126,6 +126,11 @@ class Media extends AbstractModel
     protected $likesCount = 0;
 
     /**
+     * @var boolean
+     */
+    protected $hasLiked = null;
+
+    /**
      * @var
      */
     protected $locationId;
@@ -134,6 +139,11 @@ class Media extends AbstractModel
      * @var string
      */
     protected $locationName = '';
+
+    /**
+     * @var bool
+     */
+    protected $commentsDisabled = false;
 
     /**
      * @var string
@@ -397,6 +407,14 @@ class Media extends AbstractModel
     }
 
     /**
+     * @return boolean
+     */
+    public function getHasLiked()
+    {
+      return $this->hasLiked;
+    }
+
+    /**
      * @return mixed
      */
     public function getLocationId()
@@ -410,6 +428,14 @@ class Media extends AbstractModel
     public function getLocationName()
     {
         return $this->locationName;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getCommentsDisabled()
+    {
+        return $this->commentsDisabled;
     }
 
     /**
@@ -490,6 +516,21 @@ class Media extends AbstractModel
     }
 
     /**
+     * @param string
+     */
+    public function setLocationName($name)
+    {
+        $this->locationName = $name;
+    }
+    /**
+     * @param string
+     */
+    public function setLocationSlug($slug)
+    {
+        $this->locationSlug = $slug;
+    }
+
+    /**
      * @param $value
      * @param $prop
      */
@@ -511,6 +552,9 @@ class Media extends AbstractModel
                 break;
             case 'link':
                 $this->link = $value;
+                break;
+            case 'comments_disabled':
+                $this->commentsDisabled = $value;
                 break;
             case 'comments':
                 $this->commentsCount = $arr[$prop]['count'];
@@ -655,6 +699,9 @@ class Media extends AbstractModel
                 break;
             case 'edge_liked_by':
                 $this->likesCount = $arr[$prop]['count'];
+                break;
+            case 'viewer_has_liked':
+                $this->hasLiked = $arr[$prop];
                 break;
             case 'edge_media_to_caption':
                 if (is_array($arr[$prop]['edges']) && !empty($arr[$prop]['edges'])) {

@@ -6,7 +6,7 @@ class Endpoints
 {
     const BASE_URL = 'https://www.instagram.com';
     const LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/';
-    const ACCOUNT_PAGE = 'https://www.instagram.com/{username}';
+    const ACCOUNT_PAGE = 'https://www.instagram.com/{username}/';
     const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
     const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables={variables}';
     const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
@@ -35,6 +35,7 @@ class Endpoints
     const DELETE_COMMENT_URL = 'https://www.instagram.com/web/comments/{mediaId}/delete/{commentId}/';
     const ACCOUNT_MEDIAS2 = 'https://www.instagram.com/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
     const HIGHLIGHT_URL = 'https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"{userId}","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":true,"include_live_status":false}';
+    const THREADS_URL = 'https://www.instagram.com/direct_v2/web/inbox/?persistentBadging=true&folder=&limit={limit}&thread_message_limit={messageLimit}&cursor={cursor}';
 
     // Look alike??
     const URL_SIMILAR = 'https://www.instagram.com/graphql/query/?query_id=17845312237175864&id=4663052';
@@ -140,6 +141,12 @@ class Endpoints
         return $url;
     }
 
+    public static function getUnfollowUrl($accountId)
+    {
+        $url = str_replace('{{accountId}}', urlencode($accountId), static::UNFOLLOW_URL);
+        return $url;
+    }
+
     public static function getFollowersJsonLink($accountId, $count, $after = '')
     {
         $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOWERS_URL);
@@ -168,9 +175,9 @@ class Endpoints
         return $url;
     }
 
-    public static function getUserStoriesLink()
+    public static function getUserStoriesLink($variables=[])
     {
-        $url = self::getGraphQlUrl(InstagramQueryId::USER_STORIES, ['variables' => json_encode([])]);
+        $url = self::getGraphQlUrl(InstagramQueryId::USER_STORIES, ['variables' => json_encode($variables)]);
         return $url;
     }
 
@@ -215,5 +222,16 @@ class Endpoints
     public static function getHighlightUrl($id)
     {
         return str_replace('{userId}', urlencode($id), static::HIGHLIGHT_URL);
+    }
+
+    public static function getThreadsUrl($limit, $messageLimit, $cursor)
+    {
+        $url = static::THREADS_URL;
+
+        $url = str_replace('{limit}', $limit, $url);
+        $url = str_replace('{messageLimit}', $messageLimit, $url);
+        $url = str_replace('{cursor}', $cursor, $url);
+
+        return $url;
     }
 }
