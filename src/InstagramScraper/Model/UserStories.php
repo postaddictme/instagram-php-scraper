@@ -14,6 +14,22 @@ class UserStories extends AbstractModel
     /** @var  Story[] */
     protected $stories;
 
+    /** @var  expiringAT */
+    protected $expiringAt=0;
+
+    /** @var  lastMutationData */
+    protected $lastMutationData=0;
+
+    public function getExpiringAt()
+    {
+        return $this->expiringAt;
+    }
+
+    public function getLastMutationData()
+    {
+        return $this->lastMutationData;
+    }
+
     public function setOwner($owner)
     {
         $this->owner = $owner;
@@ -37,5 +53,21 @@ class UserStories extends AbstractModel
     public function getStories()
     {
         return $this->stories;
+    }
+
+    /**
+     * @param $value
+     * @param $prop
+     */
+    protected function initPropertiesCustom($value, $prop, $arr)
+    {
+        switch ($prop) {
+          case 'expiring_at':
+              $this->expiringAt = (int)$value;
+              break;
+          case 'latest_reel_media':
+              $this->lastMutationData = (int)$value;
+              break;
+        }
     }
 }
