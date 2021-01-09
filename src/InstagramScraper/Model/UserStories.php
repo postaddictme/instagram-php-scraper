@@ -17,17 +17,17 @@ class UserStories extends AbstractModel
     /** @var  expiringAT */
     protected $expiringAt=0;
 
-    /** @var  lastMutationData */
-    protected $lastMutationData=0;
+    /** @var  lastMutatedAt */
+    protected $lastMutatedAt=0;
 
     public function getExpiringAt()
     {
         return $this->expiringAt;
     }
 
-    public function getLastMutationData()
+    public function getLastMutatedAt()
     {
-        return $this->lastMutationData;
+        return $this->lastMutatedAt;
     }
 
     public function setOwner($owner)
@@ -66,7 +66,7 @@ class UserStories extends AbstractModel
               $this->expiringAt = (int)$value;
               break;
           case 'latest_reel_media':
-              $this->lastMutationData = (int)$value;
+              $this->lastMutatedAt = (int)$value;
               break;
         }
     }

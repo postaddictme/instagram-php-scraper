@@ -21,7 +21,7 @@ use Phpfastcache\Helper\Psr16Adapter;
 require __DIR__ . '/../vendor/autoload.php';
 
 $seperator = PHP_SAPI === 'cli' ? "\n" : "<br>\n";
-$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'user', 'passwd', new Psr16Adapter('Files'));
+$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'ricdijk', '@leusdeN2020', new Psr16Adapter('Files'));
 $instagram->login();
 $instagram->saveSession(3600*24);
 
@@ -84,8 +84,8 @@ function display_story($userStories)
     echo "${seperator}First userStory expiringAt     :  " . gmdate("Y-m-d H:i:s", $userStories[0]->getExpiringAt());
     echo " - " . floor(($userStories[0]->getExpiringAt()-time())/3600) . "h";
     echo " " . floor((($userStories[0]->getExpiringAt()-time())%3600)/60) . "m ";
-    echo "${seperator}First userStory last mutation:  " . gmdate("Y-m-d H:i:s", $userStories[0]->getLastMutationData());
-    echo " - " . floor(($userStories[0]->getLastMutationData()-time())/3600) . "h";
+    echo "${seperator}First userStory last mutation:  " . gmdate("Y-m-d H:i:s", $userStories[0]->getLastMutatedAt());
+    echo " - " . floor(($userStories[0]->getLastMutatedAt()-time())/3600) . "h";
 
     echo "${seperator}First userStory user Id:  " . $userStories[0]->getOwner()->getId();
     echo "${seperator}First userStory user Name:  " . $userStories[0]->getOwner()->getUsername();
