@@ -205,6 +205,21 @@ class InstagramTest extends TestCase
         $this->assertGreaterThan(0, sizeof($highlights));
     }
 
+    /**
+     * @group getHighlightStories
+     */
+    public function testGetHighlightStories()
+    {
+        $userId = self::$instagram->getAccount('instagram')->getId();
+        $highlights = self::$instagram->getHighlights($userId);
+        if (sizeof($highlights) == 0) {
+            $this->fail("Try another user id with contain a highlight.");
+        }
+        $highlight = $highlights[0];
+        $highlightStories = self::$instagram->getHighlightStories($highlight->getId());
+        $this->assertNotEmpty($highlightStories);
+    }
+
     // TODO: Add test getMediaById
     // TODO: Add test getLocationById
 }

@@ -2078,6 +2078,42 @@ class Instagram
     }
 
     /**
+     * @param array $highlight_reel_ids - array of instagram highlight ids
+     * @return array
+     * @throws InstagramException
+     */
+    public function getHighlightStories($highlight_reel_ids)
+    {
+        if (!is_array($highlight_reel_ids)) {
+            $highlight_reel_ids = [$highlight_reel_ids];
+        }
+
+        $response = Request::get(Endpoints::getHighlightStoriesUrl($highlight_reel_ids),
+            $this->generateHeaders($this->userSession));
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if (empty($jsonResponse['data']['reels_media'])) {
+            return [];
+        }
+
+        $stories = [];
+        foreach ($jsonResponse['data']['reels_media'] as $highlight) {
+            $UserStories = UserStories::create();
+            $UserStories->setOwner(Account::create($highlight['owner']));
+            foreach ($highlight['items'] as $item) {
+                $UserStories->addStory(Story::create($item));
+            }
+            $stories[] = $UserStories;
+        }
+        return $stories;
+    }
+
+    /**
      * @param int $limit
      * @param int $messageLimit
      * @param string|null $cursor

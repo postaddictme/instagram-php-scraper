@@ -35,6 +35,7 @@ class Endpoints
     const DELETE_COMMENT_URL = 'https://www.instagram.com/web/comments/{mediaId}/delete/{commentId}/';
     const ACCOUNT_MEDIAS2 = 'https://www.instagram.com/graphql/query/?query_id=17880160963012870&id={{accountId}}&first=10&after=';
     const HIGHLIGHT_URL = 'https://www.instagram.com/graphql/query/?query_hash=c9100bf9110dd6361671f113dd02e7d6&variables={"user_id":"{userId}","include_chaining":false,"include_reel":true,"include_suggested_users":false,"include_logged_out_extras":false,"include_highlight_reels":true,"include_live_status":false}';
+    const HIGHLIGHT_STORIES_URL = 'https://www.instagram.com/graphql/query/?query_hash=90709b530ea0969f002c86a89b4f2b8d&variables={"highlight_reel_ids":{reelIds},"precomposed_overlay":false}';
     const THREADS_URL = 'https://www.instagram.com/direct_v2/web/inbox/?persistentBadging=true&folder=&limit={limit}&thread_message_limit={messageLimit}&cursor={cursor}';
 
     // Look alike??
@@ -222,6 +223,12 @@ class Endpoints
     public static function getHighlightUrl($id)
     {
         return str_replace('{userId}', urlencode($id), static::HIGHLIGHT_URL);
+    }
+
+    public static function getHighlightStoriesUrl($reelIds)
+    {
+        $reelIds = json_encode($reelIds);
+        return str_replace('{reelIds}', urlencode($reelIds), static::HIGHLIGHT_STORIES_URL);
     }
 
     public static function getThreadsUrl($limit, $messageLimit, $cursor)
