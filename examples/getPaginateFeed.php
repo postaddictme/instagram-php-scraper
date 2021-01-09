@@ -21,7 +21,7 @@ use Phpfastcache\Helper\Psr16Adapter;
 require __DIR__ . '/../vendor/autoload.php';
 
 $seperator = PHP_SAPI === 'cli' ? "\n" : "<br>\n";
-$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'ricdijk', '@leusdeN2020', new Psr16Adapter('Files'));
+$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'user', 'passwd', new Psr16Adapter('Files'));
 $instagram->login();
 $instagram->saveSession(3600*24);
 
