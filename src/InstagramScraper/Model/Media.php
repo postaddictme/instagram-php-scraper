@@ -71,6 +71,16 @@ class Media extends AbstractModel
     protected $carouselMedia = [];
 
     /**
+     * @var Account[]
+     */
+    protected $taggedUserList = [];
+
+    /**
+     * @var Account[]
+     */
+    protected $sponsorUserList = [];
+
+    /**
      * @var string
      */
     protected $caption = '';
@@ -317,6 +327,19 @@ class Media extends AbstractModel
         return $this->squareImages;
     }
 
+    /**
+     *
+     */
+    public function getTaggedUserList() {
+        return $this->taggedUserList;
+    }
+
+    /**
+     *
+     */
+    public function getSponsorUserList() {
+        return $this->sponsorUserList;
+    }
 
     /**
      * @return array
@@ -740,6 +763,23 @@ class Media extends AbstractModel
                     $this->type = static::TYPE_SIDECAR;
                 }
                 break;
+            case 'edge_media_to_tagged_user':
+                //data.shortcode_media.edge_media_to_tagged_user.edges[2].node.user.full_name
+                if (isset($arr[$prop]['edges']) && is_array($arr[$prop]['edges'])) {
+                    foreach ($arr[$prop]['edges'] as $taggedUser) {
+                        $this->taggedUserList[] = Account::create($taggedUser['node']['user']);
+                    }
+                }
+                break;
+            case 'edge_media_to_sponsor_user':
+                //data.shortcode_media.edge_media_to_sponsor_user.edges[0].node.sponsor.username
+                if (isset($arr[$prop]['edges']) && is_array($arr[$prop]['edges'])) {
+                    foreach ($arr[$prop]['edges'] as $sponsorUser) {
+                        $this->sponsorUserList[] = Account::create($sponsorUser['node']['sponsor']);
+                    }
+                }
+                break;
+
         }
         if (!$this->ownerId && !is_null($this->owner)) {
             $this->ownerId = $this->getOwner()->getId();
