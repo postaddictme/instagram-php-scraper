@@ -139,6 +139,11 @@ class Instagram
         if (is_object($rawError)) {
             $str = '';
             foreach ($rawError as $key => $value) {
+                //to avoid erros in an error function make sure all are string before concat operation
+                if (is_array($value))  $value=json_encode((array)$value);
+                if (is_object($value)) $value=json_encode((array)$value);
+                if (is_array($key))    $key=json_encode((array)$key);
+                if (is_object($key))   $key=json_encode((array)$key);
                 $str .= ' ' . $key . ' => ' . $value . ';';
             }
             return $str;
@@ -1683,16 +1688,23 @@ class Instagram
             'accounts' => $accounts
         ];
     }
-
     /**
      * @param array $reel_ids - array of instagram user ids
      * @return array
      * @throws InstagramException
      */
-    public function getStories($reel_ids = null)
+    public function getStories($reel_ids = null, $highlight_reel_ids=[], $location_ids=[])
     {
+        if (empty($reel_ids) )              $reel_ids           = [];
+        elseif (!is_array($reel_ids))       $reel_ids           = [$reel_ids];
+        if (!is_array($highlight_reel_ids)) $highlight_reel_ids = [$highlight_reel_ids];
+        if (!is_array($location_ids))       $location_ids       = [$location_ids];
+    //-------------------------------------------------------------------------------------------------------------
+    // if no arguments: get user stories
+    //-------------------------------------------------------------------------------------------------------------
         $variables = ['precomposed_overlay' => false, 'reel_ids' => []];
-        if (empty($reel_ids)) {
+        if ($reel_ids == [] && $highlight_reel_ids == [] && $location_ids==[]) {
+
             $response = Request::get(Endpoints::getUserStoriesLink($variables),
                 $this->generateHeaders($this->userSession));
 
@@ -1707,36 +1719,44 @@ class Instagram
             }
 
             foreach ($jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'] as $edge) {
-                $variables['reel_ids'][] = $edge['node']['id'];
+                $reel_ids[] = $edge['node']['id'];
             }
-        } else {
-            $variables['reel_ids'] = $reel_ids;
         }
+    //-------------------------------------------------------------------------------------------------------------
+    // Get stories from reel_ids (uswers), highlight_ids and/or location_ids
+    //-------------------------------------------------------------------------------------------------------------
+    $variables = [
+             'highlight_reel_ids'=> $highlight_reel_ids,
+             'reel_ids'=> $reel_ids,
+             'location_ids'=> $location_ids,
+             'precomposed_overlay'=> False,
+      ];
 
-        $response = Request::get(Endpoints::getStoriesLink($variables),
-            $this->generateHeaders($this->userSession));
+      $url = Endpoints::HIGHLIGHT_STORIES . '&variables=' . json_encode($variables);
+      $response = Request::get($url, $this->generateHeaders($this->userSession));
 
-        if ($response->code !== static::HTTP_OK) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
-        }
+      if ($response->code !== static::HTTP_OK) {
+          throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+      }
 
-        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+      $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
 
-        if (empty($jsonResponse['data']['reels_media'])) {
-            return [];
-        }
+      if (empty($jsonResponse['data']['reels_media'])) {
+          return [];
+      }
 
-        $stories = [];
-        foreach ($jsonResponse['data']['reels_media'] as $user) {
-            $UserStories = UserStories::create();
-            $UserStories->setOwner(Account::create($user['user']));
-            foreach ($user['items'] as $item) {
-                $UserStories->addStory(Story::create($item));
-            }
-            $stories[] = $UserStories;
-        }
-        return $stories;
-    }
+      $stories = [];
+      foreach ($jsonResponse['data']['reels_media'] as $highlight) {
+          $UserStories = UserStories::create();
+          $UserStories->setOwner(Account::create($highlight['owner']));
+          foreach ($highlight['items'] as $item) {
+              $UserStories->addStory(Story::create($item));
+          }
+          $stories[] = $UserStories;
+      }
+      return $stories;
+  }
+
 
     /**
      * @param bool $force
@@ -2163,49 +2183,6 @@ class Instagram
         }
         return $highlights;
     }
-    /**
-     * @param array $highlight_reel_ids - array of instagram highlight ids
-     * @return array
-     * @throws InstagramException
-     */
-    public function getHighlightStories($highlight_reel_ids)
-    {
-        if (!is_array($highlight_reel_ids)) {
-            $highlight_reel_ids = [$highlight_reel_ids];
-        }
-
-        $variables = [
-               'highlight_reel_ids'=> $highlight_reel_ids,
-               'reel_ids'=> [],
-               'location_ids'=> [],
-               'precomposed_overlay'=> False,
-        ];
-
-        $url = Endpoints::HIGHLIGHT_STORIES . '&variables=' . json_encode($variables);
-        $response = Request::get($url, $this->generateHeaders($this->userSession));
-
-        if ($response->code !== static::HTTP_OK) {
-            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
-        }
-
-        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
-
-        if (empty($jsonResponse['data']['reels_media'])) {
-            return [];
-        }
-
-        $stories = [];
-        foreach ($jsonResponse['data']['reels_media'] as $highlight) {
-            $UserStories = UserStories::create();
-            $UserStories->setOwner(Account::create($highlight['owner']));
-            foreach ($highlight['items'] as $item) {
-                $UserStories->addStory(Story::create($item));
-            }
-            $stories[] = $UserStories;
-        }
-        return $stories;
-    }
-
     /**
      * @param int $limit
      * @param int $messageLimit

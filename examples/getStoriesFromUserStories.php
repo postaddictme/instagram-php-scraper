@@ -4,7 +4,7 @@ ini_set('display_errors', 1);ini_set('display_startup_errors', 1);error_reportin
 require __DIR__ . '/../vendor/autoload.php';
 use Phpfastcache\Helper\Psr16Adapter;
 
-$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'user', 'passed', new Psr16Adapter('Files'));
+$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'username', 'passed', new Psr16Adapter('Files'));
 $instagram->login();
 $instagram->saveSession();
 

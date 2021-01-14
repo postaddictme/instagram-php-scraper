@@ -4,7 +4,7 @@ use Phpfastcache\Helper\Psr16Adapter;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'user', 'passwd', new Psr16Adapter('Files'));
+$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'username', 'passwd', new Psr16Adapter('Files'));
 $instagram->login();
 
 //$userId = $instagram->getAccount('instagram')->getId();
@@ -31,7 +31,7 @@ foreach ($highlights as $highlight) {
 
     echo "------------------------------------------------------------------------------------------------------------------------\n";
 
-    $userStories=$instagram->getHighlightStories($highlight->getId());
+    $userStories=$instagram->getStories([], $highlight->getId());
     for ($i=0; $i<count($userStories);$i++)
     {
       $stories = $userStories[$i]->getStories();
