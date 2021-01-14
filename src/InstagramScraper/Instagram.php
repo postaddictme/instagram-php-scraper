@@ -1723,7 +1723,7 @@ class Instagram
             }
         }
     //-------------------------------------------------------------------------------------------------------------
-    // Get stories from reel_ids (uswers), highlight_ids and/or location_ids
+    // Get stories from reel_ids (users), highlight_ids and/or location_ids
     //-------------------------------------------------------------------------------------------------------------
     $variables = [
              'highlight_reel_ids'=> $highlight_reel_ids,
