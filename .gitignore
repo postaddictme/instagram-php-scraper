@@ -6,3 +6,4 @@ composer.lock
 phpunit.phar
 tests/sessions
 phpunit.xml
+settings.json

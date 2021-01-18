@@ -4,7 +4,11 @@ use Phpfastcache\Helper\Psr16Adapter;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'user', 'passwd', new Psr16Adapter('Files'));
+$settings=json_decode(file_get_contents('settings.json'));
+$username = $settings->username;
+$password = $settings->password;
+
+$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), $username, $password, new Psr16Adapter('Files'));
 $instagram->login();
 
 //$userId = $instagram->getAccount('instagram')->getId();
