@@ -2248,11 +2248,17 @@ class Instagram
      */
     public function getThreads($count = 10, $limit = 10, $messageLimit = 10)
     {
+        $this->allowPendingRequests();
+
         $threads = [];
         $cursor = null;
 
         while (count($threads) < $count) {
             $result = $this->getPaginateThreads($limit, $messageLimit, $cursor);
+
+            if (!isset($result['threads'])) {
+                break;
+            }
 
             $threads = array_merge($threads, $result['threads']);
 
@@ -2264,5 +2270,51 @@ class Instagram
         }
 
         return $threads;
+    }
+
+    /**
+     * @param int $limit
+     *
+     * @return void
+     * @throws InstagramException
+     */
+    public function allowPendingRequests($limit = 10)
+    {
+        $response = Request::get(
+            Endpoints::getThreadsPendingRequestsUrl($limit),
+            array_merge(
+                ['x-ig-app-id' => self::X_IG_APP_ID],
+                $this->generateHeaders($this->userSession)
+            )
+        );
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if (!isset($jsonResponse['status']) || $jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+
+        if (!isset($jsonResponse['inbox']['threads']) || empty($jsonResponse['inbox']['threads'])) {
+            return;
+        }
+
+        $threadIds = [];
+
+        foreach ($jsonResponse['inbox']['threads'] as $thread) {
+            $threadIds[] = $thread['thread_id'];
+        }
+
+        Request::post(
+            Endpoints::getThreadsApproveMultipleUrl(),
+            array_merge(
+                ['x-ig-app-id' => self::X_IG_APP_ID],
+                $this->generateHeaders($this->userSession)
+            ),
+            ['thread_ids' => json_encode($threadIds)]
+        );
     }
 }
