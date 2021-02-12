@@ -389,6 +389,17 @@ class Instagram
      return $userStories;
     }
 
+    public function get($uri)
+    {
+        $response = Request::get($uri, $this->generateHeaders($this->userSession));
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $arr = $this->decodeRawBodyToJson($response->raw_body);
+        return $arr;
+    }
+
 
     /**
      *
