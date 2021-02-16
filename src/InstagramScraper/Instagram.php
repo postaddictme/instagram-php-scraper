@@ -400,6 +400,16 @@ class Instagram
         return $arr;
     }
 
+    public function setSessionByUsername($username)
+    {
+        $session = static::$instanceCache->get(md5($username));
+        $this->userSession = $session;
+    }
+
+    public function getSessionByUsername($username)
+    {
+        return static::$instanceCache->get(md5($username));
+    }
 
     /**
      *
