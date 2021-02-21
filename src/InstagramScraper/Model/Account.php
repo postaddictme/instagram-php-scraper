@@ -13,6 +13,12 @@ class Account extends AbstractModel
      * @var string
      */
     protected $id = 0;
+    
+    /**
+     * User id
+     * @var string
+     */
+    protected $fbid = 0;
 
     /**
      * Username
@@ -118,6 +124,16 @@ class Account extends AbstractModel
     /**
      * @var bool
      */
+    protected $hasClips = false;
+
+    /**
+     * @var bool
+     */
+    protected $hasGuides = false;
+
+    /**
+     * @var bool
+     */
     protected $hasBlockedViewer = false;
 
     /**
@@ -169,6 +185,11 @@ class Account extends AbstractModel
      * @var string
      */
     protected $connectedFbPage = '';
+    
+    /**
+     * @var string
+     */
+    protected $categoryName = '';
 
     /**
      * @return bool
@@ -196,6 +217,18 @@ class Account extends AbstractModel
         }
 
         return $this->id;
+    }
+
+    /**
+     * @return int
+     */
+    public function getFbid()
+    {
+        if (PHP_INT_SIZE > 4) {
+            $this->fbid = (int)$this->fbid;
+        }
+
+        return $this->fbid;
     }
 
     /**
@@ -346,6 +379,21 @@ class Account extends AbstractModel
     /**
      * @return bool
      */
+    public function isHasClips()
+    {
+        return $this->hasClips;
+    }    
+
+    /**
+     * @return bool
+     */
+    public function isHasGuides()
+    {
+        return $this->hasGuides;
+    }
+    /**
+     * @return bool
+     */
     public function isHasBlockedViewer()
     {
         return $this->hasBlockedViewer;
@@ -432,6 +480,13 @@ class Account extends AbstractModel
     }
 
     /**
+     * @return string
+     */
+    public function getCategoryName()
+    {
+        return $this->categoryName;
+    }
+    /**
      * @param $value
      * @param $prop
      * @param $array
@@ -442,6 +497,9 @@ class Account extends AbstractModel
             case 'id':
             case 'pk':
                 $this->id = $value;
+                break;
+            case 'fbid':
+                $this->fbid = $value;
                 break;
             case 'username':
                 $this->username = $value;
@@ -491,6 +549,12 @@ class Account extends AbstractModel
             case 'follows_viewer':
                 $this->followsViewer = $value;
                 break;
+            case 'has_clips':
+                $this->hasClips = (bool)$value;
+                break;
+            case 'has_guides':
+                $this->hasGuides = (bool)$value;
+                break;
             case 'has_channel':
                 $this->hasChannel = (bool)$value;
                 break;
@@ -526,6 +590,9 @@ class Account extends AbstractModel
                 break;
             case 'connected_fb_page':
                 $this->connectedFbPage = $value;
+                break;
+            case 'category_name':
+                $this->categoryName = $value;
                 break;
         }
     }
