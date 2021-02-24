@@ -291,14 +291,14 @@ class Instagram
     *
     * @throws     InstagramException
     */
-    public function getFeed($mediaCount=12, $maxId='', $commentCount=6, $likeCount=4, $paginateInd=false)
+    public function getFeed($mediaCount=12, $maxId='', $commentCount=6, $likeCount=4, $paginateInd=false, $hasStories = true)
     {
        $vars = [
          "fetch_media_item_count"=> $mediaCount,
          "fetch_comment_count"=> $commentCount,
          "fetch_media_item_cursor"=> $maxId,
          "fetch_like"=> $likeCount, //d
-         "has_stories"=> true
+         "has_stories"=> $hasStories
        ];
        $endPoint = Endpoints::USER_FEED_hash . '&variables='.json_encode($vars);
 
