@@ -2317,4 +2317,40 @@ class Instagram
             ['thread_ids' => json_encode($threadIds)]
         );
     }
+
+
+
+    public function getMediaTaggedUsersByCode($code)
+    {
+        $response = Request::get(Endpoints::getMediaJsonLink($code),
+            $this->generateHeaders($this->userSession));
+        if ($response->code === static::HTTP_NOT_FOUND) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+        }
+
+        $this->parseCookies($response->headers);
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        $tagData = [];
+        try {
+            $tagData = $jsonResponse['graphql']['shortcode_media']['edge_media_to_tagged_user']['edges'];
+        } catch (Exception $exception) {
+            return [];
+        }
+        $tagged_users = [];
+        foreach ($tagData as $tag) {
+            $x_pos = $tag['node']['x'];
+            $y_pos = $tag['node']['y'];
+            $user = $tag['node']['user'];
+            # TODO: add Model and add Data to it instead of Dict
+            $tagged_user['x_pos'] = $x_pos;
+            $tagged_user['y_pos'] = $y_pos;
+            $tagged_user['user'] = $user;
+            $tagged_users[] = $tagged_user;
+        }
+        return $tagged_users;
+    }
 }
