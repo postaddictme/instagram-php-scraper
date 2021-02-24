@@ -3,11 +3,11 @@ use Phpfastcache\Helper\Psr16Adapter;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'testtt5059', 'testtt5059#', new Psr16Adapter('Files'));
+$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'username', 'password', new Psr16Adapter('Files'));
 $instagram->login();
 
 
-$medias = $instagram->getMedias('irohslegacy');
+$medias = $instagram->getMedias('youneverknow');
 $media = $medias[0];
 
 $tagged = $instagram->getMediaTaggedUsersByCode($media->getShortCode());
