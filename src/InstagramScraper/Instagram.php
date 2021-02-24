@@ -298,7 +298,7 @@ class Instagram
          "fetch_comment_count"=> $commentCount,
          "fetch_media_item_cursor"=> $maxId,
          "fetch_like"=> $likeCount, //d
-         "has_stories"=> $hasStories
+         "has_stories"=> $hasStories && $paginateInd
        ];
        $endPoint = Endpoints::USER_FEED_hash . '&variables='.json_encode($vars);
 
