@@ -110,6 +110,7 @@ class Instagram
     {
         $session = static::$instanceCache->get($this->getCacheKey());
         $this->userSession = $session;
+        return $session;
     }
     /**
      * @param string $tag
