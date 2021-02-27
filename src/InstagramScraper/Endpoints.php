@@ -40,6 +40,7 @@ class Endpoints
     const THREADS_URL = 'https://i.instagram.com/api/v1/direct_v2/inbox/?persistentBadging=true&folder=&limit={limit}&thread_message_limit={messageLimit}&cursor={cursor}';
     const THREADS_PENDING_REQUESTS_URL = 'https://i.instagram.com/api/v1/direct_v2/pending_inbox/?limit={limit}&cursor={cursor}';
     const THREADS_APPROVE_MULTIPLE_URL = 'https://i.instagram.com/api/v1/direct_v2/threads/approve_multiple/';
+    const ACCOUNT_MEDIA_TAGGED = 'https://www.instagram.com/graphql/query/?query_hash=31fe64d9463cbbe58319dced405c6206';
 
     // Look alike??
     const URL_SIMILAR = 'https://www.instagram.com/graphql/query/?query_id=17845312237175864&id=4663052';
@@ -252,5 +253,19 @@ class Endpoints
     public static function getThreadsApproveMultipleUrl()
     {
         return static::THREADS_APPROVE_MULTIPLE_URL;
+    }
+
+    public static function getMediaTaggedLink($accountId, $count, $after = '')
+    {
+        $parameters = [
+            'variables' => json_encode([
+                'id' => $accountId,
+                'first' => $count,
+                'after' => $after,
+            ])
+        ];
+        $query_string = http_build_query($parameters);
+        $url = self::ACCOUNT_MEDIA_TAGGED . '&' . $query_string;
+        return $url;
     }
 }
