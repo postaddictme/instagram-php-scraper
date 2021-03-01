@@ -142,10 +142,10 @@ class Instagram
             $str = '';
             foreach ($rawError as $key => $value) {
                 //to avoid erros in an error function make sure all are string before concat operation
-                if (is_array($value)) $value = json_encode((array)$value);
-                if (is_object($value)) $value = json_encode((array)$value);
-                if (is_array($key)) $key = json_encode((array)$key);
-                if (is_object($key)) $key = json_encode((array)$key);
+                if (is_array($value))  $value=json_encode((array)$value);
+                if (is_object($value)) $value=json_encode((array)$value);
+                if (is_array($key))    $key=json_encode((array)$key);
+                if (is_object($key))   $key=json_encode((array)$key);
                 $str .= ' ' . $key . ' => ' . $value . ';';
             }
             return $str;
@@ -282,11 +282,9 @@ class Instagram
      *
      * @throws     InstagramException
      */
-    public function getPaginateFeed($mediaCount = 12, $maxId = '', $commentCount = 6, $likeCount = 4)
-    {
+    public function getPaginateFeed($mediaCount=12, $maxId='', $commentCount=6, $likeCount=4) {
         return $this->getFeed($mediaCount, $maxId, $commentCount, $likeCount, true);
     }
-
     /**
      * Gets logged user feed.
      *
@@ -295,16 +293,16 @@ class Instagram
      *
      * @throws     InstagramException
      */
-    public function getFeed($mediaCount = 12, $maxId = '', $commentCount = 6, $likeCount = 4, $paginateInd = false)
+    public function getFeed($mediaCount=12, $maxId='', $commentCount=6, $likeCount=4, $paginateInd=false)
     {
         $vars = [
-            "fetch_media_item_count" => $mediaCount,
-            "fetch_comment_count" => $commentCount,
-            "fetch_media_item_cursor" => $maxId,
-            "fetch_like" => $likeCount, //d
-            "has_stories" => true
+            "fetch_media_item_count"=> $mediaCount,
+            "fetch_comment_count"=> $commentCount,
+            "fetch_media_item_cursor"=> $maxId,
+            "fetch_like"=> $likeCount, //d
+            "has_stories"=> true
         ];
-        $endPoint = Endpoints::USER_FEED_hash . '&variables=' . json_encode($vars);
+        $endPoint = Endpoints::USER_FEED_hash . '&variables='.json_encode($vars);
 
         $response = Request::get($endPoint,
             $this->generateHeaders($this->userSession));
@@ -329,13 +327,15 @@ class Instagram
         $count2 = 0;
         if (empty($jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'])) {
             $userStories = [];
-        } else {
-            $userStories = [];
+        }
+        else {
+            $userStories=[];
             $nodes = (array)$jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'];
             $userStories = [];
-            if (count($nodes) == 0) {
-                $userStories = [];
-            } else {
+            if (count($nodes)==0) {
+                $userStories=[];
+            }
+            else {
                 foreach ($nodes as $node) {
                     $data = $node['node'];
                     $UserStory = UserStories::create($data);
@@ -347,7 +347,7 @@ class Instagram
         }
 
         if ($paginateInd) {
-            $maxId = $jsonResponse['data']['user']["edge_web_feed_timeline"]['page_info']['end_cursor'];
+            $maxId       = $jsonResponse['data']['user']["edge_web_feed_timeline"]['page_info']['end_cursor'];
             $hasNextPage = $jsonResponse['data']['user']["edge_web_feed_timeline"]['page_info']['has_next_page'];
             $toReturn = [
                 'medias' => $medias,
@@ -359,9 +359,9 @@ class Instagram
                 'userStories' => $userStories
             ];
             return $toReturn;
-        } else return $medias;
+        }
+        else return $medias;
     }
-
     /**
      *
      * @return array
@@ -377,7 +377,8 @@ class Instagram
         $arr = $this->decodeRawBodyToJson($response->raw_body);
 
         $userStories = [];
-        if (!empty($arr['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'])) {
+        if (!empty($arr['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges']))
+        {
             $nodes = (array)$arr['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'];
             foreach ($nodes as $node) {
                 $data = $node['node'];
@@ -411,6 +412,7 @@ class Instagram
     }
 
 
+
     /**
      * We work only on https in this case if we have same cookies on Secure and not - we will choice Secure cookie
      *
@@ -420,7 +422,7 @@ class Instagram
      */
     private function parseCookies($headers)
     {
-        if ($this->customCookies) {
+        if($this->customCookies){
             return $this->getCustomCookies();
         }
 
@@ -871,7 +873,7 @@ class Instagram
 
     /**
      * @param      $code
-     * @param int $count
+     * @param int  $count
      * @param null $maxId
      * @param bool $paginateInd (=false)
      *
@@ -932,15 +934,17 @@ class Instagram
                 $count = $numberOfComments;
             }
         }
-        if ($paginateInd) {
+        if ($paginateInd)
+        {
             $ret = new \stdClass();
-            $ret->hasPrevious = $hasPrevious;
-            $ret->commentsCount = $numberOfComments;
-            $ret->maxId = $maxId;
-            $ret->comments = $comments;
+            $ret->hasPrevious      = $hasPrevious;
+            $ret->commentsCount    = $numberOfComments;
+            $ret->maxId            = $maxId;
+            $ret->comments         = $comments;
 
             return $ret;
-        } else return $comments;
+        }
+        else return $comments;
     }
 
     /**
@@ -1050,7 +1054,7 @@ class Instagram
             throw new InstagramException('Response does not JSON');
         }
 
-        if ($responseArray['data']['user'] === null) {
+        if ($responseArray['data']['user'] === null){
             throw new InstagramNotFoundException('Failed to fetch account with given id');
         }
 
@@ -1242,8 +1246,8 @@ class Instagram
         $rvd_i = 0;
         foreach ($nodes as $mediaArray) {
             $medias[$rvd_i] = Media::create($mediaArray['node']);
-            $medias[$rvd_i]->setLocationName($name);
-            $medias[$rvd_i]->setLocationSlug($slug);
+            $medias[$rvd_i] -> setLocationName($name);
+            $medias[$rvd_i] -> setLocationSlug($slug);
             $rvd_i++;
         }
 
@@ -1314,11 +1318,11 @@ class Instagram
 
         $slug = $jsonResponse['graphql']['location']['slug'];
         $name = $jsonResponse['graphql']['location']['name'];
-        $rvd_i = 0;
+        $rvd_i=0;
         foreach ($nodes as $mediaArray) {
             $medias[$rvd_i] = Media::create($mediaArray['node']);
-            $medias[$rvd_i]->setLocationName($name);
-            $medias[$rvd_i]->setLocationSlug($slug);
+            $medias[$rvd_i] -> setLocationName($name);
+            $medias[$rvd_i] -> setLocationSlug($slug);
             $rvd_i++;
         }
 
@@ -1360,8 +1364,8 @@ class Instagram
                     return $medias;
                 }
                 $medias[] = Media::create($mediaArray['node']);
-                $medias[$index]->setLocationName($name);
-                $medias[$index]->setLocationSlug($slug);
+                $medias[$index] -> setLocationName($name);
+                $medias[$index] -> setLocationSlug($slug);
                 $index++;
             }
             if (empty($nodes)) {
@@ -1686,23 +1690,22 @@ class Instagram
             'accounts' => $accounts
         ];
     }
-
     /**
      * @param array $reel_ids - array of instagram user ids
      * @return array
      * @throws InstagramException
      */
-    public function getStories($reel_ids = null, $highlight_reel_ids = [], $location_ids = [])
+    public function getStories($reel_ids = null, $highlight_reel_ids=[], $location_ids=[])
     {
-        if (empty($reel_ids)) $reel_ids = [];
-        elseif (!is_array($reel_ids)) $reel_ids = [$reel_ids];
+        if (empty($reel_ids) )              $reel_ids           = [];
+        elseif (!is_array($reel_ids))       $reel_ids           = [$reel_ids];
         if (!is_array($highlight_reel_ids)) $highlight_reel_ids = [$highlight_reel_ids];
-        if (!is_array($location_ids)) $location_ids = [$location_ids];
+        if (!is_array($location_ids))       $location_ids       = [$location_ids];
         //-------------------------------------------------------------------------------------------------------------
         // if no arguments: get user stories
         //-------------------------------------------------------------------------------------------------------------
         $variables = ['precomposed_overlay' => false, 'reel_ids' => []];
-        if ($reel_ids == [] && $highlight_reel_ids == [] && $location_ids == []) {
+        if ($reel_ids == [] && $highlight_reel_ids == [] && $location_ids==[]) {
 
             $response = Request::get(Endpoints::getUserStoriesLink($variables),
                 $this->generateHeaders($this->userSession));
@@ -1725,10 +1728,10 @@ class Instagram
         // Get stories from reel_ids (users), highlight_ids and/or location_ids
         //-------------------------------------------------------------------------------------------------------------
         $variables = [
-            'highlight_reel_ids' => $highlight_reel_ids,
-            'reel_ids' => $reel_ids,
-            'location_ids' => $location_ids,
-            'precomposed_overlay' => False,
+            'highlight_reel_ids'=> $highlight_reel_ids,
+            'reel_ids'=> $reel_ids,
+            'location_ids'=> $location_ids,
+            'precomposed_overlay'=> False,
         ];
 
         $url = Endpoints::HIGHLIGHT_STORIES . '&variables=' . json_encode($variables);
@@ -1846,7 +1849,7 @@ class Instagram
      */
     public function loginWithSessionId($sessionId)
     {
-        $session = ['sessionid' => $sessionId, 'csrftoken' => md5(rand(1, 5000))];
+        $session = ['sessionid' => $sessionId, 'csrftoken' => md5( rand( 1, 5000 ) )];
 
         if (!$this->isLoggedIn($session)) {
             throw new InstagramAuthException('Login with session went wrong. Please report issue.');
@@ -1930,7 +1933,7 @@ class Instagram
         }
 
         // for 2FA case
-        if (!$twoStepVerificator instanceof TwoStepVerificationInterface) {
+        if (! $twoStepVerificator instanceof TwoStepVerificationInterface) {
             throw new InstagramAuthException('$twoStepVerificator must be an instance of TwoStepVerificationInterface.', $response->code);
         }
 
@@ -1978,7 +1981,7 @@ class Instagram
     /**
      *
      */
-    public function saveSession($ttl = null)
+    public function saveSession($ttl=null)
     {
         static::$instanceCache->set($this->getCacheKey(), $this->userSession, $ttl);
     }
@@ -2032,8 +2035,7 @@ class Instagram
      *
      * @return void
      */
-    public function follow($accountId)
-    {
+    public function follow($accountId){
         // return empty string and 302 code
         Request::post(Endpoints::getFollowUrl($accountId), $this->generateHeaders($this->userSession));
     }
@@ -2044,8 +2046,7 @@ class Instagram
      * @return void
      * @throws InstagramException
      */
-    public function unfollow($accountId)
-    {
+    public function unfollow($accountId){
         $response = Request::post(Endpoints::getUnfollowUrl($accountId), $this->generateHeaders($this->userSession));
 
         if ($response->code !== static::HTTP_OK) {
@@ -2184,7 +2185,6 @@ class Instagram
         }
         return $highlights;
     }
-
     /**
      * @param array $highlight_reel_ids - array of instagram highlight ids
      * @return array
@@ -2234,7 +2234,7 @@ class Instagram
         }
 
         return [
-            'hasOlder' => (bool)$jsonResponse['inbox']['has_older'],
+            'hasOlder' => (bool) $jsonResponse['inbox']['has_older'],
             'oldestCursor' => isset($jsonResponse['inbox']['oldest_cursor']) ? $jsonResponse['inbox']['oldest_cursor'] : null,
             'threads' => $threads,
         ];
@@ -2469,6 +2469,4 @@ class Instagram
         }
         return $index;
     }
-
-
 }
