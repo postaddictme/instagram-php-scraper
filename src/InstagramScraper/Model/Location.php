@@ -9,13 +9,14 @@ class Location extends AbstractModel
      * @var array
      */
     protected static $initPropertiesMap = [
-        'id' => 'id',
+        'id'              => 'id',
         'has_public_page' => 'hasPublicPage',
-        'name' => 'name',
-        'slug' => 'slug',
-        'lat' => 'lat',
-        'lng' => 'lng',
-        'modified' => 'modified'
+        'name'            => 'name',
+        'slug'            => 'slug',
+        'lat'             => 'lat',
+        'lng'             => 'lng',
+        'profile_pic_url' => 'profilePicUrl',
+        'modified'        => 'modified'
     ];
     /**
      * @var
@@ -40,6 +41,10 @@ class Location extends AbstractModel
     /**
      * @var
      */
+    protected $profilePicUrl;
+    /**
+     * @var
+     */
     protected $lat;
     /**
      * @var bool
@@ -47,7 +52,7 @@ class Location extends AbstractModel
     protected $isLoaded = false;
 
     /**
-     * @var 
+     * @var
      */
     protected $modified;
 
@@ -65,6 +70,13 @@ class Location extends AbstractModel
     public function getHasPublicPage()
     {
         return $this->hasPublicPage;
+    }
+    /**
+     * @return mixed
+     */
+    public function getProfilePicUrl()
+    {
+        return $this->profilePicUrl;
     }
 
     /**
