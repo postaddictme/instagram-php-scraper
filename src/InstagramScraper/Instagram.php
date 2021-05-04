@@ -45,17 +45,17 @@ class Instagram
     const X_IG_APP_ID = '936619743392459';
 
     /** @var CacheInterface $instanceCache */
-    private static $instanceCache = null;
+    protected static $instanceCache = null;
 
     public $pagingTimeLimitSec = self::PAGING_TIME_LIMIT_SEC;
     public $pagingDelayMinimumMicrosec = self::PAGING_DELAY_MINIMUM_MICROSEC;
     public $pagingDelayMaximumMicrosec = self::PAGING_DELAY_MAXIMUM_MICROSEC;
-    private $sessionUsername;
-    private $sessionPassword;
-    private $userSession;
-    private $rhxGis = null;
-    private $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36';
-    private $customCookies = null;
+    protected $sessionUsername;
+    protected $sessionPassword;
+    protected $userSession;
+    protected $rhxGis = null;
+    protected $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36';
+    protected $customCookies = null;
 
     /**
      * Instagram constructor.
