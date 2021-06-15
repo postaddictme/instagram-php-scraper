@@ -1603,7 +1603,7 @@ class Instagram
             }
 
             $edgesArray = $jsonResponse['data']['user']['edge_follow']['edges'];
-            if (count($edgesArray) === 0) {
+            if ((count($edgesArray) === 0) && ($index === 0)) {
                 throw new InstagramException('Failed to get followers of account id ' . $accountId . '. The account is private.', static::HTTP_FORBIDDEN);
             }
 
