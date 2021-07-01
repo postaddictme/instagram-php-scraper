@@ -33,6 +33,7 @@ class Instagram
 {
     const HTTP_NOT_FOUND = 404;
     const HTTP_OK = 200;
+    const HTTP_FOUND = 302;
     const HTTP_FORBIDDEN = 403;
     const HTTP_BAD_REQUEST = 400;
 
@@ -45,17 +46,17 @@ class Instagram
     const X_IG_APP_ID = '936619743392459';
 
     /** @var CacheInterface $instanceCache */
-    private static $instanceCache = null;
+    protected static $instanceCache = null;
 
     public $pagingTimeLimitSec = self::PAGING_TIME_LIMIT_SEC;
     public $pagingDelayMinimumMicrosec = self::PAGING_DELAY_MINIMUM_MICROSEC;
     public $pagingDelayMaximumMicrosec = self::PAGING_DELAY_MAXIMUM_MICROSEC;
-    private $sessionUsername;
-    private $sessionPassword;
-    private $userSession;
-    private $rhxGis = null;
-    private $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36';
-    private $customCookies = null;
+    protected $sessionUsername;
+    protected $sessionPassword;
+    protected $userSession;
+    protected $rhxGis = null;
+    protected $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36';
+    protected $customCookies = null;
 
     /**
      * Instagram constructor.
@@ -1624,7 +1625,7 @@ class Instagram
             }
 
             $edgesArray = $jsonResponse['data']['user']['edge_follow']['edges'];
-            if (count($edgesArray) === 0) {
+            if ((count($edgesArray) === 0) && ($index === 0)) {
                 throw new InstagramException('Failed to get followers of account id ' . $accountId . '. The account is private.', static::HTTP_FORBIDDEN);
             }
 
@@ -1805,6 +1806,9 @@ class Instagram
         $session = static::$instanceCache->get($this->getCacheKey());
         if ($force || !$this->isLoggedIn($session)) {
             $response = Request::get(Endpoints::BASE_URL);
+            if ($response->code === static::HTTP_FOUND) {
+                $response = Request::get($response->headers['Location'][0]);
+            }
             if ($response->code !== static::HTTP_OK) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
