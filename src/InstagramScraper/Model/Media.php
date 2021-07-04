@@ -189,14 +189,12 @@ class Media extends AbstractModel
      * @var string
      */
     protected $locationAddressJson;
+
     /**
+     * List of tagged users
      * @var array
      */
-    protected $taggedUsers=[];
-    /**
-     * @var array
-     */
-    protected $taggedUsersIds=[];
+    protected $taggedUsers = [];
 
     /**
      * @param string $code
@@ -240,24 +238,8 @@ class Media extends AbstractModel
             $remainder = $id % 64;
             $id = ($id - $remainder) / 64;
             $code = $alphabet[$remainder] . $code;
-        }
+        };
         return $code;
-    }
-
-    /**
-     * @return array
-     */
-    public function getTaggedUsers(): array
-    {
-        return $this->taggedUsers;
-    }
-
-    /**
-     * @return array
-     */
-    public function getTaggedUsersIds(): array
-    {
-        return $this->taggedUsersIds;
     }
 
     /**
@@ -455,14 +437,6 @@ class Media extends AbstractModel
     }
 
     /**
-     * @param string
-     */
-    public function setLocationName($name)
-    {
-        $this->locationName = $name;
-    }
-
-    /**
      * @return bool
      */
     public function getCommentsDisabled()
@@ -525,15 +499,6 @@ class Media extends AbstractModel
     {
         return $this->locationSlug;
     }
-
-    /**
-     * @param string
-     */
-    public function setLocationSlug($slug)
-    {
-        $this->locationSlug = $slug;
-    }
-
     /**
      * @return string
      */
@@ -541,7 +506,6 @@ class Media extends AbstractModel
     {
         return $this->altText;
     }
-
     /**
      * @return string
      */
@@ -549,13 +513,27 @@ class Media extends AbstractModel
     {
         return $this->locationAddressJson;
     }
-
     /**
      * @return mixed
      */
     public function getLocationAddress()
     {
         return json_decode($this->locationAddressJson);
+    }
+
+    /**
+     * @param string
+     */
+    public function setLocationName($name)
+    {
+        $this->locationName = $name;
+    }
+    /**
+     * @param string
+     */
+    public function setLocationSlug($slug)
+    {
+        $this->locationSlug = $slug;
     }
 
     /**
@@ -575,8 +553,8 @@ class Media extends AbstractModel
             case 'created_time':
                 $this->createdTime = (int)$value;
                 break;
-            case 'code':
             case 'shortcode':
+            case 'code':
                 $this->shortCode = $value;
                 $this->link = Endpoints::getMediaPageLink($this->shortCode);
                 break;
@@ -589,8 +567,8 @@ class Media extends AbstractModel
             case 'comments':
                 $this->commentsCount = $arr[$prop]['count'];
                 break;
-            case 'edge_liked_by':
             case 'edge_media_preview_like':
+            case 'edge_liked_by':
             case 'likes':
                 $this->likesCount = $arr[$prop]['count'];
                 break;
@@ -665,7 +643,7 @@ class Media extends AbstractModel
                 }
                 break;
             case 'location':
-                if (isset($arr[$prop])) {
+                if(isset($arr[$prop])) {
                     $this->locationId = $arr[$prop]['id'] ? $arr[$prop]['id'] : null;
                     $this->locationName = $arr[$prop]['name'] ? $arr[$prop]['name'] : null;
                     $this->locationSlug = $arr[$prop]['slug'] ? $arr[$prop]['slug'] : null;
@@ -696,10 +674,9 @@ class Media extends AbstractModel
             case 'taken_at_timestamp':
                 $this->createdTime = $value;
                 break;
-
             case 'edge_media_preview_comment':
                 if (isset($arr[$prop]['count'])) {
-                    $this->commentsCount = (int)$arr[$prop]['count'];
+                    $this->commentsCount = (int) $arr[$prop]['count'];
                 }
                 if (isset($arr[$prop]['edges']) && is_array($arr[$prop]['edges'])) {
                     foreach ($arr[$prop]['edges'] as $commentData) {
@@ -710,7 +687,7 @@ class Media extends AbstractModel
             case 'edge_media_to_comment':
             case 'edge_media_to_parent_comment':
                 if (isset($arr[$prop]['count'])) {
-                    $this->commentsCount = (int)$arr[$prop]['count'];
+                    $this->commentsCount = (int) $arr[$prop]['count'];
                 }
                 if (isset($arr[$prop]['edges']) && is_array($arr[$prop]['edges'])) {
                     foreach ($arr[$prop]['edges'] as $commentData) {
@@ -718,13 +695,12 @@ class Media extends AbstractModel
                     }
                 }
                 if (isset($arr[$prop]['page_info']['has_next_page'])) {
-                    $this->hasMoreComments = (bool)$arr[$prop]['page_info']['has_next_page'];
+                    $this->hasMoreComments = (bool) $arr[$prop]['page_info']['has_next_page'];
                 }
                 if (isset($arr[$prop]['page_info']['end_cursor'])) {
-                    $this->commentsNextPage = (string)$arr[$prop]['page_info']['end_cursor'];
+                    $this->commentsNextPage = (string) $arr[$prop]['page_info']['end_cursor'];
                 }
                 break;
-
             case 'viewer_has_liked':
                 $this->hasLiked = $arr[$prop];
                 break;
@@ -735,6 +711,13 @@ class Media extends AbstractModel
                         if (is_array($first_caption['node']) && isset($first_caption['node']['text'])) {
                             $this->caption = $arr[$prop]['edges'][0]['node']['text'];
                         }
+                    }
+                }
+                break;
+            case 'edge_media_to_tagged_user':
+                if (is_array($arr[$prop]['edges']) && !empty($arr[$prop]['edges'])) {
+                    foreach($arr[$prop]['edges'] AS $node){
+                        $this->taggedUsers[] = Account::create($node['node']['user']);
                     }
                 }
                 break;
@@ -750,31 +733,13 @@ class Media extends AbstractModel
                     $this->sidecarMedias[] = static::create($edge['node']);
                 }
                 break;
-            case 'edge_media_to_tagged_user':
-                if (!is_array($arr[$prop]['edges'])) {
-                    break;
-                }
-                foreach ($arr[$prop]['edges'] as $edge) {
-                    if (!isset($edge['node'])) {
-                        continue;
-                    }
-
-                    $this->taggedUsers[] = $edge['node']['user'] ?? [];
-                    $this->taggedUsersIds[] = $edge['node']['user']['id'] ?? '';
-                }
-
-                break;
             case '__typename':
                 if ($value == 'GraphImage' || $value == 'GraphStoryImage') {
                     $this->type = static::TYPE_IMAGE;
-                } else {
-                    if ($value == 'GraphVideo' || $value == 'GraphStoryVideo') {
-                        $this->type = static::TYPE_VIDEO;
-                    } else {
-                        if ($value == 'GraphSidecar') {
-                            $this->type = static::TYPE_SIDECAR;
-                        }
-                    }
+                } else if ($value == 'GraphVideo' || $value == 'GraphStoryVideo') {
+                    $this->type = static::TYPE_VIDEO;
+                } else if ($value == 'GraphSidecar') {
+                    $this->type = static::TYPE_SIDECAR;
                 }
                 break;
         }
@@ -822,7 +787,7 @@ class Media extends AbstractModel
      *
      * @return array
      */
-    private static function getImageUrls($imageUrl)
+    private static function getImageUrls($imageUrl): array
     {
         $parts = explode('/', parse_url($imageUrl)['path']);
         $imageName = $parts[sizeof($parts) - 1];
@@ -841,5 +806,12 @@ class Media extends AbstractModel
     public function getOwner()
     {
         return $this->owner;
+    }
+
+    /**
+     * @return array<Account>
+     */
+    public function getTaggedUsers(){
+        return $this->taggedUsers;
     }
 }
