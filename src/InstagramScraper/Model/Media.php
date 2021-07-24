@@ -238,7 +238,7 @@ class Media extends AbstractModel
             $remainder = $id % 64;
             $id = ($id - $remainder) / 64;
             $code = $alphabet[$remainder] . $code;
-        };
+        }
         return $code;
     }
 
