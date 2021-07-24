@@ -25,6 +25,7 @@ use InstagramScraper\TwoStepVerification\ConsoleVerification;
 use InstagramScraper\TwoStepVerification\TwoStepVerificationInterface;
 use InvalidArgumentException;
 use InstagramScraper\Http\Request;
+use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\SimpleCache\CacheInterface;
 use stdClass;
@@ -79,11 +80,11 @@ class Instagram
      * @param ClientInterface $client
      * @param string $username
      * @param string $password
-     * @param CacheInterface $cache
+     * @param ?CacheInterface $cache
      *
      * @return Instagram
      */
-    public static function withCredentials(ClientInterface $client, $username, $password, $cache)
+    public static function withCredentials(ClientInterface $client, string $username, string $password, ?CacheInterface $cache = null): Instagram
     {
         static::$instanceCache = $cache;
         $instance = new self($client);
@@ -98,8 +99,9 @@ class Instagram
      * @return array
      * @throws InstagramException
      * @throws InstagramNotFoundException
+     * @throws ClientExceptionInterface
      */
-    public static function searchTagsByTagName($tag)
+    public static function searchTagsByTagName(string $tag): array
     {
         // TODO: Add tests and auth
         $response = Request::get(Endpoints::getGeneralSearchJsonLink($tag));
@@ -132,7 +134,7 @@ class Instagram
      *
      * @return string
      */
-    private static function getErrorBody($rawError)
+    private static function getErrorBody($rawError): string
     {
         if (is_string($rawError)) {
             return $rawError;
@@ -158,19 +160,20 @@ class Instagram
      * Set how many media objects should be retrieved in a single request
      * @param int $count
      */
-    public static function setAccountMediasRequestCount($count)
+    public static function setAccountMediasRequestCount(int $count) : void
     {
         Endpoints::setAccountMediasRequestCount($count);
     }
 
     /**
      * @param string $username
-     *
+     * @param int $count
      * @return Account[]
      * @throws InstagramException
      * @throws InstagramNotFoundException
+     * @throws ClientExceptionInterface
      */
-    public function searchAccountsByUsername($username, $count = 10)
+    public function searchAccountsByUsername(string $username, $count = 10): array
     {
         $response = Request::get(Endpoints::getGeneralSearchJsonLink($username, $count), $this->generateHeaders($this->userSession));
 
@@ -203,7 +206,7 @@ class Instagram
      *
      * @return array
      */
-    public function generateHeaders($session, $gisToken = null)
+    public function generateHeaders($session, $gisToken = null): array
     {
         $headers = [];
         if ($session) {
@@ -241,7 +244,7 @@ class Instagram
      *
      * @return string
      */
-    public function getUserAgent()
+    public function getUserAgent(): string
     {
         return $this->userAgent;
     }
@@ -251,7 +254,7 @@ class Instagram
      *
      * @return string
      */
-    public function setUserAgent($userAgent)
+    public function setUserAgent($userAgent): string
     {
         return $this->userAgent = $userAgent;
     }
@@ -276,23 +279,34 @@ class Instagram
     /**
      * Gets logged user feed.
      *
+     * @param int $mediaCount
+     * @param string $maxId
+     * @param int $commentCount
+     * @param int $likeCount
      * @return     Media[]
-     * @throws     InstagramNotFoundException
-     *
-     * @throws     InstagramException
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     * @throws ClientExceptionInterface
      */
-    public function getPaginateFeed($mediaCount=12, $maxId='', $commentCount=6, $likeCount=4) {
+    public function getPaginateFeed($mediaCount=12, $maxId='', $commentCount=6, $likeCount=4): array
+    {
         return $this->getFeed($mediaCount, $maxId, $commentCount, $likeCount, true);
     }
+
     /**
      * Gets logged user feed.
      *
+     * @param int $mediaCount
+     * @param string $maxId
+     * @param int $commentCount
+     * @param int $likeCount
+     * @param bool $paginateInd
      * @return     Media[]
-     * @throws     InstagramNotFoundException
-     *
-     * @throws     InstagramException
+     * @throws ClientExceptionInterface
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
      */
-    public function getFeed($mediaCount=12, $maxId='', $commentCount=6, $likeCount=4, $paginateInd=false)
+    public function getFeed($mediaCount=12, $maxId='', $commentCount=6, $likeCount=4, $paginateInd=false): array
     {
         $vars = [
             "fetch_media_item_count"=> $mediaCount,
@@ -323,14 +337,9 @@ class Instagram
             $count++;
         }
 
-        $count2 = 0;
-        if (empty($jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'])) {
-            $userStories = [];
-        }
-        else {
-            $userStories=[];
+        $count2 = 0; $userStories = [];
+        if (!empty($jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'])) {
             $nodes = (array)$jsonResponse['data']['user']['feed_reels_tray']['edge_reels_tray_to_reel']['edges'];
-            $userStories = [];
             if (count($nodes)==0) {
                 $userStories=[];
             }
@@ -348,7 +357,7 @@ class Instagram
         if ($paginateInd) {
             $maxId       = $jsonResponse['data']['user']["edge_web_feed_timeline"]['page_info']['end_cursor'];
             $hasNextPage = $jsonResponse['data']['user']["edge_web_feed_timeline"]['page_info']['has_next_page'];
-            $toReturn = [
+            return [
                 'medias' => $medias,
                 'maxId' => $maxId,
                 'media_count' => $count,
@@ -357,15 +366,17 @@ class Instagram
                 'hasNextPage' => $hasNextPage,
                 'userStories' => $userStories
             ];
-            return $toReturn;
         }
         else return $medias;
     }
+
     /**
      *
      * @return array
+     * @throws InstagramException
+     * @throws ClientExceptionInterface
      */
-    public function getUserStories()
+    public function getUserStories(): array
     {
         $variables = ['precomposed_overlay' => false, 'reel_ids' => []];
         $response = Request::get(Endpoints::getUserStoriesLink($variables), $this->generateHeaders($this->userSession));
@@ -395,7 +406,7 @@ class Instagram
      *
      * @return array
      */
-    public function getCustomCookies()
+    public function getCustomCookies(): ?array
     {
         return $this->customCookies;
     }
@@ -405,7 +416,7 @@ class Instagram
      *
      * @return array
      */
-    public function setCustomCookies($cookies)
+    public function setCustomCookies($cookies): array
     {
         return $this->customCookies = $cookies;
     }
@@ -419,7 +430,7 @@ class Instagram
      *
      * @return array
      */
-    private function parseCookies($headers)
+    private function parseCookies(array $headers): ?array
     {
         if($this->customCookies){
             return $this->getCustomCookies();
@@ -466,8 +477,9 @@ class Instagram
      * @throws     InstagramNotFoundException
      *
      * @throws     InstagramException
+     * @throws ClientExceptionInterface
      */
-    public function getActivity()
+    public function getActivity(): Activity
     {
         $response = Request::get(Endpoints::getActivityUrl(),
             $this->generateHeaders($this->userSession));
@@ -553,7 +565,7 @@ class Instagram
 
     private static function extractSharedDataFromBody($body)
     {
-        if (preg_match_all('#\_sharedData \= (.*?)\;\<\/script\>#', $body, $out)) {
+        if (preg_match_all('#_sharedData = (.*?);</script>#', $body, $out)) {
             return json_decode($out[1][0], true, 512, JSON_BIGINT_AS_STRING);
         }
         return null;
@@ -625,10 +637,8 @@ class Instagram
     /**
      * @param $variables
      * @return string
-     * @throws InstagramException
      */
-    private function generateGisToken($variables)
-    {
+    private function generateGisToken($variables): ?string{
         return null;
 //        return md5(implode(':', [$this->getRhxGis(), $variables]));
     }
@@ -877,14 +887,17 @@ class Instagram
      * @param null $maxId
      * @param bool $paginateInd (=false)
      *
-     * @return Comment[]
+     * @return Comment[]|stdClass
      * @throws InstagramException
+     * @throws ClientExceptionInterface
      */
     public function getMediaCommentsByCode($code, $count = 10, $maxId = null, $paginateInd = false)
     {
         $comments = [];
         $index = 0;
         $hasPrevious = true;
+        $numberOfComments = 0;
+
         while ($hasPrevious && $index < $count) {
             if ($count - $index > static::MAX_COMMENTS_PER_REQUEST) {
                 $numberOfCommentsToRetrieve = static::MAX_COMMENTS_PER_REQUEST;
@@ -934,9 +947,8 @@ class Instagram
                 $count = $numberOfComments;
             }
         }
-        if ($paginateInd)
-        {
-            $ret = new \stdClass();
+        if ($paginateInd) {
+            $ret = new stdClass();
             $ret->hasPrevious      = $hasPrevious;
             $ret->commentsCount    = $numberOfComments;
             $ret->maxId            = $maxId;
@@ -944,7 +956,9 @@ class Instagram
 
             return $ret;
         }
-        else return $comments;
+        else{
+            return $comments;
+        }
     }
 
     /**
@@ -1945,7 +1959,7 @@ class Instagram
             throw new InstagramAuthException('$twoStepVerificator must be an instance of TwoStepVerificationInterface.', $response->code);
         }
 
-        if (preg_match('/window._sharedData\s\=\s(.*?)\;<\/script>/', $response->raw_body, $matches)) {
+        if (preg_match('/window._sharedData\s=\s(.*?);<\/script>/', $response->raw_body, $matches)) {
             $data = json_decode($matches[1], true, 512, JSON_BIGINT_AS_STRING);
             if (!empty($data['entry_data']['Challenge'][0]['extraData']['content'][3]['fields'][0]['values'])) {
                 $choices = $data['entry_data']['Challenge'][0]['extraData']['content'][3]['fields'][0]['values'];
