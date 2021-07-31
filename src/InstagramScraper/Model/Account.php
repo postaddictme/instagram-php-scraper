@@ -154,6 +154,11 @@ class Account extends AbstractModel
     /**
      * @var bool
      */
+    protected $isProfessionalAccount = false;
+
+    /**
+     * @var bool
+     */
     protected $isJoinedRecently = false;
 
     /**
@@ -426,6 +431,14 @@ class Account extends AbstractModel
     /**
      * @return bool
      */
+    public function isProfessionalAccount()
+    {
+        return $this->isProfessionalAccount;
+    }
+
+    /**
+     * @return bool
+     */
     public function isJoinedRecently()
     {
         return $this->isJoinedRecently;
@@ -569,6 +582,9 @@ class Account extends AbstractModel
                 break;
             case 'is_business_account':
                 $this->isBusinessAccount = (bool)$value;
+                break;
+            case 'is_professional_account':
+                $this->isProfessionalAccount = (bool)$value;
                 break;
             case 'is_joined_recently':
                 $this->isJoinedRecently = (bool)$value;
