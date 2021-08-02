@@ -1685,7 +1685,12 @@ class Instagram
 
         $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
 
-        $count = $jsonResponse['data']['user']['edge_follow']['count'];
+        if($jsonResponse && is_array($jsonResponse) && isset($jsonResponse['data']) && isset($jsonResponse['data']['user']) && isset($jsonResponse['data']['user']['edge_follow'])){
+            $count = $jsonResponse['data']['user']['edge_follow']['count'] ?? 0;
+        }else{
+            $count = 0;
+        }
+
         if ($count === 0) {
             return [];
         }
