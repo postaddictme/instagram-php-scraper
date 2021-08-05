@@ -57,7 +57,7 @@ composer.phar require raiym/instagram-php-scraper phpfastcache/phpfastcache
 ```
 or 
 ```sh
-composer require raiym/instagram-php-scraper
+composer require raiym/instagram-php-scraper phpfastcache/phpfastcache
 ```
 
 ### If you don't have composer
