@@ -1819,7 +1819,7 @@ class Instagram
                 $response = $this->verifyTwoStep($response, $cookies, $twoStepVerificator);
             }
 
-            if ($response->code !== static::HTTP_OK) {
+            if ($response->code !== static::HTTP_OK && $response->code !== static::HTTP_FOUND) {
                 if ((is_string($response->code) || is_numeric($response->code)) && is_string($response->body)) {
                     throw new InstagramAuthException('Response code is ' . $response->code . '. Body: ' . $response->body . ' Something went wrong. Please report issue.', $response->code);
                 } else {
@@ -1973,7 +1973,7 @@ class Instagram
 
         $response = Request::post($url, $headers, $post_data);
 
-        if ($response->code !== static::HTTP_OK) {
+        if ($response->code !== static::HTTP_OK && $response->code !== static::HTTP_FOUND) {
             throw new InstagramAuthException('Something went wrong when try two step verification and enter security code. Please report issue.', $response->code);
         }
 
