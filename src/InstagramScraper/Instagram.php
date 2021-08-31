@@ -38,8 +38,8 @@ class Instagram
     const HTTP_BAD_REQUEST = 400;
     const HTTP_FOUND = 302;
 
-    const MAX_COMMENTS_PER_REQUEST = 300;
-    const MAX_LIKES_PER_REQUEST = 300;
+    const MAX_COMMENTS_PER_REQUEST = 50;
+    const MAX_LIKES_PER_REQUEST = 50;
     const PAGING_TIME_LIMIT_SEC = 1800; // 30 mins time limit on operations that require multiple requests
     const PAGING_DELAY_MINIMUM_MICROSEC = 1000000; // 1 sec min delay to simulate browser
     const PAGING_DELAY_MAXIMUM_MICROSEC = 3000000; // 3 sec max delay to simulate browser
@@ -1064,6 +1064,7 @@ class Instagram
             if ($response->code !== static::HTTP_OK) {
                 throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
             }
+
             $this->parseCookies($response->headers);
 
             $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
