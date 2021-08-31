@@ -9,6 +9,7 @@ class Endpoints
     const ACCOUNT_PAGE = 'https://www.instagram.com/{username}/';
     const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
     const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables={variables}';
+    const ACCOUNT_TAGGED_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=be13233562af2d229b008d2976b998b5&variables={variables}';
     const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
     const ACCOUNT_ACTIVITY = 'https://www.instagram.com/accounts/activity/?__a=1';
     const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
@@ -23,6 +24,7 @@ class Endpoints
     const FOLLOWERS_URL = 'https://www.instagram.com/graphql/query/?query_id=17851374694183129&id={{accountId}}&first={{count}}&after={{after}}';
     const FOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/follow/';
     const UNFOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/unfollow/';
+    const REMOVE_FOLLOWER_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/remove_follower/';
     const USER_FEED = 'https://www.instagram.com/graphql/query/?query_id=17861995474116400&fetch_media_item_count=12&fetch_media_item_cursor=&fetch_comment_count=4&fetch_like=10';
     const USER_FEED2 = 'https://www.instagram.com/?__a=1';
     const USER_FEED_hash = 'https://www.instagram.com/graphql/query/?query_hash=3f01472fb28fb8aca9ad9dbc9d4578ff';
@@ -84,6 +86,11 @@ class Endpoints
     public static function getAccountMediasJsonLink($variables)
     {
         return str_replace('{variables}', urlencode($variables), static::ACCOUNT_MEDIAS);
+    }
+
+    public static function getAccountTaggedMediasJsonLink($variables)
+    {
+        return str_replace('{variables}', urlencode($variables), static::ACCOUNT_TAGGED_MEDIAS);
     }
 
     public static function getMediaPageLink($code)
@@ -149,6 +156,11 @@ class Endpoints
     {
         $url = str_replace('{{accountId}}', urlencode($accountId), static::UNFOLLOW_URL);
         return $url;
+    }
+
+    public static function getRemoveFollowerUrl($accountId)
+    {
+        return str_replace('{{accountId}}', urlencode($accountId), static::REMOVE_FOLLOWER_URL);
     }
 
     public static function getFollowersJsonLink($accountId, $count, $after = '')
