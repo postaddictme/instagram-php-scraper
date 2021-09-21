@@ -1018,13 +1018,26 @@ class Instagram
 
     /**
      * @param      $code
-     * @param int $count
+     * @param int  $count
      * @param null $maxId
      *
-     * @return array
+     * @return Like[]
      * @throws InstagramException
      */
-    public function getMediaLikesByCode($code, $count = 10, $maxId = null)
+    public function getPaginateMediaLikesByCode($code, $count = 10, $maxId = null)
+    {
+        return static::getMediaLikesByCode($code, $count, $maxId, true);
+    }
+
+    /**
+     * @param      $code
+     * @param int  $count
+     * @param null $maxId
+     *
+     * @return Like[]
+     * @throws InstagramException
+     */
+    public function getMediaLikesByCode($code, $count = 10, $maxId = null, $paginateInd = false)
     {
         $remain = $count;
         $likes = [];
