@@ -2208,6 +2208,27 @@ class Instagram
     }
 
     /**
+     * @return bool
+     * @throws InstagramException
+     */
+    public function seenInbox()
+    {
+        $response = Request::post(
+            Endpoints::getInboxNewsSeenUrl(),
+            array_merge(
+                ['x-ig-app-id' => self::X_IG_APP_ID],
+                $this->generateHeaders($this->userSession)
+            )
+        );
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        return true;
+    }
+
+    /**
      * @param int|string|Media $mediaId
      * @param int|string $text
      * @param int|string|Comment|null $repliedToCommentId
