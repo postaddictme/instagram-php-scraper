@@ -26,6 +26,7 @@ class Endpoints
     const UNFOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/unfollow/';
     const REMOVE_FOLLOWER_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/remove_follower/';
     const PENDING_URL = 'https://i.instagram.com/api/v1/friendships/pending/';
+    const INBOX_NEWS_URL = 'https://i.instagram.com/api/v1/news/inbox/';
     const USER_FEED = 'https://www.instagram.com/graphql/query/?query_id=17861995474116400&fetch_media_item_count=12&fetch_media_item_cursor=&fetch_comment_count=4&fetch_like=10';
     const USER_FEED2 = 'https://www.instagram.com/?__a=1';
     const USER_FEED_hash = 'https://www.instagram.com/graphql/query/?query_hash=3f01472fb28fb8aca9ad9dbc9d4578ff';
@@ -167,6 +168,11 @@ class Endpoints
     public static function getPendingUrl()
     {
         return  static::PENDING_URL;
+    }
+
+    public static function getInboxNewsUrl()
+    {
+        return  static::INBOX_NEWS_URL;
     }
 
     public static function getFollowersJsonLink($accountId, $count, $after = '')
