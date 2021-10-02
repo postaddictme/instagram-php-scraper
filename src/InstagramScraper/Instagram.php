@@ -2154,6 +2154,33 @@ class Instagram
     }
 
     /**
+     * @return array
+     * @throws InstagramException
+     */
+    public function pending()
+    {
+        $response = Request::get(
+            Endpoints::getPendingUrl(),
+            array_merge(
+                ['x-ig-app-id' => self::X_IG_APP_ID],
+                $this->generateHeaders($this->userSession)
+            )
+        );
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if ($jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        return $jsonResponse;
+    }
+
+    /**
      * @param int|string|Media $mediaId
      * @param int|string $text
      * @param int|string|Comment|null $repliedToCommentId
