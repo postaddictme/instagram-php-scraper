@@ -28,6 +28,7 @@ class Endpoints
     const PENDING_URL = 'https://i.instagram.com/api/v1/friendships/pending/';
     const INBOX_NEWS_URL = 'https://i.instagram.com/api/v1/news/inbox/';
     const INBOX_NEWS_SEEN_URL = 'https://i.instagram.com/api/v1/news/inbox_seen/';
+    const USER_TAGS = 'https://i.instagram.com/api/v1/usertags/{{accountId}}/feed/?count={{count}}';
     const USER_FEED = 'https://www.instagram.com/graphql/query/?query_id=17861995474116400&fetch_media_item_count=12&fetch_media_item_cursor=&fetch_comment_count=4&fetch_like=10';
     const USER_FEED2 = 'https://www.instagram.com/?__a=1';
     const USER_FEED_hash = 'https://www.instagram.com/graphql/query/?query_hash=3f01472fb28fb8aca9ad9dbc9d4578ff';
@@ -179,6 +180,11 @@ class Endpoints
     public static function getInboxNewsSeenUrl()
     {
         return  static::INBOX_NEWS_SEEN_URL;
+    }
+
+    public static function getUserTagsUrl($accountId, $count = 12)
+    {
+        return str_replace(['{{accountId}}', '{{count}}'], [urlencode($accountId), urlencode($count)], static::USER_TAGS);
     }
 
     public static function getFollowersJsonLink($accountId, $count, $after = '')
