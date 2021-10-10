@@ -99,10 +99,10 @@ class Instagram
      * @throws InstagramException
      * @throws InstagramNotFoundException
      */
-    public static function searchTagsByTagName($tag)
+    public  function searchTagsByTagName($tag)
     {
         // TODO: Add tests and auth
-        $response = Request::get(Endpoints::getGeneralSearchJsonLink($tag));
+        $response = Request::get(Endpoints::getGeneralSearchJsonLink($tag), $this->generateHeaders($this->userSession));
 
         if (static::HTTP_NOT_FOUND === $response->code) {
             throw new InstagramNotFoundException('Account with given username does not exist.');
