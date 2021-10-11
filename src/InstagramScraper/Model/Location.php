@@ -24,8 +24,8 @@ class Location extends AbstractModel
         'city'      => 'city',
         'has_viewer_saved'      => 'has_viewer_saved',
         'lng'      => 'lng',
-        'lat'      => 'lat', 
-        'facebook_places_id'      => 'facebook_places_id',    
+        'lat'      => 'lat',
+        'facebook_places_id'      => 'facebook_places_id',
     ];
     /**
      * @var
