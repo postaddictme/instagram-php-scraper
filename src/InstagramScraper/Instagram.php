@@ -197,6 +197,43 @@ class Instagram
         return $accounts;
     }
 
+
+/**
+     * @param string $locationName
+     *
+     * @return Places[]
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function searchPlacesByLocationName($locationName, $count = 10)
+    {
+        $response = Request::get(Endpoints::getGeneralSearchJsonLink($locationName, $count), $this->generateHeaders($this->userSession));
+
+        if (static::HTTP_NOT_FOUND === $response->code) {
+            throw new InstagramNotFoundException('Account with given Location does not exist.');
+        }
+        if (static::HTTP_OK !== $response->code) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+        if (!isset($jsonResponse['status']) || $jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response code is not equal 200. Something went wrong. Please report issue.');
+        }
+        if (!isset($jsonResponse['places']) || empty($jsonResponse['places'])) {
+            return [];
+        }
+
+        $places = [];
+        foreach ($jsonResponse['places'] as $jsonPlaces) {
+            $places[] = Location::create($jsonPlaces['place']['location']);
+        }
+        return $places;
+    }
+
+
+
+
     /**
      * @param $session
      * @param $gisToken
