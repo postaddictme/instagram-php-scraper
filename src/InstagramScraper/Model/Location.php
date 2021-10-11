@@ -23,8 +23,8 @@ class Location extends AbstractModel
         'address'      => 'address',
         'city'      => 'city',
         'has_viewer_saved'      => 'has_viewer_saved',
-        'lng'      => 'lng',
-        'lat'      => 'lat',
+        'lng'             => 'lng',
+        'lat'             => 'lat',
         'facebook_places_id'      => 'facebook_places_id',
     ];
     /**
@@ -165,7 +165,7 @@ class Location extends AbstractModel
     {
         return $this->modified;
     }
-    
+
     /**
      * @return mixed
      */
@@ -173,42 +173,42 @@ class Location extends AbstractModel
     {
         return $this->pk;
     }
-  
-  
+
+
     /**
      * @return mixed
      */
     public function getShortNname()
     {
         return $this->short_name;
-    }  
-    
+    }
+
     /**
      * @return mixed
      */
     public function getFacebookPlacesId()
     {
         return $this->facebook_places_id;
-    }  
-    
-    
+    }
+
+
     /**
      * @return mixed
      */
     public function externalSource()
     {
         return $this->external_source;
-    } 
-    
-    
+    }
+
+
     /**
      * @return mixed
      */
     public function getAddress()
     {
         return $this->address;
-    }  
-    
+    }
+
     /**
      * @return mixed
      */
@@ -216,13 +216,13 @@ class Location extends AbstractModel
     {
         return $this->city;
     }
-    
+
     /**
      * @return mixed
      */
     public function isHasViewerSaved()
     {
         return $this->has_viewer_saved;
-    } 
-    
+    }
+
 }
