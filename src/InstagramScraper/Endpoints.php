@@ -22,6 +22,8 @@ class Endpoints
     const LIKES_BY_SHORTCODE = 'https://www.instagram.com/graphql/query/?query_id=17864450716183058&variables={"shortcode":"{{shortcode}}","first":{{count}},"after":"{{likeId}}"}';
     const FOLLOWING_URL = 'https://www.instagram.com/graphql/query/?query_id=17874545323001329&id={{accountId}}&first={{count}}&after={{after}}';
     const FOLLOWERS_URL = 'https://www.instagram.com/graphql/query/?query_id=17851374694183129&id={{accountId}}&first={{count}}&after={{after}}';
+    const FOLLOWING_URL_V1 = 'https://i.instagram.com/api/v1/friendships/{{accountId}}/following/';
+    const FOLLOWERS_URL_V1 = 'https://i.instagram.com/api/v1/friendships/{{accountId}}/followers/';
     const FOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/follow/';
     const UNFOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/unfollow/';
     const REMOVE_FOLLOWER_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/remove_follower/';
@@ -211,6 +213,20 @@ class Endpoints
         } else {
             $url = str_replace('{{after}}', urlencode($after), $url);
         }
+
+        return $url;
+    }
+
+    public static function getFollowersUrl_v1($accountId)
+    {
+        $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOWERS_URL_V1);
+
+        return $url;
+    }
+
+    public static function getFollowingUrl_v1($accountId)
+    {
+        $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOWING_URL_V1);
 
         return $url;
     }
