@@ -1796,6 +1796,80 @@ class Instagram
             'accounts' => $accounts
         ];
     }
+
+    /**
+     * Search users by followers 
+     * @param string $accountId Account id of the profile to query
+     * @param string $query Query to search by followers
+     * 
+     * @return array
+     * @throws InstagramException
+     */
+    public function searchFollowers($accountId, $query = '')
+    {
+        $response = Request::get(
+            Endpoints::getFollowersUrl_v1($accountId),
+            array_merge(
+                ['x-ig-app-id' => self::X_IG_APP_ID],
+                $this->generateHeaders($this->userSession)
+            ),
+            array(
+                "search_surface" => "follow_list_page",
+                "query" => $query,
+                "enable_groups" => "true"
+            )
+        );
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if ($jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        return $jsonResponse;
+    }
+
+    /**
+     * Search users by following 
+     * @param string $accountId Account id of the profile to query
+     * @param string $query Query to search by following
+     * 
+     * @return array
+     * @throws InstagramException
+     */
+    public function searchFollowing($accountId, $query = '')
+    {
+        $response = Request::get(
+            Endpoints::getFollowingUrl_v1($accountId),
+            array_merge(
+                ['x-ig-app-id' => self::X_IG_APP_ID],
+                $this->generateHeaders($this->userSession)
+            ),
+            array(
+                "includes_hashtags" => "false",
+                "search_surface" => "follow_list_page",
+                "query" => $query,
+                "enable_groups" => "true"
+            )
+        );
+
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if ($jsonResponse['status'] !== 'ok') {
+            throw new InstagramException('Response status is ' . $jsonResponse['status'] . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.', $response->code);
+        }
+
+        return $jsonResponse;
+    }
+
     /**
      * @param array $reel_ids - array of instagram user ids
      * @return array
