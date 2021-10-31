@@ -7,3 +7,4 @@ phpunit.phar
 tests/sessions
 phpunit.xml
 settings.json
+.phpunit.result.cache
