@@ -20,7 +20,7 @@
     "ext-json": "*",
     "psr/simple-cache": "~3.0",
     "psr/http-client": "~1.0",
-    "guzzlehttp/psr7": "^1.7"
+    "guzzlehttp/psr7": "^2.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.0",
