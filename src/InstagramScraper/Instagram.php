@@ -86,7 +86,7 @@ class Instagram
     public static function withCredentials(ClientInterface $client, $username, $password, $cache)
     {
         static::$instanceCache = $cache;
-        $instance = new self($client);
+        $instance = new static($client);
         $instance->sessionUsername = $username;
         $instance->sessionPassword = $password;
         return $instance;
