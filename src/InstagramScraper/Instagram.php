@@ -1271,11 +1271,11 @@ class Instagram
             throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
         }
 
-        if (empty($arr['data']['hashtag']['edge_hashtag_to_media']['count'])) {
+        if (empty($arr['graphql']['hashtag']['edge_hashtag_to_media']['count'])) {
             return $toReturn;
         }
 
-        $nodes = $arr['data']['hashtag']['edge_hashtag_to_media']['edges'];
+        $nodes = $arr['graphql']['hashtag']['edge_hashtag_to_media']['edges'];
 
         if (empty($nodes)) {
             return $toReturn;
@@ -1285,9 +1285,9 @@ class Instagram
             $medias[] = Media::create($mediaArray['node']);
         }
 
-        $maxId = $arr['data']['hashtag']['edge_hashtag_to_media']['page_info']['end_cursor'];
+        $maxId = $arr['graphql']['hashtag']['edge_hashtag_to_media']['page_info']['end_cursor'];
         $hasNextPage = $arr['graphql']['hashtag']['edge_hashtag_to_media']['page_info']['has_next_page'];
-        $count = $arr['data']['hashtag']['edge_hashtag_to_media']['count'];
+        $count = $arr['graphql']['hashtag']['edge_hashtag_to_media']['count'];
 
         $toReturn = [
             'medias' => $medias,
