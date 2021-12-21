@@ -13,7 +13,7 @@ class Account extends AbstractModel
      * @var string
      */
     protected $id = 0;
-    
+
     /**
      * User id
      * @var string
@@ -73,6 +73,12 @@ class Account extends AbstractModel
      * @var integer
      */
     protected $mediaCount = 0;
+
+    /**
+     * Information of next page
+     * @var array
+     */
+    protected $mediaPageInfo = [];
 
     /**
      * true if account is private
@@ -190,7 +196,7 @@ class Account extends AbstractModel
      * @var string
      */
     protected $connectedFbPage = '';
-    
+
     /**
      * @var string
      */
@@ -331,6 +337,14 @@ class Account extends AbstractModel
     }
 
     /**
+     * @return array
+     */
+    public function getMediaPageInfo()
+    {
+        return $this->mediaPageInfo;
+    }
+
+    /**
      * @param Media $media
      * @return Account
      */
@@ -387,7 +401,7 @@ class Account extends AbstractModel
     public function isHasClips()
     {
         return $this->hasClips;
-    }    
+    }
 
     /**
      * @return bool
@@ -396,6 +410,7 @@ class Account extends AbstractModel
     {
         return $this->hasGuides;
     }
+
     /**
      * @return bool
      */
@@ -499,6 +514,7 @@ class Account extends AbstractModel
     {
         return $this->categoryName;
     }
+
     /**
      * @param $value
      * @param $prop
@@ -619,10 +635,10 @@ class Account extends AbstractModel
     protected function initMedia($array)
     {
         $this->mediaCount = !empty($array['count']) ? $array['count'] : 0;
+        $this->mediaPageInfo = $array['page_info'];
         if (!$this->mediaCount || !isset($array['edges']) || !is_array($array['edges'])) {
             return;
         }
-
         $nodes = $array['edges'];
         foreach ($nodes as $mediaArray) {
             $media = Media::create($mediaArray['node']);
