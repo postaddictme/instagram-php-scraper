@@ -819,10 +819,10 @@ class Instagram
         }
 
         $mediaArray = $this->decodeRawBodyToJson($response->raw_body);
-        if (!isset($mediaArray['graphql']['shortcode_media'])) {
+        if (!isset($mediaArray['items'])) {
             throw new InstagramException('Media with this code does not exist');
         }
-        return Media::create($mediaArray['graphql']['shortcode_media']);
+        return Media::create(current($mediaArray['items'])); 
     }
 
     /**
@@ -2626,5 +2626,31 @@ class Instagram
             ),
             ['thread_ids' => json_encode($threadIds)]
         );
+    }
+
+    /**
+     * @return Account
+     * @throws InstagramException
+     * @throws InstagramNotFoundException
+     */
+    public function getCurrentUserInfo(): Account
+    {
+        $response = Request::get(Endpoints::USER_FEED_hash, $this->generateHeaders($this->userSession));
+
+        if ($response->code === static::HTTP_NOT_FOUND) {
+            throw new InstagramNotFoundException('Account with given username does not exist.');
+        }
+        if ($response->code !== static::HTTP_OK) {
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+        }
+
+        $this->parseCookies($response->headers);
+        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+
+        if(!isset($jsonResponse['data']['user']['username'])){
+            throw new InstagramException('Response code is ' . $response->code . '. Body: ' . static::getErrorBody($response->body) . ' Something went wrong. Please report issue.');
+        }
+
+        return $this->getAccount($jsonResponse['data']['user']['username']);
     }
 }
