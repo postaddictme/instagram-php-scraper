@@ -819,10 +819,10 @@ class Instagram
         }
 
         $mediaArray = $this->decodeRawBodyToJson($response->raw_body);
-        if (!isset($mediaArray['graphql']['shortcode_media'])) {
+        if (!isset($mediaArray['items'])) {
             throw new InstagramException('Media with this code does not exist');
         }
-        return Media::create($mediaArray['graphql']['shortcode_media']);
+        return Media::create(current($mediaArray['items'])); 
     }
 
     /**
