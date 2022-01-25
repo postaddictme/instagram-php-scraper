@@ -2048,7 +2048,7 @@ class Instagram
     /**
      * @return string
      */
-    private function getCacheKey()
+    public function getCacheKey()
     {
         return md5($this->sessionUsername);
     }
