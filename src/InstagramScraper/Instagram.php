@@ -822,7 +822,7 @@ class Instagram
         if (!isset($mediaArray['items'])) {
             throw new InstagramException('Media with this code does not exist');
         }
-        return Media::create(current($mediaArray['items'])); 
+        return Media::create(current($mediaArray['items']));
     }
 
     /**
@@ -1205,7 +1205,7 @@ class Instagram
                 throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
             }
             $rootKey = array_key_exists('graphql', $arr) ? 'graphql' : 'data';
-            
+
             if (empty($arr[$rootKey]['hashtag']['edge_hashtag_to_media']['count'])) {
                 return [];
             }
@@ -1800,10 +1800,10 @@ class Instagram
     }
 
     /**
-     * Search users by followers 
+     * Search users by followers
      * @param string $accountId Account id of the profile to query
      * @param string $query Query to search by followers
-     * 
+     *
      * @return array
      * @throws InstagramException
      */
@@ -1836,10 +1836,10 @@ class Instagram
     }
 
     /**
-     * Search users by following 
+     * Search users by following
      * @param string $accountId Account id of the profile to query
      * @param string $query Query to search by following
-     * 
+     *
      * @return array
      * @throws InstagramException
      */
@@ -2058,11 +2058,15 @@ class Instagram
      *
      * @return bool
      */
-    public function isLoggedIn($session)
+    public function isLoggedIn($session = null)
     {
-        if ($session === null || !isset($session['sessionid'])) {
+        if ($session === null) {
+            $session = static::$instanceCache->get($this->getCacheKey());
+        }
+        if (!isset($session['sessionid'])) {
             return false;
         }
+
         $sessionId = $session['sessionid'];
         $csrfToken = $session['csrftoken'];
         $headers = [
