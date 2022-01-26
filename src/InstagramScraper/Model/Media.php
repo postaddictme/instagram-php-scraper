@@ -599,6 +599,9 @@ class Media extends AbstractModel
             case 'likes':
                 $this->likesCount = $arr[$prop]['count'];
                 break;
+            case 'like_count':
+                $this->likesCount = $value;
+                break;
             case 'display_resources':
                 foreach ($value as $media) {
                     $mediasUrl[] = $media['src'];
