@@ -702,7 +702,7 @@ class Media extends AbstractModel
             case 'is_ad':
                 $this->isAd = $value;
                 break;
-            case 'taken_at_timestamp':
+            case 'taken_at':
                 $this->createdTime = $value;
                 break;
 
