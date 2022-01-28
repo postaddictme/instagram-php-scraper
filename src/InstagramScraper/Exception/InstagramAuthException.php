@@ -4,8 +4,8 @@ namespace InstagramScraper\Exception;
 
 class InstagramAuthException extends InstagramException
 {
-    public function __construct($message = "", $code = 401, $previous = null)
+    public function __construct($message = "", $code = 401, $responseBody = "", $previous = null)
     {
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, $code, $responseBody, $previous);
     }
 }
