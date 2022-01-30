@@ -9,7 +9,7 @@ class InstagramException extends \Exception
     public function __construct($message = "", $code = 500, $responseBody = "", $previous = null)
     {
         parent::__construct($message, $code, $previous);
-        $this->responseBody = responseBody;
+        $this->responseBody = $responseBody;
     }
     
     public function getResponseBody()
