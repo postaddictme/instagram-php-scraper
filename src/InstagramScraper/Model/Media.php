@@ -571,13 +571,14 @@ class Media extends AbstractModel
     protected function initPropertiesCustom($value, $prop, $arr)
     {
         switch ($prop) {
-            case 'id':
+            case 'pk':
                 $this->id = $value;
                 break;
             case 'type':
                 $this->type = $value;
                 break;
             case 'date':
+            case 'created_at':
             case 'created_time':
                 $this->createdTime = (int)$value;
                 break;
@@ -674,7 +675,7 @@ class Media extends AbstractModel
                 break;
             case 'location':
                 if (isset($arr[$prop])) {
-                    $this->locationId = $arr[$prop]['id'] ?? null;
+                    $this->locationId = $arr[$prop]['pk'] ?? null;
                     $this->locationName = $arr[$prop]['name'] ?? null;
                     $this->locationSlug = $arr[$prop]['slug'] ?? null;
                     $this->locationAddressJson = $arr[$prop]['address_json'] ?? null;
