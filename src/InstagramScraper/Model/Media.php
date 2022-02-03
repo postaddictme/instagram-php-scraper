@@ -854,6 +854,9 @@ class Media extends AbstractModel
     private static function setCarouselMedia($mediaArray, $carouselArray, $instance)
     {
         $carouselMedia = new CarouselMedia();
+        if(isset($carouselArray['id'])) {
+            $carouselMedia->setId($carouselArray['id']);
+        }
         if(isset($carouselArray['type'])) {
             $carouselMedia->setType($carouselArray['type']);
 
