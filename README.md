@@ -9,7 +9,9 @@ This library is based on the Instagram web version. We develop it because nowada
 
 ## Code Example
 ```php
-$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'username', 'password');
+use Phpfastcache\Helper\Psr16Adapter;
+
+$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'username', 'password', new Psr16Adapter('Files'));
 $instagram->login();
 $account = $instagram->getAccountById(3);
 echo $account->getUsername();
@@ -51,11 +53,11 @@ $account = $instagram->getAccount('kevin');
 ### Using composer
 
 ```sh
-composer.phar require raiym/instagram-php-scraper
+composer.phar require raiym/instagram-php-scraper phpfastcache/phpfastcache
 ```
 or 
 ```sh
-composer require raiym/instagram-php-scraper
+composer require raiym/instagram-php-scraper phpfastcache/phpfastcache
 ```
 
 ### If you don't have composer

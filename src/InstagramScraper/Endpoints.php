@@ -9,6 +9,7 @@ class Endpoints
     const ACCOUNT_PAGE = 'https://www.instagram.com/{username}/';
     const MEDIA_LINK = 'https://www.instagram.com/p/{code}';
     const ACCOUNT_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables={variables}';
+    const ACCOUNT_TAGGED_MEDIAS = 'https://www.instagram.com/graphql/query/?query_hash=be13233562af2d229b008d2976b998b5&variables={variables}';
     const ACCOUNT_JSON_INFO = 'https://www.instagram.com/{username}/?__a=1';
     const ACCOUNT_ACTIVITY = 'https://www.instagram.com/accounts/activity/?__a=1';
     const MEDIA_JSON_INFO = 'https://www.instagram.com/p/{code}/?__a=1';
@@ -21,8 +22,15 @@ class Endpoints
     const LIKES_BY_SHORTCODE = 'https://www.instagram.com/graphql/query/?query_id=17864450716183058&variables={"shortcode":"{{shortcode}}","first":{{count}},"after":"{{likeId}}"}';
     const FOLLOWING_URL = 'https://www.instagram.com/graphql/query/?query_id=17874545323001329&id={{accountId}}&first={{count}}&after={{after}}';
     const FOLLOWERS_URL = 'https://www.instagram.com/graphql/query/?query_id=17851374694183129&id={{accountId}}&first={{count}}&after={{after}}';
+    const FOLLOWING_URL_V1 = 'https://i.instagram.com/api/v1/friendships/{{accountId}}/following/';
+    const FOLLOWERS_URL_V1 = 'https://i.instagram.com/api/v1/friendships/{{accountId}}/followers/';
     const FOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/follow/';
     const UNFOLLOW_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/unfollow/';
+    const REMOVE_FOLLOWER_URL = 'https://www.instagram.com/web/friendships/{{accountId}}/remove_follower/';
+    const PENDING_URL = 'https://i.instagram.com/api/v1/friendships/pending/';
+    const INBOX_NEWS_URL = 'https://i.instagram.com/api/v1/news/inbox/';
+    const INBOX_NEWS_SEEN_URL = 'https://i.instagram.com/api/v1/news/inbox_seen/';
+    const USER_TAGS = 'https://i.instagram.com/api/v1/usertags/{{accountId}}/feed/?count={{count}}';
     const USER_FEED = 'https://www.instagram.com/graphql/query/?query_id=17861995474116400&fetch_media_item_count=12&fetch_media_item_cursor=&fetch_comment_count=4&fetch_like=10';
     const USER_FEED2 = 'https://www.instagram.com/?__a=1';
     const USER_FEED_hash = 'https://www.instagram.com/graphql/query/?query_hash=3f01472fb28fb8aca9ad9dbc9d4578ff';
@@ -84,6 +92,11 @@ class Endpoints
     public static function getAccountMediasJsonLink($variables)
     {
         return str_replace('{variables}', urlencode($variables), static::ACCOUNT_MEDIAS);
+    }
+
+    public static function getAccountTaggedMediasJsonLink($variables)
+    {
+        return str_replace('{variables}', urlencode($variables), static::ACCOUNT_TAGGED_MEDIAS);
     }
 
     public static function getMediaPageLink($code)
@@ -151,6 +164,31 @@ class Endpoints
         return $url;
     }
 
+    public static function getRemoveFollowerUrl($accountId)
+    {
+        return str_replace('{{accountId}}', urlencode($accountId), static::REMOVE_FOLLOWER_URL);
+    }
+
+    public static function getPendingUrl()
+    {
+        return  static::PENDING_URL;
+    }
+
+    public static function getInboxNewsUrl()
+    {
+        return  static::INBOX_NEWS_URL;
+    }
+
+    public static function getInboxNewsSeenUrl()
+    {
+        return  static::INBOX_NEWS_SEEN_URL;
+    }
+
+    public static function getUserTagsUrl($accountId, $count = 12)
+    {
+        return str_replace(['{{accountId}}', '{{count}}'], [urlencode($accountId), urlencode($count)], static::USER_TAGS);
+    }
+
     public static function getFollowersJsonLink($accountId, $count, $after = '')
     {
         $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOWERS_URL);
@@ -175,6 +213,20 @@ class Endpoints
         } else {
             $url = str_replace('{{after}}', urlencode($after), $url);
         }
+
+        return $url;
+    }
+
+    public static function getFollowersUrl_v1($accountId)
+    {
+        $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOWERS_URL_V1);
+
+        return $url;
+    }
+
+    public static function getFollowingUrl_v1($accountId)
+    {
+        $url = str_replace('{{accountId}}', urlencode($accountId), static::FOLLOWING_URL_V1);
 
         return $url;
     }
