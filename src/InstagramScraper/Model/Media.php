@@ -578,7 +578,7 @@ class Media extends AbstractModel
                 $this->type = $value;
                 break;
             case 'date':
-            case 'created_at':
+            case 'taken_at':
             case 'created_time':
                 $this->createdTime = (int)$value;
                 break;
