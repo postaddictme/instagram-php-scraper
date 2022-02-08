@@ -11,6 +11,11 @@ class CarouselMedia
     /**
      * @var string
      */
+    private $id;
+    
+    /**
+     * @var string
+     */
     private $type;
 
     /**
@@ -61,6 +66,25 @@ class CarouselMedia
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+    
+    /**
+     * @param mixed $id
+     *
+     * @return $this
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+        return $this;
+    }
+    
     /**
      * @return mixed
      */
