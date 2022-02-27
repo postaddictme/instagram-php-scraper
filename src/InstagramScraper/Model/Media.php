@@ -908,7 +908,7 @@ class Media extends AbstractModel
                 }
             }
             
-            if($carouselArray['media_type'] == static::MEDIA_TYPE_IMAGE && isset($carouselArray['image_versions2'])){                 
+            if(($carouselArray['media_type'] == static::MEDIA_TYPE_IMAGE || $carouselArray['media_type'] == static::MEDIA_TYPE_VIDEO) && isset($carouselArray['image_versions2'])){                 
                 foreach ($carouselArray['image_versions2']['candidates'] as $media) {
                     $mediasUrl[] = $media['url'];
                     switch ($media['width']) {
