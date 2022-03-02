@@ -93,6 +93,27 @@ class Instagram
     }
 
     /**
+     * @param ClientInterface $client
+     * @param string $username
+     * @param CacheInterface $cache
+     *
+     * @return Instagram
+     */
+    public static function withUsername(ClientInterface $client, $username, $cache)
+    {
+        static::$instanceCache = $cache;
+        $instance = new self($client);
+        $instance->sessionUsername = $username;
+        return $instance;
+    }
+
+    public function loadSession()
+    {
+        $session = static::$instanceCache->get($this->getCacheKey());
+        $this->userSession = $session;
+        return $session;
+    }
+    /**
      * @param string $tag
      *
      * @return array

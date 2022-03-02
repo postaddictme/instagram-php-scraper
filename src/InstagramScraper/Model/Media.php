@@ -571,13 +571,14 @@ class Media extends AbstractModel
     protected function initPropertiesCustom($value, $prop, $arr)
     {
         switch ($prop) {
-            case 'id':
+            case 'pk':
                 $this->id = $value;
                 break;
             case 'type':
                 $this->type = $value;
                 break;
             case 'date':
+            case 'taken_at':
             case 'created_time':
                 $this->createdTime = (int)$value;
                 break;
@@ -674,7 +675,7 @@ class Media extends AbstractModel
                 break;
             case 'location':
                 if (isset($arr[$prop])) {
-                    $this->locationId = $arr[$prop]['id'] ?? null;
+                    $this->locationId = $arr[$prop]['pk'] ?? null;
                     $this->locationName = $arr[$prop]['name'] ?? null;
                     $this->locationSlug = $arr[$prop]['slug'] ?? null;
                     $this->locationAddressJson = $arr[$prop]['address_json'] ?? null;
@@ -853,6 +854,9 @@ class Media extends AbstractModel
     private static function setCarouselMedia($mediaArray, $carouselArray, $instance)
     {
         $carouselMedia = new CarouselMedia();
+        if(isset($carouselArray['id'])) {
+            $carouselMedia->setId($carouselArray['id']);
+        }
         if(isset($carouselArray['type'])) {
             $carouselMedia->setType($carouselArray['type']);
 
@@ -904,7 +908,7 @@ class Media extends AbstractModel
                 }
             }
             
-            if($carouselArray['media_type'] == static::MEDIA_TYPE_IMAGE && isset($carouselArray['image_versions2'])){                 
+            if(($carouselArray['media_type'] == static::MEDIA_TYPE_IMAGE || $carouselArray['media_type'] == static::MEDIA_TYPE_VIDEO) && isset($carouselArray['image_versions2'])){                 
                 foreach ($carouselArray['image_versions2']['candidates'] as $media) {
                     $mediasUrl[] = $media['url'];
                     switch ($media['width']) {
