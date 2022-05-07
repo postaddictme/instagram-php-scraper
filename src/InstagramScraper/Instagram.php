@@ -1689,7 +1689,7 @@ class Instagram
 
         $this->parseCookies($response->headers);
         $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
-        return Location::create($jsonResponse['graphql']['location']);
+        return Location::create($jsonResponse['native_location_data']['location_info']);
     }
 
     /**
