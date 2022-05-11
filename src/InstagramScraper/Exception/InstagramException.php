@@ -16,4 +16,9 @@ class InstagramException extends \Exception
     {
         return $this->responseBody;
     }
+
+    public function getHttpCode()
+    {
+        return $this->code;
+    }
 }
