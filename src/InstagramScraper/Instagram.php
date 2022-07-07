@@ -2227,7 +2227,8 @@ class Instagram
      */
     public function loginWithSessionId($sessionId)
     {
-        $session = ['sessionid' => $sessionId, 'csrftoken' => md5( rand( 1, 5000 ) )];
+        $sessionParts = explode('%',$sessionId);
+        $session = ['sessionid' => $sessionId, 'ds_user_id' => $sessionParts[0], 'csrftoken' => md5( rand( 1, 5000 ) )];
 
         if (!$this->isLoggedIn($session)) {
             throw new InstagramAuthException('Login with session went wrong. Please report issue.');
@@ -2261,9 +2262,10 @@ class Instagram
         }
 
         $sessionId = $session['sessionid'];
+        $dsuserId = $session['ds_user_id'];
         $csrfToken = $session['csrftoken'];
         $headers = [
-            'cookie' => "ig_cb=1; csrftoken=$csrfToken; sessionid=$sessionId;",
+            'cookie' => "ig_cb=1; csrftoken=$csrfToken; sessionid=$sessionId; ds_user_id=$dsuserId",
             'referer' => Endpoints::BASE_URL . '/',
             'x-csrftoken' => $csrfToken,
             'X-CSRFToken' => $csrfToken,
@@ -2274,9 +2276,6 @@ class Instagram
             return false;
         }
         $cookies = $this->parseCookies($response->headers);
-        if (!isset($cookies['ds_user_id'])) {
-            return false;
-        }
         return true;
     }
 
