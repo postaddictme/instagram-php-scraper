@@ -572,6 +572,7 @@ class Media extends AbstractModel
     {
         switch ($prop) {
             case 'pk':
+            case 'id':
                 $this->id = $value;
                 break;
             case 'type':
