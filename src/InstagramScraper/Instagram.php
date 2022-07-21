@@ -693,7 +693,7 @@ class Instagram
     public function getMedias($username, $count = 20, $maxId = '')
     {
 
-        $account = $this->getAccount($username);
+        $account = $this->getAccountInfo($username);
         return $this->getMediasByUserId($account->getId(), $count, $maxId);
     }
 
@@ -709,7 +709,7 @@ class Instagram
     public function getTaggedMedias($username, $count = 20, $maxId = '')
     {
 
-        $account = $this->getAccount($username);
+        $account = $this->getAccountInfo($username);
         return $this->getTaggedMediasByUserId($account->getId(), $count, $maxId);
     }
 
@@ -1020,7 +1020,7 @@ class Instagram
      */
     public function getPaginateMedias($username, $maxId = '')
     {
-        $account = $this->getAccount($username);
+        $account = $this->getAccountInfo($username);
 
         return $this->getPaginateMediasByUserId(
             $account->getId(),
