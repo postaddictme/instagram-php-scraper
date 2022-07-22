@@ -16,7 +16,7 @@ class InstagramTest extends TestCase
      */
     private static $instagram;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $sessionFolder = __DIR__ . DIRECTORY_SEPARATOR . 'sessions' . DIRECTORY_SEPARATOR;
         $defaultDriver = 'Files';
@@ -34,7 +34,7 @@ class InstagramTest extends TestCase
 
     }
 
-    public function testGetAccountByUsername()
+    public function testGetAccountByUsername(): void
     {
         $account = self::$instagram->getAccount('kevin');
         $this->assertEquals('kevin', $account->getUsername());
@@ -44,7 +44,7 @@ class InstagramTest extends TestCase
     /**
      * @group getAccountById
      */
-    public function testGetAccountById()
+    public function testGetAccountById(): void
     {
 
         $account = self::$instagram->getAccountById(3);
@@ -60,61 +60,62 @@ class InstagramTest extends TestCase
         self::$instagram->getAccountById(PHP_INT_MAX);
     }
 
-    public function testGetMedias()
+    public function testGetMedias(): void
     {
         $medias = self::$instagram->getMedias('kevin', 80);
         $this->assertEquals(80, sizeof($medias));
     }
 
-    public function testGet100Medias()
+    public function testGet100Medias(): void
     {
         $medias = self::$instagram->getMedias('kevin', 100);
         $this->assertEquals(100, sizeof($medias));
     }
 
-    public function testGetMediasByTag()
+    public function testGetMediasByTag(): void
     {
         $medias = self::$instagram->getMediasByTag('youneverknow', 20);
         $this->assertEquals(20, sizeof($medias));
     }
 
-    public function testGetMediaByCode()
+    public function testGetMediaByCode(): void
     {
         $media = self::$instagram->getMediaByCode('BHaRdodBouH');
         $this->assertEquals('kevin', $media->getOwner()->getUsername());
     }
 
-    public function testGetMediaByUrl()
+    public function testGetMediaByUrl(): void
     {
         $media = self::$instagram->getMediaByUrl('https://www.instagram.com/p/BHaRdodBouH');
         $this->assertEquals('kevin', $media->getOwner()->getUsername());
     }
 
-    public function testGetLocationTopMediasById()
+    public function testGetLocationTopMediasById(): void
     {
         $medias = self::$instagram->getCurrentTopMediasByTagName(1);
         $this->assertEquals(9, count($medias));
     }
 
-    public function testGetLocationMediasById()
+    public function testGetLocationMediasById(): void
     {
         $medias = self::$instagram->getMediasByLocationId(881442298, 56);
         $this->assertEquals(56, count($medias));
     }
 
-    public function testGetLocationById()
+    public function testGetLocationById(): void
     {
         $location = self::$instagram->getLocationById(881442298);
         $this->assertEquals('Pendleberry Grove', $location->getName());
     }
 
-    public function testGetMediaByTag()
+    public function testGetMediaByTag(): void
     {
         $medias = self::$instagram->getMediasByTag('hello');
-        echo json_encode($medias);
+        $this->assertIsArray($medias);
+        $this->assertIsIterable($medias);
     }
 
-    public function testGetIdFromCode()
+    public function testGetIdFromCode(): void
     {
         $code = Media::getCodeFromId('1270593720437182847');
         $this->assertEquals('BGiDkHAgBF_', $code);
@@ -124,13 +125,13 @@ class InstagramTest extends TestCase
         $this->assertEquals('BGiDkHAgBF_', $code);
     }
 
-    public function testGetCodeFromId()
+    public function testGetCodeFromId(): void
     {
         $id = Media::getIdFromCode('BGiDkHAgBF_');
         $this->assertEquals(1270593720437182847, $id);
     }
 
-    public function testGeMediaCommentsByCode()
+    public function testGeMediaCommentsByCode(): void
     {
         $comments = self::$instagram->getMediaCommentsByCode('BR5Njq1gKmB', 40);
         //TODO: check why returns less comments
@@ -140,7 +141,7 @@ class InstagramTest extends TestCase
     /**
      * @group getUsernameById
      */
-    public function testGetUsernameById()
+    public function testGetUsernameById(): void
     {
         $username = self::$instagram->getUsernameById(3);
         $this->assertEquals('kevin', $username);
@@ -149,28 +150,28 @@ class InstagramTest extends TestCase
     /**
      * @group getMediasByIserId
      */
-    public function testGetMediasByUserId()
+    public function testGetMediasByUserId(): void
     {
         $instagram = new Instagram(new Client());
         $nonPrivateAccountMedias = $instagram->getMediasByUserId(3);
         $this->assertEquals(12, count($nonPrivateAccountMedias));
     }
 
-    public function testLikeMediaById()
+    public function testLikeMediaById(): void
     {
         // https://www.instagram.com/p/B910VxfgEIO/
         self::$instagram->like('2266948182120350222');
         $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
     }
 
-    public function testUnlikeMediaById()
+    public function testUnlikeMediaById(): void
     {
         // https://www.instagram.com/p/B910VxfgEIO/
         self::$instagram->unlike('2266948182120350222');
         $this->assertTrue(true, 'Return type ensures this assertion is never reached on failure');
     }
 
-    public function testAddAndDeleteComment()
+    public function testAddAndDeleteComment(): void
     {
         // https://www.instagram.com/p/B910VxfgEIO/
         $comment1 = self::$instagram->addComment('2266948182120350222', 'Cool!');
@@ -189,7 +190,7 @@ class InstagramTest extends TestCase
     /**
      * @group getPaginateMediasByLocationId
      */
-    public function testGetPaginateMediasByLocationId()
+    public function testGetPaginateMediasByLocationId(): void
     {
         $medias = self::$instagram->getPaginateMediasByLocationId('201176299974017');
         echo json_encode($medias);
@@ -198,7 +199,7 @@ class InstagramTest extends TestCase
     /**
      * @group getHighlights
      */
-    public function testGetHighlights()
+    public function testGetHighlights(): void
     {
         $userId = self::$instagram->getAccount('instagram')->getId();
         $highlights = self::$instagram->getHighlights($userId);

@@ -2,7 +2,7 @@
 This library is based on the Instagram web version. We develop it because nowadays it is hard to get an approved Instagram application. The purpose is to support every feature that the web desktop and mobile version support. 
 
 ## Dependencies
-- PHP >= 7.2
+- PHP >= 8.0
 - [PSR-16](http://www.php-fig.org/psr/psr-16/)
 - [PSR-18](http://www.php-fig.org/psr/psr-18/)
 
