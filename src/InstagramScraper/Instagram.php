@@ -1375,7 +1375,8 @@ class Instagram
             }
             if ($response->code !== static::HTTP_OK) {
                 throw new InstagramException('Response code is ' . $response->code . ': ' . static::httpCodeToString($response->code) . '.' .
-                                             'Something went wrong. Please report issue.', $response->code, static::getErrorBody($response->body));
+                                             'Something went wrong. Please report issue. Body: ' . static::getErrorBody($response->body)
+                                            , $response->code, static::getErrorBody($response->body));
             }
 
             $this->parseCookies($response->headers);
@@ -1387,16 +1388,21 @@ class Instagram
             }
             $rootKey = array_key_exists('graphql', $arr) ? 'graphql' : 'data';
 
-            if (empty($arr[$rootKey]['hashtag']['edge_hashtag_to_media']['count'])) {
+            if (empty($arr[$rootKey]['media_count'])) {
                 return [];
             }
 
-            $nodes = $arr[$rootKey]['hashtag']['edge_hashtag_to_media']['edges'];
+            $payload = $arr[$rootKey]['recent']['sections'];
+            $nodes = array();
+            foreach($payload as $p){
+                $nodes = array_merge($nodes,$p['layout_content']['medias']);
+            }
+
             foreach ($nodes as $mediaArray) {
                 if ($index === $count) {
                     return $medias;
                 }
-                $media = Media::create($mediaArray['node']);
+                $media = Media::create($mediaArray['media']);
                 if (in_array($media->getId(), $mediaIds)) {
                     return $medias;
                 }
@@ -1410,8 +1416,8 @@ class Instagram
             if (empty($nodes)) {
                 return $medias;
             }
-            $maxId = $arr[$rootKey]['hashtag']['edge_hashtag_to_media']['page_info']['end_cursor'];
-            $hasNextPage = $arr[$rootKey]['hashtag']['edge_hashtag_to_media']['page_info']['has_next_page'];
+            $maxId = $arr[$rootKey]['recent']['next_max_id']; // $arr[$rootKey]['hashtag']['edge_hashtag_to_media']['page_info']['end_cursor'];
+            $hasNextPage = $arr[$rootKey]['recent']['more_available']; // $arr[$rootKey]['hashtag']['edge_hashtag_to_media']['page_info']['has_next_page'];
         }
         return $medias;
     }
@@ -1443,8 +1449,9 @@ class Instagram
         }
 
         if ($response->code !== static::HTTP_OK) {
-            throw new InstagramException('Response code is ' . $response->code . ': ' . static::httpCodeToString($response->code) . '.' .
-                                         'Something went wrong. Please report issue.', $response->code, static::getErrorBody($response->body));
+                throw new InstagramException('Response code is ' . $response->code . ': ' . static::httpCodeToString($response->code) . '.' .
+                                             'Something went wrong. Please report issue. Body: ' . static::getErrorBody($response->body)
+                                            , $response->code, static::getErrorBody($response->body));
         }
 
         $this->parseCookies($response->headers);
@@ -1454,24 +1461,29 @@ class Instagram
         if (!is_array($arr)) {
             throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
         }
+        $rootKey = array_key_exists('graphql', $arr) ? 'graphql' : 'data';
 
-        if (empty($arr['data']['hashtag']['edge_hashtag_to_media']['count'])) {
+        if (empty($arr[$rootKey]['media_count'])) {
             return $toReturn;
         }
 
-        $nodes = $arr['data']['hashtag']['edge_hashtag_to_media']['edges'];
+        $payload = $arr[$rootKey]['recent']['sections'];
+        $nodes = array();
+        foreach($payload as $p){
+            $nodes = array_merge($nodes,$p['layout_content']['medias']);
+        }
 
         if (empty($nodes)) {
             return $toReturn;
         }
 
         foreach ($nodes as $mediaArray) {
-            $medias[] = Media::create($mediaArray['node']);
+            $medias[] = Media::create($mediaArray['media']);
         }
 
-        $maxId = $arr['data']['hashtag']['edge_hashtag_to_media']['page_info']['end_cursor'];
-        $hasNextPage = $arr['graphql']['hashtag']['edge_hashtag_to_media']['page_info']['has_next_page'];
-        $count = $arr['data']['hashtag']['edge_hashtag_to_media']['count'];
+        $maxId = $arr[$rootKey]['recent']['next_max_id']; // $arr['data']['hashtag']['edge_hashtag_to_media']['page_info']['end_cursor'];
+        $hasNextPage = $arr[$rootKey]['recent']['more_available']; // $arr['graphql']['hashtag']['edge_hashtag_to_media']['page_info']['has_next_page'];
+        $count = $arr[$rootKey]['media_count']; // $arr['data']['hashtag']['edge_hashtag_to_media']['count'];
 
         $toReturn = [
             'medias' => $medias,
@@ -1572,16 +1584,30 @@ class Instagram
             throw new InstagramNotFoundException('Account with given username does not exist.');
         }
         if ($response->code !== static::HTTP_OK) {
-            throw new InstagramException('Response code is ' . $response->code . ': ' . static::httpCodeToString($response->code) . '.' .
-                                         'Something went wrong. Please report issue.');
+                throw new InstagramException('Response code is ' . $response->code . ': ' . static::httpCodeToString($response->code) . '.' .
+                                             'Something went wrong. Please report issue. Body: ' . static::getErrorBody($response->body)
+                                            , $response->code, static::getErrorBody($response->body));
         }
 
         $this->parseCookies($response->headers);
-        $jsonResponse = $this->decodeRawBodyToJson($response->raw_body);
+        
+        $arr = $this->decodeRawBodyToJson($response->raw_body);
+
+        if (!is_array($arr)) {
+            throw new InstagramException('Response decoding failed. Returned data corrupted or this library outdated. Please report issue');
+        }
+        $rootKey = array_key_exists('graphql', $arr) ? 'graphql' : 'data';
+        
         $medias = [];
-        $nodes = (array)@$jsonResponse['graphql']['hashtag']['edge_hashtag_to_top_posts']['edges'];
+        
+        $payload = $arr[$rootKey]['top']['sections'];
+        $nodes = array();
+        foreach($payload as $p){
+            $nodes = array_merge($nodes,$p['layout_content']['medias']);
+        }
+            
         foreach ($nodes as $mediaArray) {
-            $medias[] = Media::create($mediaArray['node']);
+            $medias[] = Media::create($mediaArray['media']);
         }
         return $medias;
     }
