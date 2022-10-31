@@ -1308,6 +1308,20 @@ class Instagram
 
     /**
      * @param string $id
+     *
+     * @return Account
+     * @throws InstagramException
+     * @throws InvalidArgumentException
+     * @throws InstagramNotFoundException
+     */
+    public function getAccountInfoById($id)
+    {
+        $username = $this->getUsernameById($id);
+        return $this->getAccountInfo($username);
+    }
+
+    /**
+     * @param string $id
      * @return string
      * @throws InstagramException
      * @throws InstagramNotFoundException
