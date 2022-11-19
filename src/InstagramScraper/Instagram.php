@@ -2210,7 +2210,7 @@ class Instagram
                 throw new InstagramException('Response code is ' . $response->code . ': ' . static::httpCodeToString($response->code) . '.' .
                                              'Something went wrong. Please report issue.', $response->code, static::getErrorBody($response->body));
             }
-            preg_match('/"csrf_token":"(.*?)"/', $response->body, $match);
+            preg_match('/\\\\"csrf_token\\\\":\\\\"(.*?)\\\\"/', $response->body, $match);
             $csrfToken = isset($match[1]) ? $match[1] : '';
             $cookies = $this->parseCookies($response->headers);
 
