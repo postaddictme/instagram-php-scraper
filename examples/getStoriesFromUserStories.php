@@ -4,9 +4,13 @@ ini_set('display_errors', 1);ini_set('display_startup_errors', 1);error_reportin
 require __DIR__ . '/../vendor/autoload.php';
 use Phpfastcache\Helper\Psr16Adapter;
 
-$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), 'user', 'passed', new Psr16Adapter('Files'));
+$settings=json_decode(file_get_contents('settings.json'));
+$username = $settings->username;
+$password = $settings->password;
+
+$instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), $username, $password, new Psr16Adapter('Files'));
 $instagram->login();
-$instagram->saveSession();
+$instagram->saveSession(10*24*3600);
 
 
 // *************************** get storie from unsetStories **********************************
