@@ -1895,8 +1895,8 @@ class Instagram
      */
     public function getFollowing($accountId, $count = 20, $pageSize = 20, $delayed = true)
     {
-        $res = $this->getPaginateFollowing($accountId, $count, $pageSize, $delayed, '');
-        return $res;
+        $result = $this->getPaginateFollowing($accountId, $count, $pageSize, $delayed, '');
+        return $result['accounts'] ?? [];
     }
 
     /**
