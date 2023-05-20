@@ -607,14 +607,14 @@ class Media extends AbstractModel
             case 'display_resources':
                 foreach ($value as $media) {
                     $mediasUrl[] = $media['src'];
-                    switch ($media['config_width']) {
-                        case 640:
+                    switch (true) {
+                        case ($media['config_width'] < 700):
                             $this->imageThumbnailUrl = $media['src'];
                             break;
-                        case 750:
+                        case ($media['config_width'] < 1000):
                             $this->imageLowResolutionUrl = $media['src'];
                             break;
-                        case 1080:
+                        default:
                             $this->imageStandardResolutionUrl = $media['src'];
                             break;
                     }
@@ -808,17 +808,17 @@ class Media extends AbstractModel
             case 'image_versions2':
                 foreach ($value['candidates'] as $media) {
                     $mediasUrl[] = $media['url'];
-                    switch ($media['width']) {
-                        case 150:
+                    switch (true) {
+                        case ($media['width'] < 300):
                             $this->imageThumbnailUrl = $media['url'];
                             break;
-                        case 320:
+                        case ($media['width'] < 700):
                             $this->imageLowResolutionUrl = $media['url'];
                             break;
-                        case 750:
+                        case ($media['width'] < 1000):
                             $this->imageStandardResolutionUrl = $media['url'];
                             break;
-                        case 1080:
+                        default:
                             $this->imageHighResolutionUrl = $media['url'];
                             break;
                     }
@@ -912,17 +912,17 @@ class Media extends AbstractModel
             if(($carouselArray['media_type'] == static::MEDIA_TYPE_IMAGE || $carouselArray['media_type'] == static::MEDIA_TYPE_VIDEO) && isset($carouselArray['image_versions2'])){                 
                 foreach ($carouselArray['image_versions2']['candidates'] as $media) {
                     $mediasUrl[] = $media['url'];
-                    switch ($media['width']) {
-                        case 150:
+                    switch (true) {
+                        case ($media['width'] < 300):
                             $carouselMedia->setImageThumbnailUrl($media['url']);
                             break;
-                        case 320:
+                        case ($media['width'] < 700):
                             $carouselMedia->setImageLowResolutionUrl($media['url']);
                             break;
-                        case 750:
+                        case ($media['width'] < 1000):
                             $carouselMedia->setImageStandardResolutionUrl($media['url']);
                             break;
-                        case 1080:
+                        default:
                             $carouselMedia->setImageHighResolutionUrl($media['url']);
                             break;
                     }
