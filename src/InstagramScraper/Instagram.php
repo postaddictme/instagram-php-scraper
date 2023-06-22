@@ -415,6 +415,9 @@ class Instagram
 
         }
 
+        //user agent to retrieve account data
+        $this->setUserAgent("Instagram 219.0.0.12.117 Android");
+	
         if ($this->getUserAgent()) {
             $headers['user-agent'] = $this->getUserAgent();
 
@@ -738,11 +741,11 @@ class Instagram
             throw new InstagramAgeRestrictedException('Account with given username is age-restricted.');
         }
 
-        if (!isset($userArray['entry_data']['ProfilePage'][0]['graphql']['user'])) {
+        if (!isset($userArray['entry_data']['ProfilePage'][0]['graphql']['user']) && !isset($userArray['data']['user'])) {
             throw new InstagramException('Response code is ' . $response->code . ': ' . static::httpCodeToString($response->code) . '.' .
                                          'Something went wrong. Please report issue.', $response->code, static::getErrorBody($response->body));
         }
-        return Account::create($userArray['entry_data']['ProfilePage'][0]['graphql']['user']);
+        return Account::create($userArray['entry_data']['ProfilePage'][0]['graphql']['user']?? $userArray['data']['user']);
     }
 
     public function getAccountInfo($username)
@@ -772,7 +775,7 @@ class Instagram
         if (preg_match_all('#\_sharedData \= (.*?)\;\<\/script\>#', $body, $out)) {
             return json_decode($out[1][0], true, 512, JSON_BIGINT_AS_STRING);
         }
-        return null;
+        return json_decode($body, true, 512, JSON_BIGINT_AS_STRING);
     }
 
     private function isAccountAgeRestricted($userArray, $body)
@@ -1430,7 +1433,7 @@ class Instagram
             if (empty($nodes)) {
                 return $medias;
             }
-            $maxId = $arr[$rootKey]['recent']['next_max_id']; // $arr[$rootKey]['hashtag']['edge_hashtag_to_media']['page_info']['end_cursor'];
+            $maxId = $arr[$rootKey]['recent']['next_max_id']?? ''; // $arr[$rootKey]['hashtag']['edge_hashtag_to_media']['page_info']['end_cursor'];
             $hasNextPage = $arr[$rootKey]['recent']['more_available']; // $arr[$rootKey]['hashtag']['edge_hashtag_to_media']['page_info']['has_next_page'];
         }
         return $medias;
